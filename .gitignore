@@ -1,0 +1,23 @@
+# Node
+node_modules/
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# Build
+dist/
+build/
+
+# Expo
+.expo/
+
+# Logs
+*.log
+
+# Windows
+Thumbs.db
+
+# macOS
+.DS_Store
