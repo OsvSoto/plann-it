@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Link } from 'expo-router'
+import { Link, router } from 'expo-router'
 
 import { supabase } from '../../lib/supabase'
 
@@ -19,8 +19,14 @@ export default function RegisterScreen() {
   const [cargando, setCargando] = useState(false)
 
   async function registrarse() {
-    if (!nombre || !correo || !password) {
-      Alert.alert('Error', 'Completa todos los campos')
+    const nombreLimpio = nombre.trim()
+    const correoLimpio = correo.trim().toLowerCase()
+
+    if (!nombreLimpio || !correoLimpio || !password) {
+      Alert.alert(
+        'Error',
+        'Completa todos los campos'
+      )
       return
     }
 
@@ -28,25 +34,56 @@ export default function RegisterScreen() {
       setCargando(true)
 
       const { data, error } = await supabase.auth.signUp({
-        email: correo.trim(),
+        email: correoLimpio,
         password,
         options: {
           data: {
-            usuario_nombre: nombre.trim(),
+            usuario_nombre: nombreLimpio,
           },
         },
       })
 
       if (error) {
-        Alert.alert('Error', error.message)
+        Alert.alert(
+          'Error al registrarse',
+          error.message
+        )
         return
       }
 
-      console.log('Usuario creado:', data.user)
+      if (!data.user) {
+        Alert.alert(
+          'Error',
+          'No fue posible crear el usuario'
+        )
+        return
+      }
+
+      console.log('Usuario creado:', data.user.id)
+      console.log('Correo:', data.user.email)
+
+      if (!data.session) {
+        Alert.alert(
+          'Confirma tu correo',
+          'Tu cuenta fue creada. Revisa tu correo electrónico para confirmarla antes de iniciar sesión.',
+          [
+            {
+              text: 'Aceptar',
+              onPress: () => router.replace('/(auth)/login'),
+            },
+          ]
+        )
+
+        return
+      }
+
+      router.replace('/(tabs)')
+    } catch (error) {
+      console.error('Error inesperado al registrar usuario:', error)
 
       Alert.alert(
-        'Registro correcto',
-        'Usuario registrado correctamente'
+        'Error',
+        'Ocurrió un error inesperado al crear la cuenta'
       )
     } finally {
       setCargando(false)
@@ -56,13 +93,16 @@ export default function RegisterScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.form}>
-        <Text style={styles.title}>Crear cuenta</Text>
+        <Text style={styles.title}>
+          Crear cuenta
+        </Text>
 
         <TextInput
           style={styles.input}
           placeholder="Nombre"
           value={nombre}
           onChangeText={setNombre}
+          autoCorrect={false}
         />
 
         <TextInput
@@ -72,6 +112,7 @@ export default function RegisterScreen() {
           onChangeText={setCorreo}
           keyboardType="email-address"
           autoCapitalize="none"
+          autoCorrect={false}
         />
 
         <TextInput
@@ -80,19 +121,29 @@ export default function RegisterScreen() {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          autoCapitalize="none"
+          autoCorrect={false}
         />
 
         <Pressable
-          style={styles.button}
+          style={[
+            styles.button,
+            cargando && styles.buttonDisabled,
+          ]}
           onPress={registrarse}
           disabled={cargando}
         >
           <Text style={styles.buttonText}>
-            {cargando ? 'Registrando...' : 'Registrarse'}
+            {cargando
+              ? 'Registrando...'
+              : 'Registrarse'}
           </Text>
         </Pressable>
 
-        <Link href="/(auth)/login" style={styles.link}>
+        <Link
+          href="/(auth)/login"
+          style={styles.link}
+        >
           Ya tengo una cuenta
         </Link>
       </View>
@@ -130,6 +181,10 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
+  },
+
+  buttonDisabled: {
+    opacity: 0.5,
   },
 
   buttonText: {

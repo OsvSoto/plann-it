@@ -8,8 +8,7 @@ import {
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Link, router } from 'expo-router'
-
+import { Link } from 'expo-router'
 import { supabase } from '../../lib/supabase'
 
 export default function LoginScreen() {
@@ -18,32 +17,52 @@ export default function LoginScreen() {
   const [cargando, setCargando] = useState(false)
 
   async function iniciarSesion() {
-    if (!correo || !password) {
-      Alert.alert('Error', 'Ingresa correo y contraseña')
+  if (!correo || !password) {
+    Alert.alert(
+      'Error',
+      'Ingresa correo y contraseña'
+    )
+    return
+  }
+
+  try {
+    setCargando(true)
+
+    const { data, error } =
+      await supabase.auth.signInWithPassword({
+        email: correo.trim().toLowerCase(),
+        password,
+      })
+
+    if (error) {
+      Alert.alert(
+        'Error al iniciar sesión',
+        error.message
+      )
       return
     }
 
-    try {
-      setCargando(true)
+    console.log(
+      'Sesión iniciada:',
+      data.user.email
+    )
 
-      const { data, error } =
-        await supabase.auth.signInWithPassword({
-          email: correo.trim(),
-          password,
-        })
+    // NO hacemos router.replace().
+    // RootLayout detecta la nueva sesión.
+  } catch (error) {
+    console.error(
+      'Error inesperado en login:',
+      error
+    )
 
-      if (error) {
-        Alert.alert('Error al iniciar sesión', error.message)
-        return
-      }
-
-      console.log('Sesión iniciada:', data.session)
-
-      router.replace('/(tabs)')
-    } finally {
-      setCargando(false)
-    }
+    Alert.alert(
+      'Error',
+      'Ocurrió un error inesperado'
+    )
+  } finally {
+    setCargando(false)
   }
+}
 
   return (
     <SafeAreaView style={styles.container}>
