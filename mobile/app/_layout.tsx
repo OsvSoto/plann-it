@@ -1,24 +1,80 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { useEffect, useState } from 'react'
+import {
+  ActivityIndicator,
+  StyleSheet,
+  View,
+} from 'react-native'
+import { Stack } from 'expo-router'
+import type {
+  AuthChangeEvent,
+  Session,
+} from '@supabase/supabase-js'
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import { supabase } from '../lib/supabase'
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const [session, setSession] = useState<Session | null>(null)
+  const [cargando, setCargando] = useState(true)
+
+  useEffect(() => {
+    async function cargarSesion() {
+      const { data, error } =
+        await supabase.auth.getSession()
+
+      if (error) {
+        console.error(
+          'Error recuperando sesión:',
+          error.message
+        )
+      }
+
+      setSession(data.session)
+      setCargando(false)
+    }
+
+    cargarSesion()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      (
+        _event: AuthChangeEvent,
+        nuevaSession: Session | null
+      ) => {
+        setSession(nuevaSession)
+      }
+    )
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  if (cargando) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" />
+      </View>
+    )
+  }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-  );
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Protected guard={!session}>
+        <Stack.Screen name="(auth)" />
+      </Stack.Protected>
+
+      <Stack.Protected guard={!!session}>
+        <Stack.Screen name="(tabs)" />
+      </Stack.Protected>
+    </Stack>
+  )
 }
+
+const styles = StyleSheet.create({
+  loading: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+})

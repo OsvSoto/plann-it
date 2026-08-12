@@ -1,0 +1,24 @@
+{
+  "name": "plann-it",
+  "version": "1.0.0",
+  "description": "- Node.js - npm - Git",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OsvSoto/plann-it.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/OsvSoto/plann-it/issues"
+  },
+  "homepage": "https://github.com/OsvSoto/plann-it#readme",
+  "devDependencies": {
+    "supabase": "^2.113.0"
+  }
+}
