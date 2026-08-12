@@ -9,6 +9,13 @@ export default function TabLayout() {
           title: 'Inicio',
         }}
       />
+
+      <Tabs.Screen
+        name="proyectos"
+        options={{
+          title: 'Proyectos',
+        }}
+      />
     </Tabs>
   )
 }
