@@ -32,6 +32,13 @@ export default function ProyectosScreen() {
     router.push('/proyectos/crear')
   }
 
+  function abrirProyecto(proyectoId: string) {
+    router.push({
+      pathname: '/proyectos/[proyectoId]',
+      params: { proyectoId },
+    })
+  }
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'right', 'left']}>
       <View style={styles.header}>
@@ -87,7 +94,12 @@ export default function ProyectosScreen() {
         <FlatList
           data={proyectos}
           keyExtractor={(proyecto) => proyecto.proyecto_id}
-          renderItem={({ item }) => <ProyectoCard proyecto={item} />}
+          renderItem={({ item }) => (
+            <ProyectoCard
+              proyecto={item}
+              onPress={() => abrirProyecto(item.proyecto_id)}
+            />
+          )}
           contentContainerStyle={styles.list}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           refreshing={cargando}
