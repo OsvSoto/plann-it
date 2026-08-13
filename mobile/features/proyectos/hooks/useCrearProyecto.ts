@@ -73,7 +73,7 @@ export function useCrearProyecto() {
 
       await crearProyecto({
         nombre,
-        descripcion: descripcion || null,
+        descripcion,
         fechaFin,
       })
 
