@@ -9,6 +9,6 @@ export type Proyecto = {
 
 export type CrearProyectoInput = {
   nombre: string
-  descripcion: string | null
+  descripcion: string
   fechaFin: string
 }
