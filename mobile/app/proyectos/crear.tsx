@@ -1,0 +1,288 @@
+import { router } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+
+import { useCrearProyecto } from '../../features/proyectos/hooks/useCrearProyecto'
+
+export default function CrearProyectoScreen() {
+  const {
+    formulario,
+    guardando,
+    error,
+    actualizarCampo,
+    guardarProyecto,
+  } = useCrearProyecto()
+
+  async function crear() {
+    const proyectoCreado = await guardarProyecto()
+
+    if (proyectoCreado) {
+      router.back()
+    }
+  }
+
+  return (
+    <SafeAreaView style={styles.safeArea} edges={['right', 'bottom', 'left']}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.content}>
+            <View style={styles.intro}>
+              <View style={styles.iconContainer}>
+                <Ionicons name="folder-open-outline" size={24} color="#166534" />
+              </View>
+              <View style={styles.introText}>
+                <Text style={styles.title}>Información general</Text>
+                <Text style={styles.subtitle}>Datos principales del proyecto</Text>
+              </View>
+            </View>
+
+            <View style={styles.form}>
+              <View style={styles.field}>
+                <Text style={styles.label}>Nombre</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Ej. Aplicacion de inventario"
+                  placeholderTextColor="#8A918B"
+                  value={formulario.nombre}
+                  onChangeText={(valor) => actualizarCampo('nombre', valor)}
+                  autoFocus
+                  autoCorrect={false}
+                  returnKeyType="next"
+                  maxLength={100}
+                  editable={!guardando}
+                />
+              </View>
+
+              <View style={styles.field}>
+                <View style={styles.labelRow}>
+                  <Text style={styles.label}>Descripción</Text>
+                  <Text style={styles.optional}>Opcional</Text>
+                </View>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  placeholder="Objetivo y alcance del proyecto"
+                  placeholderTextColor="#8A918B"
+                  value={formulario.descripcion}
+                  onChangeText={(valor) => actualizarCampo('descripcion', valor)}
+                  multiline
+                  numberOfLines={4}
+                  maxLength={500}
+                  textAlignVertical="top"
+                  editable={!guardando}
+                />
+                <Text style={styles.counter}>{formulario.descripcion.length}/500</Text>
+              </View>
+
+              <View style={styles.field}>
+                <Text style={styles.label}>Fecha de término</Text>
+                <View style={styles.dateInputContainer}>
+                  <Ionicons name="calendar-outline" size={20} color="#59615B" />
+                  <TextInput
+                    style={styles.dateInput}
+                    placeholder="AAAA-MM-DD"
+                    placeholderTextColor="#8A918B"
+                    value={formulario.fechaFin}
+                    onChangeText={(valor) => actualizarCampo('fechaFin', valor)}
+                    keyboardType="numbers-and-punctuation"
+                    autoCapitalize="none"
+                    maxLength={10}
+                    editable={!guardando}
+                  />
+                </View>
+                <Text style={styles.helper}>Ej. 2026-12-15</Text>
+              </View>
+
+              {error ? (
+                <View style={styles.errorContainer} accessibilityRole="alert">
+                  <Ionicons name="alert-circle-outline" size={20} color="#B42318" />
+                  <Text style={styles.errorText}>{error}</Text>
+                </View>
+              ) : null}
+            </View>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.button,
+                pressed && !guardando && styles.buttonPressed,
+                guardando && styles.buttonDisabled,
+              ]}
+              onPress={crear}
+              disabled={guardando}
+            >
+              {guardando ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <>
+                  <Ionicons name="add" size={21} color="#FFFFFF" />
+                  <Text style={styles.buttonText}>Crear proyecto</Text>
+                </>
+              )}
+            </Pressable>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  )
+}
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F7F9F7',
+  },
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+  },
+  content: {
+    width: '100%',
+    maxWidth: 640,
+    alignSelf: 'center',
+    gap: 28,
+  },
+  intro: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 14,
+  },
+  iconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#DCFCE7',
+  },
+  introText: {
+    flex: 1,
+    gap: 6,
+  },
+  title: {
+    color: '#172019',
+    fontSize: 22,
+    fontWeight: '700',
+  },
+  subtitle: {
+    color: '#59615B',
+    fontSize: 15,
+    lineHeight: 21,
+  },
+  form: {
+    gap: 22,
+  },
+  field: {
+    gap: 8,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  label: {
+    color: '#273029',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  optional: {
+    color: '#747C76',
+    fontSize: 13,
+  },
+  input: {
+    minHeight: 50,
+    borderWidth: 1,
+    borderColor: '#CDD3CE',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    color: '#172019',
+    backgroundColor: '#FFFFFF',
+    fontSize: 16,
+  },
+  textArea: {
+    minHeight: 112,
+  },
+  counter: {
+    color: '#747C76',
+    fontSize: 12,
+    textAlign: 'right',
+  },
+  dateInputContainer: {
+    minHeight: 50,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderWidth: 1,
+    borderColor: '#CDD3CE',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    backgroundColor: '#FFFFFF',
+  },
+  dateInput: {
+    flex: 1,
+    paddingVertical: 12,
+    color: '#172019',
+    fontSize: 16,
+  },
+  helper: {
+    color: '#747C76',
+    fontSize: 12,
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#D92D20',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#FEF3F2',
+  },
+  errorText: {
+    flex: 1,
+    color: '#912018',
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  button: {
+    minHeight: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    backgroundColor: '#166534',
+  },
+  buttonPressed: {
+    backgroundColor: '#14532D',
+  },
+  buttonDisabled: {
+    opacity: 0.65,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+})

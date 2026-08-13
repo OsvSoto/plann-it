@@ -33,7 +33,7 @@ export async function crearProyecto(
   const { data, error } = await supabase.rpc(
     'crear_proyecto',
     {
-      p_nombre: proyecto.nombre,
+      p_nombre: proyecto.nombre.trim(),
       p_descripcion: proyecto.descripcion,
       p_fecha_fin: proyecto.fechaFin,
     }
@@ -41,6 +41,10 @@ export async function crearProyecto(
 
   if (error) {
     throw error
+  }
+
+  if (typeof data !== 'string') {
+    throw new Error('La RPC crear_proyecto no devolvió un identificador')
   }
 
   return data

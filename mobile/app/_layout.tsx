@@ -66,6 +66,14 @@ export default function RootLayout() {
 
       <Stack.Protected guard={!!session}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="proyectos/crear"
+          options={{
+            headerShown: true,
+            title: 'Nuevo proyecto',
+            headerBackTitle: 'Proyectos',
+          }}
+        />
       </Stack.Protected>
     </Stack>
   )
