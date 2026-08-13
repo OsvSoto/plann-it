@@ -1,14 +1,52 @@
-export type Proyecto = {
-  proyecto_id: string
-  proyecto_nombre: string
-  proyecto_descripcion: string | null
-  proyecto_fecha_inicio: string
-  proyecto_fecha_fin: string
-  proyecto_estado: string
+import type { Tables } from '../../lib/database.types'
+
+export type Proyecto = Tables<'proyecto'>
+export type Tarea = Tables<'tarea'>
+
+export type ListaDetalle = Tables<'lista'> & {
+  tareas: Tarea[]
+}
+
+export type TableroDetalle = Tables<'tablero'> & {
+  listas: ListaDetalle[]
+}
+
+export type DetalleProyecto = {
+  proyecto: Proyecto
+  tableros: TableroDetalle[]
+  esLider: boolean
+  puedeEliminarProyecto: boolean
 }
 
 export type CrearProyectoInput = {
   nombre: string
   descripcion: string
   fechaFin: string
+}
+
+export type CrearTableroInput = {
+  proyectoId: string
+  nombre: string
+}
+
+export type CrearListaInput = {
+  tableroId: string
+  nombre: string
+  orden: number
+}
+
+export const ESTADOS_TAREA = [
+  'PENDIENTE',
+  'EN_PROGRESO',
+  'COMPLETADA',
+] as const
+
+export type EstadoTarea = (typeof ESTADOS_TAREA)[number]
+
+export type CrearTareaInput = {
+  listaId: string
+  nombre: string
+  descripcion: string | null
+  estado: EstadoTarea
+  fechaEntrega: string
 }

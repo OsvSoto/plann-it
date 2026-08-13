@@ -74,6 +74,14 @@ export default function RootLayout() {
             headerBackTitle: 'Proyectos',
           }}
         />
+        <Stack.Screen
+          name="proyectos/[proyectoId]"
+          options={{
+            headerShown: true,
+            title: 'Detalle del proyecto',
+            headerBackTitle: 'Proyectos',
+          }}
+        />
       </Stack.Protected>
     </Stack>
   )

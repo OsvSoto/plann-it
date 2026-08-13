@@ -179,35 +179,6 @@ export type Database = {
           },
         ]
       }
-      cartagantt: {
-        Row: {
-          carta_gantt_fecha_fin: string
-          carta_gantt_fecha_inicio: string
-          carta_gantt_id: string
-          carta_gantt_proyecto_id: string
-        }
-        Insert: {
-          carta_gantt_fecha_fin: string
-          carta_gantt_fecha_inicio: string
-          carta_gantt_id?: string
-          carta_gantt_proyecto_id: string
-        }
-        Update: {
-          carta_gantt_fecha_fin?: string
-          carta_gantt_fecha_inicio?: string
-          carta_gantt_id?: string
-          carta_gantt_proyecto_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cartagantt_proyecto_id_fkey"
-            columns: ["carta_gantt_proyecto_id"]
-            isOneToOne: false
-            referencedRelation: "proyecto"
-            referencedColumns: ["proyecto_id"]
-          },
-        ]
-      }
       chat: {
         Row: {
           chat_id: string
@@ -318,51 +289,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "usuario"
             referencedColumns: ["usuario_id"]
-          },
-        ]
-      }
-      itemgantt: {
-        Row: {
-          item_gantt_carta_gantt_id: string | null
-          item_gantt_fecha_fin: string
-          item_gantt_fecha_inicio: string
-          item_gantt_id: string
-          item_gantt_posicion: number
-          item_gantt_progreso: number
-          item_gantt_tarea_id: string
-        }
-        Insert: {
-          item_gantt_carta_gantt_id?: string | null
-          item_gantt_fecha_fin: string
-          item_gantt_fecha_inicio: string
-          item_gantt_id?: string
-          item_gantt_posicion: number
-          item_gantt_progreso: number
-          item_gantt_tarea_id: string
-        }
-        Update: {
-          item_gantt_carta_gantt_id?: string | null
-          item_gantt_fecha_fin?: string
-          item_gantt_fecha_inicio?: string
-          item_gantt_id?: string
-          item_gantt_posicion?: number
-          item_gantt_progreso?: number
-          item_gantt_tarea_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "itemgantt_item_gantt_carta_gantt_id_fkey"
-            columns: ["item_gantt_carta_gantt_id"]
-            isOneToOne: false
-            referencedRelation: "cartagantt"
-            referencedColumns: ["carta_gantt_id"]
-          },
-          {
-            foreignKeyName: "itemgantt_tarea_id_fkey"
-            columns: ["item_gantt_tarea_id"]
-            isOneToOne: false
-            referencedRelation: "tarea"
-            referencedColumns: ["tarea_id"]
           },
         ]
       }
@@ -687,6 +613,10 @@ export type Database = {
       }
       es_lider_proyecto: { Args: { p_proyecto_id: string }; Returns: boolean }
       es_miembro_proyecto: { Args: { p_proyecto_id: string }; Returns: boolean }
+      puede_eliminar_proyecto: {
+        Args: { p_proyecto_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
