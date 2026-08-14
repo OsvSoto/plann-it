@@ -97,33 +97,55 @@ export default function RegisterScreen() {
           Crear cuenta
         </Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Nombre"
-          value={nombre}
-          onChangeText={setNombre}
-          autoCorrect={false}
-        />
+        <View style={styles.field}>
+          <Text style={styles.label}>Nombre de usuario</Text>
+          <TextInput
+            accessibilityLabel="Nombre de usuario"
+            style={styles.input}
+            placeholder="Cómo quieres que te llamemos"
+            placeholderTextColor="#8A918B"
+            value={nombre}
+            onChangeText={setNombre}
+            autoCapitalize="words"
+            autoCorrect={false}
+            autoComplete="name"
+            textContentType="name"
+          />
+        </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Correo"
-          value={correo}
-          onChangeText={setCorreo}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
+        <View style={styles.field}>
+          <Text style={styles.label}>Correo electrónico</Text>
+          <TextInput
+            accessibilityLabel="Correo electrónico"
+            style={styles.input}
+            placeholder="nombre@correo.com"
+            placeholderTextColor="#8A918B"
+            value={correo}
+            onChangeText={setCorreo}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="email"
+            textContentType="emailAddress"
+          />
+        </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Contraseña"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
+        <View style={styles.field}>
+          <Text style={styles.label}>Contraseña</Text>
+          <TextInput
+            accessibilityLabel="Contraseña"
+            style={styles.input}
+            placeholder="Crea una contraseña"
+            placeholderTextColor="#8A918B"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="new-password"
+            textContentType="newPassword"
+          />
+        </View>
 
         <Pressable
           style={[
@@ -168,6 +190,16 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 16,
+  },
+
+  field: {
+    gap: 7,
+  },
+
+  label: {
+    color: '#4F2D7F',
+    fontSize: 14,
+    fontWeight: '600',
   },
 
   input: {

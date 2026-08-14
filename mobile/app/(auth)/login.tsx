@@ -70,22 +70,39 @@ export default function LoginScreen() {
         <Text style={styles.title}>Plann-It</Text>
         <Text style={styles.subtitle}>Iniciar sesión</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Correo"
-          value={correo}
-          onChangeText={setCorreo}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
+        <View style={styles.field}>
+          <Text style={styles.label}>Correo electrónico</Text>
+          <TextInput
+            accessibilityLabel="Correo electrónico"
+            style={styles.input}
+            placeholder="nombre@correo.com"
+            placeholderTextColor="#8A918B"
+            value={correo}
+            onChangeText={setCorreo}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="email"
+            textContentType="emailAddress"
+          />
+        </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Contraseña"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+        <View style={styles.field}>
+          <Text style={styles.label}>Contraseña</Text>
+          <TextInput
+            accessibilityLabel="Contraseña"
+            style={styles.input}
+            placeholder="Ingresa tu contraseña"
+            placeholderTextColor="#8A918B"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="current-password"
+            textContentType="password"
+          />
+        </View>
 
         <Pressable
           style={styles.button}
@@ -129,6 +146,16 @@ const styles = StyleSheet.create({
     fontSize: 22,
     textAlign: 'center',
     marginBottom: 16,
+  },
+
+  field: {
+    gap: 7,
+  },
+
+  label: {
+    color: '#4F2D7F',
+    fontSize: 14,
+    fontWeight: '600',
   },
 
   input: {

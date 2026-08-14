@@ -101,6 +101,16 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="invitaciones"
+        options={{
+          title: 'Invitaciones',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="mail-outline" size={size} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   )
 }

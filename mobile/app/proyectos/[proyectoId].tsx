@@ -13,6 +13,7 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { EquipoProyecto } from '../../features/invitaciones/components/EquipoProyecto'
 import { CrearTableroModal } from '../../features/proyectos/components/CrearTableroModal'
 import { TableroCard } from '../../features/proyectos/components/TableroCard'
 import { useDetalleProyecto } from '../../features/proyectos/hooks/useDetalleProyecto'
@@ -190,6 +191,12 @@ export default function DetalleProyectoScreen() {
             </View>
           </View>
         </View>
+
+        <EquipoProyecto
+          proyectoId={proyecto.proyecto_id}
+          proyectoNombre={proyecto.proyecto_nombre}
+          esLider={esLider}
+        />
 
         <View style={styles.workspaceHeader}>
           <View style={styles.workspaceText}>
