@@ -13,17 +13,18 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { useCrearTarea } from '../hooks/useCrearTarea'
+import { useFormularioTarea } from '../hooks/useCrearTarea'
 
 import { ESTADOS_TAREA } from '../types'
-import type { EstadoTarea } from '../types'
+import type { EstadoTarea, Tarea } from '../types'
 
 type Props = {
   visible: boolean
   listaId: string
   listaNombre: string
+  tarea?: Tarea | null
   onClose: () => void
-  onCreated: () => Promise<void>
+  onSaved: () => Promise<void>
 }
 
 const ETIQUETAS_ESTADO: Record<EstadoTarea, string> = {
@@ -32,12 +33,13 @@ const ETIQUETAS_ESTADO: Record<EstadoTarea, string> = {
   COMPLETADA: 'Completada',
 }
 
-export function CrearTareaModal({
+export function TareaModal({
   visible,
   listaId,
   listaNombre,
+  tarea,
   onClose,
-  onCreated,
+  onSaved,
 }: Props) {
   const {
     nombre,
@@ -53,7 +55,7 @@ export function CrearTareaModal({
     limpiarError,
     reiniciar,
     guardar,
-  } = useCrearTarea()
+  } = useFormularioTarea(tarea)
 
   function cerrar() {
     if (!guardando) {
@@ -62,12 +64,12 @@ export function CrearTareaModal({
     }
   }
 
-  async function crear() {
-    const creada = await guardar(listaId)
+  async function guardarCambios() {
+    const guardada = await guardar(listaId)
 
-    if (creada) {
+    if (guardada) {
       onClose()
-      await onCreated()
+      await onSaved()
     }
   }
 
@@ -85,7 +87,9 @@ export function CrearTareaModal({
         >
           <View style={styles.header}>
             <View style={styles.headerText}>
-              <Text style={styles.title}>Nueva tarea</Text>
+              <Text style={styles.title}>
+                {tarea ? 'Editar tarea' : 'Nueva tarea'}
+              </Text>
               <Text style={styles.subtitle} numberOfLines={1}>
                 Lista: {listaNombre}
               </Text>
@@ -148,7 +152,7 @@ export function CrearTareaModal({
             </View>
 
             <View style={styles.field}>
-              <Text style={styles.label}>Estado inicial</Text>
+              <Text style={styles.label}>Estado</Text>
               <View style={styles.segmentedControl}>
                 {ESTADOS_TAREA.map((opcion) => {
                   const seleccionada = estado === opcion
@@ -214,7 +218,7 @@ export function CrearTareaModal({
             </Pressable>
             <Pressable
               disabled={guardando}
-              onPress={() => void crear()}
+              onPress={() => void guardarCambios()}
               style={({ pressed }) => [
                 styles.primaryButton,
                 pressed && !guardando && styles.primaryButtonPressed,
@@ -225,8 +229,14 @@ export function CrearTareaModal({
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
                 <>
-                  <Ionicons name="add" size={20} color="#FFFFFF" />
-                  <Text style={styles.primaryText}>Crear tarea</Text>
+                  <Ionicons
+                    name={tarea ? 'save-outline' : 'add'}
+                    size={20}
+                    color="#FFFFFF"
+                  />
+                  <Text style={styles.primaryText}>
+                    {tarea ? 'Guardar cambios' : 'Crear tarea'}
+                  </Text>
                 </>
               )}
             </Pressable>

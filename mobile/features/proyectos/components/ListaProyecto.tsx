@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native'
 
-import { CrearTareaModal } from './CrearTareaModal'
+import { TareaModal } from './CrearTareaModal'
 import { useEliminarRecursosProyecto } from '../hooks/useEliminarRecursosProyecto'
 
 import type { ListaDetalle, Tarea } from '../types'
@@ -33,10 +33,17 @@ type TareaItemProps = {
   tarea: Tarea
   indice: number
   eliminando: boolean
+  onOpen: () => void
   onDelete: () => void
 }
 
-function TareaItem({ tarea, indice, eliminando, onDelete }: TareaItemProps) {
+function TareaItem({
+  tarea,
+  indice,
+  eliminando,
+  onOpen,
+  onDelete,
+}: TareaItemProps) {
   const colorNota = tarea.tarea_estado === 'COMPLETADA'
     ? styles.notaCompletada
     : tarea.tarea_estado === 'EN_PROGRESO'
@@ -44,12 +51,17 @@ function TareaItem({ tarea, indice, eliminando, onDelete }: TareaItemProps) {
       : styles.notaPendiente
 
   return (
-    <View
-      style={[
+    <Pressable
+      accessibilityLabel={`Editar tarea ${tarea.tarea_nombre}`}
+      accessibilityRole="button"
+      disabled={eliminando}
+      onPress={onOpen}
+      style={({ pressed }) => [
         styles.tarea,
         colorNota,
         indice % 3 === 0 && styles.notaInclinadaIzquierda,
         indice % 3 === 2 && styles.notaInclinadaDerecha,
+        pressed && styles.tareaPressed,
       ]}
     >
       <View style={styles.pin} />
@@ -64,7 +76,10 @@ function TareaItem({ tarea, indice, eliminando, onDelete }: TareaItemProps) {
           accessibilityRole="button"
           disabled={eliminando}
           hitSlop={6}
-          onPress={onDelete}
+          onPress={(event) => {
+            event.stopPropagation()
+            onDelete()
+          }}
           style={({ pressed }) => [
             styles.deleteTaskButton,
             pressed && styles.deleteButtonPressed,
@@ -94,12 +109,13 @@ function TareaItem({ tarea, indice, eliminando, onDelete }: TareaItemProps) {
           {formatearFecha(tarea.tarea_fecha_entrega)}
         </Text>
       </View>
-    </View>
+    </Pressable>
   )
 }
 
 export function ListaProyecto({ lista, esLider, onChanged }: Props) {
   const [creandoTarea, setCreandoTarea] = useState(false)
+  const [tareaEditando, setTareaEditando] = useState<Tarea | null>(null)
   const {
     eliminando,
     eliminarLista,
@@ -220,18 +236,23 @@ export function ListaProyecto({ lista, esLider, onChanged }: Props) {
               tarea={tarea}
               indice={indice}
               eliminando={eliminando === tarea.tarea_id}
+              onOpen={() => setTareaEditando(tarea)}
               onDelete={() => confirmarEliminacionTarea(tarea)}
             />
           ))}
         </View>
       )}
 
-      <CrearTareaModal
-        visible={creandoTarea}
+      <TareaModal
+        visible={creandoTarea || tareaEditando !== null}
         listaId={lista.lista_id}
         listaNombre={lista.lista_nombre}
-        onClose={() => setCreandoTarea(false)}
-        onCreated={onChanged}
+        tarea={tareaEditando}
+        onClose={() => {
+          setCreandoTarea(false)
+          setTareaEditando(null)
+        }}
+        onSaved={onChanged}
       />
     </View>
   )
@@ -321,6 +342,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
+  },
+  tareaPressed: {
+    opacity: 0.82,
   },
   notaPendiente: {
     backgroundColor: '#FFE0B8',
