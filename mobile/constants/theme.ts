@@ -3,18 +3,34 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
-import { Platform } from 'react-native';
+import { Platform } from 'react-native'
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+export const AppColors = {
+  brand: '#6F45A5',
+  brandDark: '#4F2D7F',
+  brandSoft: '#E9E1F3',
+  accent: '#FF6B2C',
+  accentPressed: '#E8521D',
+  accentSoft: '#FFF0E8',
+  background: '#F8F5FB',
+  surface: '#FFFFFF',
+  text: '#342247',
+  textMuted: '#766682',
+  border: '#D9CEE8',
+  danger: '#B42318',
+  dangerSoft: '#FEF3F2',
+} as const
+
+const tintColorLight = AppColors.brand
+const tintColorDark = '#FFFFFF'
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
+    text: AppColors.text,
+    background: AppColors.background,
     tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
+    icon: AppColors.textMuted,
+    tabIconDefault: AppColors.textMuted,
     tabIconSelected: tintColorLight,
   },
   dark: {
@@ -25,7 +41,7 @@ export const Colors = {
     tabIconDefault: '#9BA1A6',
     tabIconSelected: tintColorDark,
   },
-};
+}
 
 export const Fonts = Platform.select({
   ios: {
@@ -50,4 +66,4 @@ export const Fonts = Platform.select({
     rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
-});
+})
