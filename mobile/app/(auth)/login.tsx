@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import {
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -66,58 +69,71 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.form}>
-        <Text style={styles.title}>Plann-It</Text>
-        <Text style={styles.subtitle}>Iniciar sesión</Text>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Correo electrónico</Text>
-          <TextInput
-            accessibilityLabel="Correo electrónico"
-            style={styles.input}
-            placeholder="nombre@correo.com"
-            placeholderTextColor="#8A918B"
-            value={correo}
-            onChangeText={setCorreo}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete="email"
-            textContentType="emailAddress"
-          />
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Contraseña</Text>
-          <TextInput
-            accessibilityLabel="Contraseña"
-            style={styles.input}
-            placeholder="Ingresa tu contraseña"
-            placeholderTextColor="#8A918B"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete="current-password"
-            textContentType="password"
-          />
-        </View>
-
-        <Pressable
-          style={styles.button}
-          onPress={iniciarSesion}
-          disabled={cargando}
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView
+          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+          contentContainerStyle={styles.scrollContent}
+          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.buttonText}>
-            {cargando ? 'Ingresando...' : 'Ingresar'}
-          </Text>
-        </Pressable>
+          <View style={styles.form}>
+            <Text style={styles.title}>Plann-It</Text>
+            <Text style={styles.subtitle}>Iniciar sesión</Text>
 
-        <Link href="/(auth)/register" style={styles.link}>
-          Crear una cuenta
-        </Link>
-      </View>
+            <View style={styles.field}>
+              <Text style={styles.label}>Correo electrónico</Text>
+              <TextInput
+                accessibilityLabel="Correo electrónico"
+                style={styles.input}
+                placeholder="nombre@correo.com"
+                placeholderTextColor="#8A918B"
+                value={correo}
+                onChangeText={setCorreo}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="email"
+                textContentType="emailAddress"
+              />
+            </View>
+
+            <View style={styles.field}>
+              <Text style={styles.label}>Contraseña</Text>
+              <TextInput
+                accessibilityLabel="Contraseña"
+                style={styles.input}
+                placeholder="Ingresa tu contraseña"
+                placeholderTextColor="#8A918B"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="current-password"
+                textContentType="password"
+              />
+            </View>
+
+            <Pressable
+              style={styles.button}
+              onPress={iniciarSesion}
+              disabled={cargando}
+            >
+              <Text style={styles.buttonText}>
+                {cargando ? 'Ingresando...' : 'Ingresar'}
+              </Text>
+            </Pressable>
+
+            <Link href="/(auth)/register" style={styles.link}>
+              Crear una cuenta
+            </Link>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   )
 }
@@ -125,12 +141,23 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    padding: 24,
     backgroundColor: '#F8F5FB',
   },
 
+  keyboardView: {
+    flex: 1,
+  },
+
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: 24,
+  },
+
   form: {
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
     gap: 16,
   },
 
