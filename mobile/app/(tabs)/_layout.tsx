@@ -1,15 +1,17 @@
 import { Ionicons } from '@expo/vector-icons'
-import { Tabs } from 'expo-router'
+import { Tabs, useRouter } from 'expo-router'
 import {
   ActivityIndicator,
   Alert,
   Pressable,
   StyleSheet,
+  View,
 } from 'react-native'
 
 import { useCerrarSesion } from '../../features/auth/hooks/useCerrarSesion'
 
 export default function TabLayout() {
+  const router = useRouter()
   const { cerrandoSesion, cerrarSesion } = useCerrarSesion()
 
   function confirmarCierreDeSesion() {
@@ -47,25 +49,46 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerRight: () => (
-          <Pressable
-            accessibilityLabel="Cerrar sesión"
-            accessibilityRole="button"
-            disabled={cerrandoSesion}
-            hitSlop={8}
-            onPress={confirmarCierreDeSesion}
-            style={({ pressed }) => [
-              styles.logoutButton,
-              pressed && styles.logoutButtonPressed,
-              cerrandoSesion && styles.logoutButtonDisabled,
-            ]}
-          >
-            {cerrandoSesion ? (
-              <ActivityIndicator size="small" color="#B42318" />
-            ) : (
-              <Ionicons name="log-out-outline" size={23} color="#B42318" />
-            )}
-          </Pressable>
+headerRight: () => (
+          // Contenedor principal que pone todo en fila
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 15 }}>
+            
+            {/* NUESTRO NUEVO BOTÓN DE PERFIL */}
+            <Pressable
+              accessibilityLabel="Mi Perfil"
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={() => router.push('/perfil')}
+              style={({ pressed }) => [
+                styles.logoutButton, // Usamos el mismo estilo base para que sean consistentes
+                pressed && styles.logoutButtonPressed,
+                { marginRight: 10 } // Espacio entre el ícono de perfil y el de salir
+              ]}
+            >
+              <Ionicons name="person-circle-outline" size={26} color="#166534" />
+            </Pressable>
+
+            {/* EL BOTÓN ORIGINAL DE SALIR (Intacto) */}
+            <Pressable
+              accessibilityLabel="Cerrar sesión"
+              accessibilityRole="button"
+              disabled={cerrandoSesion}
+              hitSlop={8}
+              onPress={confirmarCierreDeSesion}
+              style={({ pressed }) => [
+                styles.logoutButton,
+                pressed && styles.logoutButtonPressed,
+                cerrandoSesion && styles.logoutButtonDisabled,
+              ]}
+            >
+              {cerrandoSesion ? (
+                <ActivityIndicator size="small" color="#842318" />
+              ) : (
+                <Ionicons name="log-out-outline" size={26} color="#842318" />
+              )}
+            </Pressable>
+
+          </View>
         ),
       }}
     >
