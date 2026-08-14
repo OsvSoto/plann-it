@@ -59,7 +59,14 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        headerStyle: { backgroundColor: '#FFFFFF' },
+        headerTintColor: '#342247',
+        headerTitleStyle: { fontWeight: '700' },
+      }}
+    >
       <Stack.Protected guard={!session}>
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
@@ -80,6 +87,14 @@ export default function RootLayout() {
             headerShown: true,
             title: 'Detalle del proyecto',
             headerBackTitle: 'Proyectos',
+          }}
+        />
+        <Stack.Screen
+          name="proyectos/[proyectoId]/tableros/[tableroId]"
+          options={{
+            headerShown: true,
+            title: 'Tablero',
+            headerBackTitle: 'Proyecto',
           }}
         />
       </Stack.Protected>

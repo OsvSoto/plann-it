@@ -28,15 +28,9 @@ export function TableroProyecto({ tablero, esLider, onChanged }: Props) {
   return (
     <View style={styles.section}>
       <View style={styles.header}>
-        <View style={styles.icon}>
-          <Ionicons name="grid-outline" size={18} color="#166534" />
-        </View>
-        <View style={styles.headerText}>
-          <Text style={styles.nombre}>{tablero.tablero_nombre}</Text>
-          <Text style={styles.resumen}>
-            {tablero.listas.length}{' '}
-            {tablero.listas.length === 1 ? 'lista' : 'listas'}
-          </Text>
+        <View style={styles.boardLabel}>
+          <Ionicons name="pin-outline" size={18} color="#F6F8F6" />
+          <Text style={styles.boardLabelText}>ESPACIO DE TRABAJO</Text>
         </View>
         {esLider ? (
           <Pressable
@@ -48,22 +42,28 @@ export function TableroProyecto({ tablero, esLider, onChanged }: Props) {
               pressed && styles.addListButtonPressed,
             ]}
           >
-            <Ionicons name="add" size={18} color="#166534" />
-            <Text style={styles.addListText}>Nueva lista</Text>
+            <Ionicons name="add" size={18} color="#FFFFFF" />
+            <Text style={styles.addListText}>Añadir lista</Text>
           </Pressable>
         ) : null}
       </View>
 
-      {tablero.listas.length === 0 ? (
-        <View style={styles.vacio}>
-          <Text style={styles.vacioText}>Este tablero aún no tiene listas.</Text>
-        </View>
-      ) : (
-        <ScrollView
-          horizontal
-          contentContainerStyle={styles.listas}
-          showsHorizontalScrollIndicator={false}
-        >
+      <View style={styles.boardSurface}>
+        {tablero.listas.length === 0 ? (
+          <View style={styles.vacio}>
+            <View style={styles.emptyPaper}>
+              <View style={styles.emptyPin} />
+              <Ionicons name="documents-outline" size={28} color="#6F45A5" />
+              <Text style={styles.vacioTitle}>Tablero vacío</Text>
+              <Text style={styles.vacioText}>Añade una lista para comenzar a organizar tareas.</Text>
+            </View>
+          </View>
+        ) : (
+          <ScrollView
+            horizontal
+            contentContainerStyle={styles.listas}
+            showsHorizontalScrollIndicator={false}
+          >
           {tablero.listas.map((lista) => (
             <ListaProyecto
               key={lista.lista_id}
@@ -72,8 +72,9 @@ export function TableroProyecto({ tablero, esLider, onChanged }: Props) {
               onChanged={onChanged}
             />
           ))}
-        </ScrollView>
-      )}
+          </ScrollView>
+        )}
+      </View>
 
       <CrearListaModal
         visible={creandoLista}
@@ -88,34 +89,37 @@ export function TableroProyecto({ tablero, esLider, onChanged }: Props) {
 
 const styles = StyleSheet.create({
   section: {
-    gap: 14,
+    marginHorizontal: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#4F2D7F',
+    borderRadius: 8,
+    backgroundColor: '#5B378D',
+    shadowColor: '#3B205F',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.18,
+    shadowRadius: 9,
+    elevation: 5,
   },
   header: {
+    minHeight: 54,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 20,
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
   },
-  icon: {
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 8,
-    backgroundColor: '#DCFCE7',
-  },
-  headerText: {
+  boardLabel: {
     flex: 1,
-    gap: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
   },
-  nombre: {
-    color: '#172019',
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  resumen: {
-    color: '#667069',
-    fontSize: 12,
+  boardLabelText: {
+    color: '#F6F8F6',
+    fontSize: 11,
+    fontWeight: '800',
   },
   addListButton: {
     minHeight: 38,
@@ -123,35 +127,70 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 5,
-    borderWidth: 1,
-    borderColor: '#86B694',
     borderRadius: 8,
     paddingHorizontal: 10,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FF6B2C',
   },
   addListButtonPressed: {
-    backgroundColor: '#EAF4ED',
+    backgroundColor: '#E8521D',
   },
   addListText: {
-    color: '#166534',
+    color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '700',
   },
+  boardSurface: {
+    minHeight: 430,
+    borderTopWidth: 1,
+    borderTopColor: '#A98ACB',
+    backgroundColor: '#E9E1F3',
+  },
   listas: {
-    gap: 12,
-    paddingHorizontal: 20,
-    paddingBottom: 2,
+    alignItems: 'flex-start',
+    gap: 18,
+    paddingHorizontal: 18,
+    paddingTop: 22,
+    paddingBottom: 26,
   },
   vacio: {
-    marginHorizontal: 20,
-    borderLeftWidth: 3,
-    borderLeftColor: '#AAB2AC',
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    backgroundColor: '#EEF1EE',
+    minHeight: 430,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 28,
+  },
+  emptyPaper: {
+    width: '100%',
+    maxWidth: 310,
+    minHeight: 180,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    padding: 24,
+    backgroundColor: '#FFFFFF',
+    transform: [{ rotate: '-1deg' }],
+    shadowColor: '#4F2D7F',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  emptyPin: {
+    position: 'absolute',
+    top: 12,
+    width: 11,
+    height: 11,
+    borderRadius: 6,
+    backgroundColor: '#FF6B2C',
+  },
+  vacioTitle: {
+    color: '#342247',
+    fontSize: 17,
+    fontWeight: '700',
   },
   vacioText: {
-    color: '#59615B',
-    fontSize: 14,
+    color: '#62566E',
+    fontSize: 13,
+    lineHeight: 19,
+    textAlign: 'center',
   },
 })

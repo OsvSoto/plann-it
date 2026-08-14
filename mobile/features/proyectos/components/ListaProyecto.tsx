@@ -31,46 +31,69 @@ function formatearFecha(fecha: string) {
 
 type TareaItemProps = {
   tarea: Tarea
+  indice: number
   eliminando: boolean
   onDelete: () => void
 }
 
-function TareaItem({ tarea, eliminando, onDelete }: TareaItemProps) {
+function TareaItem({ tarea, indice, eliminando, onDelete }: TareaItemProps) {
+  const colorNota = tarea.tarea_estado === 'COMPLETADA'
+    ? styles.notaCompletada
+    : tarea.tarea_estado === 'EN_PROGRESO'
+      ? styles.notaEnProgreso
+      : styles.notaPendiente
+
   return (
-    <View style={styles.tarea}>
-      <View style={styles.tareaInfo}>
-        <Text style={styles.tareaNombre} numberOfLines={2}>
-          {tarea.tarea_nombre}
-        </Text>
-        <View style={styles.tareaMeta}>
-          <Ionicons name="calendar-outline" size={14} color="#667069" />
-          <Text style={styles.tareaFecha}>
-            {formatearFecha(tarea.tarea_fecha_entrega)}
+    <View
+      style={[
+        styles.tarea,
+        colorNota,
+        indice % 3 === 0 && styles.notaInclinadaIzquierda,
+        indice % 3 === 2 && styles.notaInclinadaDerecha,
+      ]}
+    >
+      <View style={styles.pin} />
+      <View style={styles.tareaTopRow}>
+        <View style={styles.estado}>
+          <Text style={styles.estadoText} numberOfLines={1}>
+            {tarea.tarea_estado.replace('_', ' ')}
           </Text>
         </View>
+        <Pressable
+          accessibilityLabel={`Eliminar tarea ${tarea.tarea_nombre}`}
+          accessibilityRole="button"
+          disabled={eliminando}
+          hitSlop={6}
+          onPress={onDelete}
+          style={({ pressed }) => [
+            styles.deleteTaskButton,
+            pressed && styles.deleteButtonPressed,
+          ]}
+        >
+          {eliminando ? (
+            <ActivityIndicator size="small" color="#7A271A" />
+          ) : (
+            <Ionicons name="trash-outline" size={17} color="#7A271A" />
+          )}
+        </Pressable>
       </View>
-      <View style={styles.estado}>
-        <Text style={styles.estadoText} numberOfLines={1}>
-          {tarea.tarea_estado}
+
+      <Text style={styles.tareaNombre} numberOfLines={3}>
+        {tarea.tarea_nombre}
+      </Text>
+
+      {tarea.tarea_desc ? (
+        <Text style={styles.tareaDescripcion} numberOfLines={3}>
+          {tarea.tarea_desc}
+        </Text>
+      ) : null}
+
+      <View style={styles.tareaMeta}>
+        <Ionicons name="calendar-outline" size={14} color="#5D4D68" />
+        <Text style={styles.tareaFecha}>
+          {formatearFecha(tarea.tarea_fecha_entrega)}
         </Text>
       </View>
-      <Pressable
-        accessibilityLabel={`Eliminar tarea ${tarea.tarea_nombre}`}
-        accessibilityRole="button"
-        disabled={eliminando}
-        hitSlop={6}
-        onPress={onDelete}
-        style={({ pressed }) => [
-          styles.deleteTaskButton,
-          pressed && styles.deleteButtonPressed,
-        ]}
-      >
-        {eliminando ? (
-          <ActivityIndicator size="small" color="#B42318" />
-        ) : (
-          <Ionicons name="trash-outline" size={17} color="#B42318" />
-        )}
-      </Pressable>
     </View>
   )
 }
@@ -161,7 +184,7 @@ export function ListaProyecto({ lista, esLider, onChanged }: Props) {
             pressed && styles.addTaskButtonPressed,
           ]}
         >
-          <Ionicons name="add" size={19} color="#166534" />
+          <Ionicons name="add" size={19} color="#6F45A5" />
         </Pressable>
         {esLider ? (
           <Pressable
@@ -191,10 +214,11 @@ export function ListaProyecto({ lista, esLider, onChanged }: Props) {
         </View>
       ) : (
         <View style={styles.tareas}>
-          {lista.tareas.map((tarea) => (
+          {lista.tareas.map((tarea, indice) => (
             <TareaItem
               key={tarea.tarea_id}
               tarea={tarea}
+              indice={indice}
               eliminando={eliminando === tarea.tarea_id}
               onDelete={() => confirmarEliminacionTarea(tarea)}
             />
@@ -215,14 +239,18 @@ export function ListaProyecto({ lista, esLider, onChanged }: Props) {
 
 const styles = StyleSheet.create({
   lista: {
-    width: 286,
+    width: 292,
     alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderColor: '#DDE2DE',
-    borderRadius: 8,
+    borderTopWidth: 6,
+    borderTopColor: '#6F45A5',
     padding: 14,
-    backgroundColor: '#FFFFFF',
-    gap: 12,
+    backgroundColor: '#FCFAFE',
+    gap: 14,
+    shadowColor: '#4F2D7F',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 5,
   },
   header: {
     minHeight: 30,
@@ -232,7 +260,7 @@ const styles = StyleSheet.create({
   },
   nombre: {
     flex: 1,
-    color: '#273029',
+    color: '#342247',
     fontSize: 16,
     fontWeight: '700',
     lineHeight: 21,
@@ -244,10 +272,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 8,
     paddingHorizontal: 7,
-    backgroundColor: '#EEF1EE',
+    backgroundColor: '#E9E1F3',
   },
   contadorText: {
-    color: '#59615B',
+    color: '#6F45A5',
     fontSize: 12,
     fontWeight: '700',
   },
@@ -259,7 +287,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   addTaskButtonPressed: {
-    backgroundColor: '#EAF4ED',
+    backgroundColor: '#EEE7F6',
   },
   deleteListButton: {
     width: 28,
@@ -279,26 +307,67 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEF3F2',
   },
   tareas: {
-    gap: 8,
+    gap: 14,
+    paddingTop: 2,
   },
   tarea: {
-    minHeight: 62,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#EDF0ED',
-    paddingTop: 10,
+    minHeight: 148,
+    gap: 9,
+    paddingHorizontal: 14,
+    paddingTop: 18,
+    paddingBottom: 13,
+    shadowColor: '#4F2D7F',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  tareaInfo: {
-    flex: 1,
-    gap: 6,
+  notaPendiente: {
+    backgroundColor: '#FFE0B8',
+  },
+  notaEnProgreso: {
+    backgroundColor: '#DCCEF0',
+  },
+  notaCompletada: {
+    backgroundColor: '#FFD0C4',
+  },
+  notaInclinadaIzquierda: {
+    transform: [{ rotate: '-0.7deg' }],
+  },
+  notaInclinadaDerecha: {
+    transform: [{ rotate: '0.7deg' }],
+  },
+  pin: {
+    position: 'absolute',
+    top: 7,
+    left: '50%',
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#FF6B2C',
+    shadowColor: '#A73812',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.35,
+    shadowRadius: 1,
+    elevation: 2,
+  },
+  tareaTopRow: {
+    minHeight: 28,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
   },
   tareaNombre: {
-    color: '#273029',
-    fontSize: 14,
-    fontWeight: '600',
-    lineHeight: 19,
+    color: '#342247',
+    fontSize: 16,
+    fontWeight: '700',
+    lineHeight: 21,
+  },
+  tareaDescripcion: {
+    color: '#55475F',
+    fontSize: 13,
+    lineHeight: 18,
   },
   tareaMeta: {
     flexDirection: 'row',
@@ -306,32 +375,31 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   tareaFecha: {
-    color: '#667069',
+    color: '#5D4D68',
     fontSize: 12,
+    fontWeight: '600',
   },
   estado: {
-    maxWidth: 88,
-    borderRadius: 8,
-    paddingHorizontal: 7,
-    paddingVertical: 4,
-    backgroundColor: '#EAF4ED',
+    maxWidth: 125,
   },
   estadoText: {
-    color: '#166534',
+    color: '#503A63',
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '800',
     textTransform: 'uppercase',
   },
   vacio: {
-    minHeight: 70,
+    minHeight: 92,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    borderTopWidth: 1,
-    borderTopColor: '#EDF0ED',
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: '#CDBDDF',
+    backgroundColor: '#F0EAF6',
   },
   vacioText: {
-    color: '#747C76',
+    color: '#766682',
     fontSize: 13,
   },
 })

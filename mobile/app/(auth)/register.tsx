@@ -156,6 +156,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 24,
+    backgroundColor: '#F8F5FB',
   },
 
   form: {
@@ -163,6 +164,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
+    color: '#342247',
     fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 16,
@@ -170,14 +172,16 @@ const styles = StyleSheet.create({
 
   input: {
     borderWidth: 1,
-    borderColor: '#aaa',
+    borderColor: '#D9CEE8',
     borderRadius: 8,
     padding: 14,
+    color: '#342247',
+    backgroundColor: '#FFFFFF',
     fontSize: 16,
   },
 
   button: {
-    backgroundColor: '#111',
+    backgroundColor: '#FF6B2C',
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
@@ -193,6 +197,8 @@ const styles = StyleSheet.create({
   },
 
   link: {
+    color: '#6F45A5',
+    fontWeight: '700',
     textAlign: 'center',
     marginTop: 12,
   },

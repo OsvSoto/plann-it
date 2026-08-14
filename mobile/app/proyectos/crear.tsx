@@ -45,7 +45,7 @@ export default function CrearProyectoScreen() {
           <View style={styles.content}>
             <View style={styles.intro}>
               <View style={styles.iconContainer}>
-                <Ionicons name="folder-open-outline" size={24} color="#166534" />
+                <Ionicons name="folder-open-outline" size={24} color="#6F45A5" />
               </View>
               <View style={styles.introText}>
                 <Text style={styles.title}>Información general</Text>
@@ -93,7 +93,7 @@ export default function CrearProyectoScreen() {
               <View style={styles.field}>
                 <Text style={styles.label}>Fecha de término</Text>
                 <View style={styles.dateInputContainer}>
-                  <Ionicons name="calendar-outline" size={20} color="#59615B" />
+                  <Ionicons name="calendar-outline" size={20} color="#6F45A5" />
                   <TextInput
                     style={styles.dateInput}
                     placeholder="AAAA-MM-DD"
@@ -145,7 +145,7 @@ export default function CrearProyectoScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F7F9F7',
+    backgroundColor: '#F8F5FB',
   },
   container: {
     flex: 1,
@@ -172,19 +172,19 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#DCFCE7',
+    backgroundColor: '#E9E1F3',
   },
   introText: {
     flex: 1,
     gap: 6,
   },
   title: {
-    color: '#172019',
+    color: '#342247',
     fontSize: 22,
     fontWeight: '700',
   },
   subtitle: {
-    color: '#59615B',
+    color: '#766682',
     fontSize: 15,
     lineHeight: 21,
   },
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   label: {
-    color: '#273029',
+    color: '#4F2D7F',
     fontSize: 15,
     fontWeight: '600',
   },
@@ -211,11 +211,11 @@ const styles = StyleSheet.create({
   input: {
     minHeight: 50,
     borderWidth: 1,
-    borderColor: '#CDD3CE',
+    borderColor: '#D9CEE8',
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: '#172019',
+    color: '#342247',
     backgroundColor: '#FFFFFF',
     fontSize: 16,
   },
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     borderWidth: 1,
-    borderColor: '#CDD3CE',
+    borderColor: '#D9CEE8',
     borderRadius: 8,
     paddingHorizontal: 14,
     backgroundColor: '#FFFFFF',
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   dateInput: {
     flex: 1,
     paddingVertical: 12,
-    color: '#172019',
+    color: '#342247',
     fontSize: 16,
   },
   helper: {
@@ -272,10 +272,10 @@ const styles = StyleSheet.create({
     gap: 8,
     borderRadius: 8,
     paddingHorizontal: 20,
-    backgroundColor: '#166534',
+    backgroundColor: '#FF6B2C',
   },
   buttonPressed: {
-    backgroundColor: '#14532D',
+    backgroundColor: '#E8521D',
   },
   buttonDisabled: {
     opacity: 0.65,

@@ -82,7 +82,7 @@ export function CrearListaModal({
                 pressed && styles.iconButtonPressed,
               ]}
             >
-              <Ionicons name="close" size={23} color="#273029" />
+              <Ionicons name="close" size={23} color="#4F2D7F" />
             </Pressable>
           </View>
 
@@ -142,7 +142,7 @@ export function CrearListaModal({
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F7F9F7' },
+  safeArea: { flex: 1, backgroundColor: '#F8F5FB' },
   container: {
     flex: 1,
     width: '100%',
@@ -157,8 +157,8 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   headerText: { flex: 1, gap: 4 },
-  title: { color: '#172019', fontSize: 23, fontWeight: '700' },
-  subtitle: { color: '#667069', fontSize: 14 },
+  title: { color: '#342247', fontSize: 23, fontWeight: '700' },
+  subtitle: { color: '#766682', fontSize: 14 },
   iconButton: {
     width: 40,
     height: 40,
@@ -169,15 +169,15 @@ const styles = StyleSheet.create({
   iconButtonPressed: { backgroundColor: '#E8ECE9' },
   form: { flex: 1, paddingTop: 34, gap: 18 },
   field: { gap: 8 },
-  label: { color: '#273029', fontSize: 15, fontWeight: '600' },
+  label: { color: '#4F2D7F', fontSize: 15, fontWeight: '600' },
   input: {
     minHeight: 50,
     borderWidth: 1,
-    borderColor: '#CDD3CE',
+    borderColor: '#D9CEE8',
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: '#172019',
+    color: '#342247',
     backgroundColor: '#FFFFFF',
     fontSize: 16,
   },
@@ -199,11 +199,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#AAB2AC',
+    borderColor: '#D9CEE8',
     borderRadius: 8,
     backgroundColor: '#FFFFFF',
   },
-  secondaryText: { color: '#273029', fontSize: 15, fontWeight: '600' },
+  secondaryText: { color: '#4F2D7F', fontSize: 15, fontWeight: '600' },
   primaryButton: {
     minHeight: 48,
     flex: 1.3,
@@ -212,9 +212,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 7,
     borderRadius: 8,
-    backgroundColor: '#166534',
+    backgroundColor: '#FF6B2C',
   },
-  primaryButtonPressed: { backgroundColor: '#14532D' },
+  primaryButtonPressed: { backgroundColor: '#E8521D' },
   primaryText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
   disabled: { opacity: 0.65 },
 })

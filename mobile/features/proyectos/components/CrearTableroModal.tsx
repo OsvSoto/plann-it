@@ -82,7 +82,7 @@ export function CrearTableroModal({
                 pressed && styles.closeButtonPressed,
               ]}
             >
-              <Ionicons name="close" size={23} color="#273029" />
+              <Ionicons name="close" size={23} color="#4F2D7F" />
             </Pressable>
           </View>
 
@@ -155,7 +155,7 @@ export function CrearTableroModal({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F7F9F7',
+    backgroundColor: '#F8F5FB',
   },
   container: {
     flex: 1,
@@ -172,12 +172,12 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   title: {
-    color: '#172019',
+    color: '#342247',
     fontSize: 23,
     fontWeight: '700',
   },
   subtitle: {
-    color: '#667069',
+    color: '#766682',
     fontSize: 14,
     marginTop: 4,
   },
@@ -200,18 +200,18 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   label: {
-    color: '#273029',
+    color: '#4F2D7F',
     fontSize: 15,
     fontWeight: '600',
   },
   input: {
     minHeight: 50,
     borderWidth: 1,
-    borderColor: '#CDD3CE',
+    borderColor: '#D9CEE8',
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: '#172019',
+    color: '#342247',
     backgroundColor: '#FFFFFF',
     fontSize: 16,
   },
@@ -242,15 +242,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#AAB2AC',
+    borderColor: '#D9CEE8',
     borderRadius: 8,
     backgroundColor: '#FFFFFF',
   },
   secondaryButtonPressed: {
-    backgroundColor: '#EEF1EE',
+    backgroundColor: '#F0EAF6',
   },
   secondaryButtonText: {
-    color: '#273029',
+    color: '#4F2D7F',
     fontSize: 15,
     fontWeight: '600',
   },
@@ -262,10 +262,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 7,
     borderRadius: 8,
-    backgroundColor: '#166534',
+    backgroundColor: '#FF6B2C',
   },
   primaryButtonPressed: {
-    backgroundColor: '#14532D',
+    backgroundColor: '#E8521D',
   },
   buttonDisabled: {
     opacity: 0.65,
