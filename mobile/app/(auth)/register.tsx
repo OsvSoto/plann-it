@@ -16,16 +16,30 @@ export default function RegisterScreen() {
   const [nombre, setNombre] = useState('')
   const [correo, setCorreo] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmacionPassword, setConfirmacionPassword] = useState('')
   const [cargando, setCargando] = useState(false)
 
   async function registrarse() {
     const nombreLimpio = nombre.trim()
     const correoLimpio = correo.trim().toLowerCase()
 
-    if (!nombreLimpio || !correoLimpio || !password) {
+    if (
+      !nombreLimpio
+      || !correoLimpio
+      || !password
+      || !confirmacionPassword
+    ) {
       Alert.alert(
         'Error',
         'Completa todos los campos'
+      )
+      return
+    }
+
+    if (password !== confirmacionPassword) {
+      Alert.alert(
+        'Las contraseñas no coinciden',
+        'Revisa ambos campos e intenta nuevamente.'
       )
       return
     }
@@ -144,6 +158,24 @@ export default function RegisterScreen() {
             autoCorrect={false}
             autoComplete="new-password"
             textContentType="newPassword"
+          />
+        </View>
+
+        <View style={styles.field}>
+          <Text style={styles.label}>Confirmar contraseña</Text>
+          <TextInput
+            accessibilityLabel="Confirmar contraseña"
+            style={styles.input}
+            placeholder="Repite tu contraseña"
+            placeholderTextColor="#8A918B"
+            value={confirmacionPassword}
+            onChangeText={setConfirmacionPassword}
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="new-password"
+            textContentType="newPassword"
+            onSubmitEditing={() => void registrarse()}
           />
         </View>
 
