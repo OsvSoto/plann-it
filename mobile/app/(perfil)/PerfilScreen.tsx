@@ -2,14 +2,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase'; // Ajusta la ruta a tu lib/supabase si cambia
 
 export default function PerfilScreen() {
-  const [userEmail, setUserEmail] = useState<string | undefined>('');
   const [cargando, setCargando] = useState(true);
-
-  const [nombreUsuario, setNombreUsuario] = useState('Monse Plann-It');
-  const [biografia, setBiografia] = useState('¡Hola! Soy parte del equipo creador de Plann-It. Me encanta organizar mis proyectos y mantener todo al día.');
+  const [nombreUsuario, setNombreUsuario] = useState('Usuario');
+  const [userEmail, setUserEmail] = useState('');
+  const [biografia, setBiografia] = useState('Sin biografía.');
   const [fotoPerfil, setFotoPerfil] = useState('https://cdn-icons-png.flaticon.com/512/3135/3135715.png');
 
   useEffect(() => {
@@ -20,7 +19,25 @@ export default function PerfilScreen() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        setUserEmail(user.email);
+        setUserEmail(user.email || '');
+
+        // Consultar la tabla usuario de tu base de datos
+        const { data, error } = await supabase
+  .from('usuario')
+  .select('usuario_nombre, usuario_correo, usuario_bio, usuario_foto')
+  .eq('usuario_id', user.id)
+  .single();
+
+if (error) {
+  console.log("Aviso/Error obteniendo datos de tabla usuario:", error.message);
+} else if (data) {
+  const usuarioData = data as any; // <-- Le dice a VS Code que confíe en que estas columnas sí existen
+  if (usuarioData.usuario_nombre) setNombreUsuario(usuarioData.usuario_nombre);
+  if (usuarioData.usuario_correo) setUserEmail(usuarioData.usuario_correo);
+  if (usuarioData.usuario_bio) setBiografia(usuarioData.usuario_bio);
+  if (usuarioData.usuario_foto) setFotoPerfil(usuarioData.usuario_foto);
+}
+        
       }
     } catch (error) {
       console.log("Error al obtener usuario:", error);
@@ -30,7 +47,6 @@ export default function PerfilScreen() {
   };
 
   const irAlInicio = () => {
-    console.log("Navegando al inicio...");
     router.replace('/(tabs)');
   };
 
@@ -46,7 +62,7 @@ export default function PerfilScreen() {
     <View style={styles.container}>
       <View style={styles.card}>
         
-        {/* BOTÓN PARA REDIRECCIONAR AL INDEX */}
+        {/* BOTÓN PARA REGRESAR AL INDEX */}
         <TouchableOpacity 
           style={styles.backButton} 
           onPress={irAlInicio}
@@ -71,14 +87,13 @@ export default function PerfilScreen() {
           <Text style={styles.bioText}>{biografia}</Text>
         </View>
 
-{/* BOTÓN EDITAR PERFIL */}
-<TouchableOpacity 
-  style={styles.editButton} 
-  onPress={() => router.push('/editarPerfil')} // <-- Cambia el alert por la navegación hacia tu nueva pantalla
->
-  <Text style={styles.editButtonText}>Editar Perfil</Text>
-</TouchableOpacity>
-
+        {/* BOTÓN EDITAR PERFIL */}
+        <TouchableOpacity 
+          style={styles.editButton} 
+          onPress={() => router.push('/editarPerfil')}
+        >
+          <Text style={styles.editButtonText}>Editar Perfil</Text>
+        </TouchableOpacity>
         
       </View>
     </View>
@@ -109,9 +124,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 15,
     left: 15,
-    zIndex: 999, // Asegura que esté por encima de cualquier otro elemento
-    elevation: 10, // Para Android
-    padding: 10, // Área de toque más amplia
+    zIndex: 999,
+    elevation: 10,
+    padding: 10,
   },
   avatar: {
     width: 110,

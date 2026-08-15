@@ -1,59 +1,111 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { supabase } from '../../lib/supabase';
 
 export default function EditarPerfilScreen() {
-  const [nombre, setNombre] = useState('Monse Plann-It');
-  const [biografia, setBiografia] = useState('¡Hola! Soy parte del equipo creador de Plann-It. Me encanta organizar mis proyectos y mantener todo al día.');
-  // Estado para la foto (guardará la dirección local de la imagen seleccionada)
+  const [userId, setUserId] = useState<string | null>(null);
+  const [correo, setCorreo] = useState('');
+  const [nombre, setNombre] = useState('');
+  const [biografia, setBiografia] = useState('');
   const [fotoPerfil, setFotoPerfil] = useState('https://cdn-icons-png.flaticon.com/512/3135/3135715.png');
+  const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
 
-  // FUNCIÓN PARA ABRIR LA GALERÍA DEL CELULAR
-  const seleccionarFoto = async () => {
-    // Solicitar permisos para acceder a la galería
-    const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  useEffect(() => {
+    cargarDatos();
+  }, []);
 
+  const cargarDatos = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+        setCorreo(user.email || '');
+
+        const { data } = await supabase
+          .from('usuario')
+          .select('usuario_nombre, usuario_correo, usuario_bio, usuario_foto')
+          .eq('usuario_id', user.id)
+          .single();
+
+        if (data) {
+          const usuarioData = data as any;
+          if (usuarioData.usuario_nombre) setNombre(usuarioData.usuario_nombre);
+          if (usuarioData.usuario_correo) setCorreo(usuarioData.usuario_correo);
+          if (usuarioData.usuario_bio) setBiografia(usuarioData.usuario_bio);
+          if (usuarioData.usuario_foto) setFotoPerfil(usuarioData.usuario_foto);
+        }
+      }
+    } catch (error) {
+      console.log('Error al cargar datos:', error);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const seleccionarFoto = async () => {
+    const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permiso.granted) {
       Alert.alert('Permiso denegado', 'Necesitamos acceso a tus fotos para cambiar la imagen de perfil.');
       return;
     }
 
-    // Abrir la galería de fotos
     const resultado = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true, // Permite al usuario recortar/ajustar la foto
-      aspect: [1, 1],       // Mantiene la imagen en formato cuadrado
+      allowsEditing: true,
+      aspect: [1, 1],
       quality: 0.8,
     });
 
     if (!resultado.canceled && resultado.assets[0].uri) {
-      // Guardar la dirección local de la nueva foto
       setFotoPerfil(resultado.assets[0].uri);
     }
   };
 
   const guardarCambios = async () => {
+    if (!userId) return;
     setGuardando(true);
     try {
-      // Más adelante subiremos la foto a Supabase Storage y actualizaremos la tabla de perfiles
+      const { error } = await supabase
+        .from('usuario')
+        .upsert({
+          usuario_id: userId,
+          usuario_correo: correo,
+          usuario_nombre: nombre,
+          usuario_bio: biografia,
+          usuario_foto: fotoPerfil,
+        } as any);
+
+      if (error) {
+        throw error;
+      }
+
       Alert.alert('Éxito', 'Perfil actualizado correctamente');
       router.replace('/perfil');
-    } catch (error) {
+    } catch (error: any) {
       console.log('Error al guardar:', error);
-      Alert.alert('Error', 'No se pudieron guardar los cambios');
+      Alert.alert('Error', error.message || 'No se pudieron guardar los cambios');
     } finally {
       setGuardando(false);
     }
   };
 
+  if (cargando) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#166534" />
+      </View>
+    );
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
         
-        {/* BOTÓN REGRESAR AL PERFIL */}
+        {/* BOTÓN REGRESAR */}
         <TouchableOpacity 
           style={styles.backButton} 
           onPress={() => router.replace('/perfil')}
@@ -64,7 +116,7 @@ export default function EditarPerfilScreen() {
 
         <Text style={styles.title}>Editar Perfil</Text>
 
-        {/* SECCIÓN DE FOTO DE PERFIL CON BOTÓN DE GALERÍA */}
+        {/* FOTO DE PERFIL */}
         <View style={styles.avatarSection}>
           <TouchableOpacity onPress={seleccionarFoto} activeOpacity={0.8} style={styles.avatarContainer}>
             <Image source={{ uri: fotoPerfil }} style={styles.avatar} />
@@ -77,7 +129,7 @@ export default function EditarPerfilScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* CAMPO NOMBRE DE USUARIO */}
+        {/* NOMBRE DE USUARIO */}
         <Text style={styles.label}>Nombre de usuario</Text>
         <TextInput
           style={styles.input}
@@ -86,7 +138,7 @@ export default function EditarPerfilScreen() {
           placeholder="Tu nombre"
         />
 
-        {/* CAMPO BIOGRAFÍA */}
+        {/* BIOGRAFÍA */}
         <Text style={styles.label}>Biografía</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
