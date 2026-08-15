@@ -107,7 +107,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({ proyectoId, tareas, proy
             style={[styles.button, viewMode === 'day' && styles.buttonActive]} 
             onPress={() => setViewMode('day')}
           >
-            <Text style={[styles.buttonText, viewMode === 'day' && styles.buttonTextActive]}>D as</Text>
+            <Text style={[styles.buttonText, viewMode === 'day' && styles.buttonTextActive]}>Días</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.button, viewMode === 'week' && styles.buttonActive]} 
@@ -176,21 +176,6 @@ export const GanttChart: React.FC<GanttChartProps> = ({ proyectoId, tareas, proy
           </View>
         </ScrollView>
       </ScrollView>
-
-      {expandedTask && (
-        <View style={styles.floatingButtonContainer}>
-          <TouchableOpacity
-            style={styles.floatingButton}
-            onPress={() => router.push({
-              pathname: '/tareas/[id]/editar',
-              params: { id: expandedTask, proyectoId }
-            })}
-          >
-            <Ionicons name="pencil" size={20} color="#FFFFFF" />
-            <Text style={styles.floatingButtonText}>Editar tarea</Text>
-          </TouchableOpacity>
-        </View>
-      )}
     </View>
   );
 };
@@ -337,32 +322,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 10,
     marginBottom: 2,
-  },
-  floatingButtonContainer: {
-    position: 'absolute',
-    bottom: 30,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-  floatingButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: '#6F45A5',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 6,
-  },
-  floatingButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 });
