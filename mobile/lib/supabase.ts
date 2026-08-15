@@ -1,15 +1,12 @@
 import 'react-native-url-polyfill/auto'
-import 'expo-sqlite/localStorage/install'
 
 import { createClient } from '@supabase/supabase-js'
 
+import { authStorage } from './authStorage'
 import type { Database } from './database.types'
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL
 const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_KEY
-const authStorage = typeof localStorage === 'undefined'
-  ? undefined
-  : localStorage
 
 if (!supabaseUrl) {
   throw new Error('Falta EXPO_PUBLIC_SUPABASE_URL')
