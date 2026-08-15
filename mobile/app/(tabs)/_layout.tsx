@@ -69,7 +69,7 @@ export default function TabLayout() {
               accessibilityLabel="Abrir mi perfil"
               accessibilityRole="button"
               hitSlop={8}
-              onPress={() => router.push('/perfil')}
+              onPress={() => router.push('/(perfil)/perfil')}
               style={({ pressed }) => [
                 styles.headerButton,
                 pressed && styles.profileButtonPressed,

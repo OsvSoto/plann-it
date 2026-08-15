@@ -95,7 +95,7 @@ export default function PerfilScreen() {
 
             <Pressable
               accessibilityRole="button"
-              onPress={() => router.push('/editarPerfil')}
+              onPress={() => router.push('/(perfil)/editarPerfil')}
               style={({ pressed }) => [
                 styles.editButton,
                 pressed && styles.primaryButtonPressed,
