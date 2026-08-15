@@ -8,8 +8,12 @@ import {
   View,
 } from 'react-native'
 
+import { AppColors } from '../../../constants/theme'
 import { useMiembrosProyecto } from '../hooks/useMiembrosProyecto'
+import { AdministrarMiembroModal } from './AdministrarMiembroModal'
 import { InvitarMiembroModal } from './InvitarMiembroModal'
+
+import type { MiembroProyecto } from '../types'
 
 type Props = {
   proyectoId: string
@@ -27,8 +31,10 @@ export function EquipoProyecto({
   esLider,
 }: Props) {
   const [invitando, setInvitando] = useState(false)
+  const [miembroSeleccionado, setMiembroSeleccionado] = useState<MiembroProyecto | null>(null)
   const {
     miembros,
+    usuarioActualId,
     cargando,
     error,
     cargarMiembros,
@@ -107,6 +113,20 @@ export function EquipoProyecto({
                   {miembro.miembro_rol === 'LIDER' ? 'Líder' : 'Miembro'}
                 </Text>
               </View>
+              {esLider && miembro.usuario_id !== usuarioActualId ? (
+                <Pressable
+                  accessibilityLabel={`Administrar a ${miembro.usuario_nombre}`}
+                  accessibilityRole="button"
+                  hitSlop={6}
+                  onPress={() => setMiembroSeleccionado(miembro)}
+                  style={({ pressed }) => [
+                    styles.manageButton,
+                    pressed && styles.manageButtonPressed,
+                  ]}
+                >
+                  <Ionicons name="settings-outline" size={19} color={AppColors.brandDark} />
+                </Pressable>
+              ) : null}
             </View>
           ))
         )}
@@ -117,6 +137,11 @@ export function EquipoProyecto({
         proyectoId={proyectoId}
         proyectoNombre={proyectoNombre}
         onClose={() => setInvitando(false)}
+      />
+      <AdministrarMiembroModal
+        miembro={miembroSeleccionado}
+        onClose={() => setMiembroSeleccionado(null)}
+        onUpdated={cargarMiembros}
       />
     </View>
   )
@@ -192,4 +217,12 @@ const styles = StyleSheet.create({
   roleText: { color: '#6F45A5', fontSize: 10, fontWeight: '700' },
   leaderRole: { backgroundColor: '#FFF0E8' },
   leaderRoleText: { color: '#D94D1C' },
+  manageButton: {
+    width: 38,
+    height: 38,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+  },
+  manageButtonPressed: { backgroundColor: AppColors.brandSoft },
 })
