@@ -1,7 +1,19 @@
 import type { Tables } from '../../lib/database.types'
 
 export type Proyecto = Tables<'proyecto'>
-export type Tarea = Tables<'tarea'>
+
+export type AsignacionTarea = {
+  asignacion_id: string
+  tarea_id: string
+  miembro_proyecto_id: string
+  usuario_id: string
+  usuario_nombre: string
+  usuario_correo: string
+}
+
+export type Tarea = Tables<'tarea'> & {
+  asignaciones: AsignacionTarea[]
+}
 
 export type ListaDetalle = Tables<'lista'> & {
   tareas: Tarea[]

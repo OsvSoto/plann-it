@@ -1,4 +1,5 @@
 import { supabase } from '../../../lib/supabase'
+import { obtenerAsignacionesProyecto } from './asignacion.service'
 
 import type {
   CrearListaInput,
@@ -64,6 +65,7 @@ export async function obtenerDetalleProyecto(
     tablerosResultado,
     liderResultado,
     puedeEliminarResultado,
+    asignacionesResultado,
   ] = await Promise.all([
     supabase
       .from('proyecto')
@@ -106,6 +108,7 @@ export async function obtenerDetalleProyecto(
     supabase.rpc('puede_eliminar_proyecto', {
       p_proyecto_id: proyectoId,
     }),
+    obtenerAsignacionesProyecto(proyectoId),
   ])
 
   if (proyectoResultado.error) {
@@ -124,6 +127,14 @@ export async function obtenerDetalleProyecto(
     throw puedeEliminarResultado.error
   }
 
+  const asignacionesPorTarea = new Map<string, typeof asignacionesResultado>()
+
+  asignacionesResultado.forEach((asignacion) => {
+    const asignaciones = asignacionesPorTarea.get(asignacion.tarea_id) ?? []
+    asignaciones.push(asignacion)
+    asignacionesPorTarea.set(asignacion.tarea_id, asignaciones)
+  })
+
   const tableros: TableroDetalle[] = (tablerosResultado.data ?? []).map(
     (tablero) => ({
       tablero_id: tablero.tablero_id,
@@ -136,7 +147,10 @@ export async function obtenerDetalleProyecto(
           lista_tablero_id: lista.lista_tablero_id,
           lista_nombre: lista.lista_nombre,
           lista_orden: lista.lista_orden,
-          tareas: lista.tarea,
+          tareas: lista.tarea.map((tarea) => ({
+            ...tarea,
+            asignaciones: asignacionesPorTarea.get(tarea.tarea_id) ?? [],
+          })),
         })),
     })
   )

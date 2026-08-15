@@ -10,11 +10,13 @@ import {
 } from 'react-native'
 
 import { TareaModal } from './CrearTareaModal'
+import { AsignarMiembrosModal } from './AsignarMiembrosModal'
 import { useEliminarRecursosProyecto } from '../hooks/useEliminarRecursosProyecto'
 
 import type { ListaDetalle, Tarea } from '../types'
 
 type Props = {
+  proyectoId: string
   lista: ListaDetalle
   esLider: boolean
   onChanged: () => Promise<void>
@@ -33,7 +35,9 @@ type TareaItemProps = {
   tarea: Tarea
   indice: number
   eliminando: boolean
+  esLider: boolean
   onOpen: () => void
+  onAssign: () => void
   onDelete: () => void
 }
 
@@ -41,7 +45,9 @@ function TareaItem({
   tarea,
   indice,
   eliminando,
+  esLider,
   onOpen,
+  onAssign,
   onDelete,
 }: TareaItemProps) {
   const colorNota = tarea.tarea_estado === 'COMPLETADA'
@@ -109,13 +115,54 @@ function TareaItem({
           {formatearFecha(tarea.tarea_fecha_entrega)}
         </Text>
       </View>
+
+      <View style={styles.assignmentRow}>
+        <View style={styles.assignees}>
+          {tarea.asignaciones.length === 0 ? (
+            <Text style={styles.noAssignees}>Sin responsables</Text>
+          ) : (
+            <>
+              {tarea.asignaciones.slice(0, 3).map((asignacion) => (
+                <View key={asignacion.asignacion_id} style={styles.assigneeAvatar}>
+                  <Text style={styles.assigneeAvatarText}>
+                    {asignacion.usuario_nombre.trim().charAt(0).toUpperCase() || '?'}
+                  </Text>
+                </View>
+              ))}
+              {tarea.asignaciones.length > 3 ? (
+                <Text style={styles.moreAssignees}>
+                  +{tarea.asignaciones.length - 3}
+                </Text>
+              ) : null}
+            </>
+          )}
+        </View>
+        {esLider ? (
+          <Pressable
+            accessibilityLabel={`Asignar responsables a ${tarea.tarea_nombre}`}
+            accessibilityRole="button"
+            hitSlop={6}
+            onPress={(event) => {
+              event.stopPropagation()
+              onAssign()
+            }}
+            style={({ pressed }) => [
+              styles.assignButton,
+              pressed && styles.assignButtonPressed,
+            ]}
+          >
+            <Ionicons name="people-outline" size={17} color="#4F2D7F" />
+          </Pressable>
+        ) : null}
+      </View>
     </Pressable>
   )
 }
 
-export function ListaProyecto({ lista, esLider, onChanged }: Props) {
+export function ListaProyecto({ proyectoId, lista, esLider, onChanged }: Props) {
   const [creandoTarea, setCreandoTarea] = useState(false)
   const [tareaEditando, setTareaEditando] = useState<Tarea | null>(null)
+  const [tareaAsignando, setTareaAsignando] = useState<Tarea | null>(null)
   const {
     eliminando,
     eliminarLista,
@@ -236,7 +283,9 @@ export function ListaProyecto({ lista, esLider, onChanged }: Props) {
               tarea={tarea}
               indice={indice}
               eliminando={eliminando === tarea.tarea_id}
+              esLider={esLider}
               onOpen={() => setTareaEditando(tarea)}
+              onAssign={() => setTareaAsignando(tarea)}
               onDelete={() => confirmarEliminacionTarea(tarea)}
             />
           ))}
@@ -253,6 +302,12 @@ export function ListaProyecto({ lista, esLider, onChanged }: Props) {
           setTareaEditando(null)
         }}
         onSaved={onChanged}
+      />
+      <AsignarMiembrosModal
+        proyectoId={proyectoId}
+        tarea={tareaAsignando}
+        onClose={() => setTareaAsignando(null)}
+        onChanged={onChanged}
       />
     </View>
   )
@@ -398,6 +453,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 5,
   },
+  assignmentRow: {
+    minHeight: 30,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  assignees: {
+    minWidth: 0,
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  noAssignees: { color: '#766682', fontSize: 11, fontWeight: '600' },
+  assigneeAvatar: {
+    width: 26,
+    height: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    borderRadius: 13,
+    marginRight: -5,
+    backgroundColor: '#6F45A5',
+  },
+  assigneeAvatarText: { color: '#FFFFFF', fontSize: 10, fontWeight: '800' },
+  moreAssignees: { marginLeft: 9, color: '#4F2D7F', fontSize: 11, fontWeight: '700' },
+  assignButton: {
+    width: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF80',
+  },
+  assignButtonPressed: { backgroundColor: '#FFFFFF' },
   tareaFecha: {
     color: '#5D4D68',
     fontSize: 12,
