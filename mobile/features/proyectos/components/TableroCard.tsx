@@ -6,6 +6,7 @@ import {
   View,
 } from 'react-native'
 
+import { AppColors } from '../../../constants/theme'
 import type { TableroDetalle } from '../types'
 
 type Props = {
@@ -38,7 +39,11 @@ export function TableroCard({ tablero, onPress }: Props) {
         <View style={styles.previewTopBar} />
         {tareasVistaPrevia.length === 0 ? (
           <View style={styles.emptyPreview}>
-            <Ionicons name="documents-outline" size={25} color="#8B67B5" />
+            <Ionicons
+              name="documents-outline"
+              size={25}
+              color={AppColors.brand}
+            />
           </View>
         ) : (
           <View style={styles.notesPreview}>
@@ -67,18 +72,30 @@ export function TableroCard({ tablero, onPress }: Props) {
             {tablero.tablero_nombre}
           </Text>
           <View style={styles.openButton}>
-            <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
+            <Ionicons
+              name="arrow-forward"
+              size={18}
+              color={AppColors.surface}
+            />
           </View>
         </View>
         <View style={styles.metaRow}>
           <View style={styles.metaItem}>
-            <Ionicons name="albums-outline" size={15} color="#6F45A5" />
+            <Ionicons
+              name="albums-outline"
+              size={15}
+              color={AppColors.brand}
+            />
             <Text style={styles.metaText}>
               {tablero.listas.length} {tablero.listas.length === 1 ? 'lista' : 'listas'}
             </Text>
           </View>
           <View style={styles.metaItem}>
-            <Ionicons name="document-text-outline" size={15} color="#FF6B2C" />
+            <Ionicons
+              name="document-text-outline"
+              size={15}
+              color={AppColors.accent}
+            />
             <Text style={styles.metaText}>
               {cantidadTareas} {cantidadTareas === 1 ? 'tarea' : 'tareas'}
             </Text>
@@ -93,9 +110,9 @@ const styles = StyleSheet.create({
   card: {
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: AppColors.border,
     borderRadius: 8,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: AppColors.surface,
   },
   cardPressed: {
     opacity: 0.86,
@@ -104,12 +121,12 @@ const styles = StyleSheet.create({
     height: 132,
     overflow: 'hidden',
     borderBottomWidth: 1,
-    borderBottomColor: '#C7B5DD',
-    backgroundColor: '#E9E1F3',
+    borderBottomColor: AppColors.border,
+    backgroundColor: AppColors.brandSoft,
   },
   previewTopBar: {
     height: 9,
-    backgroundColor: '#5B378D',
+    backgroundColor: AppColors.brandDark,
   },
   emptyPreview: {
     flex: 1,
@@ -128,7 +145,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 72,
     padding: 12,
-    shadowColor: '#4F2D7F',
+    shadowColor: AppColors.brandDark,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.24,
     shadowRadius: 4,
@@ -147,7 +164,7 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 4,
-    backgroundColor: '#FF6B2C',
+    backgroundColor: AppColors.accent,
   },
   previewLineLong: {
     height: 4,
@@ -172,7 +189,7 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
-    color: '#342247',
+    color: AppColors.text,
     fontSize: 18,
     fontWeight: '700',
     lineHeight: 23,
@@ -183,7 +200,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
-    backgroundColor: '#FF6B2C',
+    backgroundColor: AppColors.accent,
   },
   metaRow: {
     flexDirection: 'row',
@@ -196,7 +213,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   metaText: {
-    color: '#62566E',
+    color: AppColors.textMuted,
     fontSize: 12,
     fontWeight: '600',
   },
