@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useCrearProyecto } from '../../features/proyectos/hooks/useCrearProyecto'
+import { CampoFecha } from '../../features/proyectos/components/CampoFecha'
 
 export default function CrearProyectoScreen() {
   const {
@@ -92,21 +93,13 @@ export default function CrearProyectoScreen() {
 
               <View style={styles.field}>
                 <Text style={styles.label}>Fecha de término</Text>
-                <View style={styles.dateInputContainer}>
-                  <Ionicons name="calendar-outline" size={20} color="#6F45A5" />
-                  <TextInput
-                    style={styles.dateInput}
-                    placeholder="AAAA-MM-DD"
-                    placeholderTextColor="#8A918B"
-                    value={formulario.fechaFin}
-                    onChangeText={(valor) => actualizarCampo('fechaFin', valor)}
-                    keyboardType="numbers-and-punctuation"
-                    autoCapitalize="none"
-                    maxLength={10}
-                    editable={!guardando}
-                  />
-                </View>
-                <Text style={styles.helper}>Ej. 2026-12-15</Text>
+                <CampoFecha
+                  accessibilityLabel="Fecha de término"
+                  editable={!guardando}
+                  valor={formulario.fechaFin}
+                  onChange={(valor) => actualizarCampo('fechaFin', valor)}
+                />
+                <Text style={styles.helper}>Ej. 15-12-2026</Text>
               </View>
 
               {error ? (
@@ -226,23 +219,6 @@ const styles = StyleSheet.create({
     color: '#747C76',
     fontSize: 12,
     textAlign: 'right',
-  },
-  dateInputContainer: {
-    minHeight: 50,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    borderWidth: 1,
-    borderColor: '#D9CEE8',
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    backgroundColor: '#FFFFFF',
-  },
-  dateInput: {
-    flex: 1,
-    paddingVertical: 12,
-    color: '#342247',
-    fontSize: 16,
   },
   helper: {
     color: '#747C76',
