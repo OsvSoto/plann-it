@@ -1,6 +1,6 @@
-import { useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { router, useLocalSearchParams } from 'expo-router'
+import { useState } from 'react'
 import {
   ActivityIndicator,
   Alert,
@@ -21,7 +21,6 @@ import { useEliminarRecursosProyecto } from '../../features/proyectos/hooks/useE
 
 function formatearFecha(fecha: string) {
   const [anio, mes, dia] = fecha.split('-').map(Number)
-
   return new Intl.DateTimeFormat('es-CL', {
     day: '2-digit',
     month: 'short',
@@ -32,10 +31,12 @@ function formatearFecha(fecha: string) {
 export default function DetalleProyectoScreen() {
   const { proyectoId } = useLocalSearchParams<{ proyectoId: string }>()
   const [creandoTablero, setCreandoTablero] = useState(false)
+
   const {
     eliminando,
     eliminarProyecto,
   } = useEliminarRecursosProyecto()
+
   const {
     detalle,
     cargando,
@@ -84,12 +85,10 @@ export default function DetalleProyectoScreen() {
 
   async function ejecutarEliminacionProyecto() {
     const eliminado = await eliminarProyecto(proyecto.proyecto_id)
-
     if (eliminado) {
       router.replace('/(tabs)/proyectos')
       return
     }
-
     Alert.alert('No fue posible eliminar el proyecto', 'Intenta nuevamente.')
   }
 
@@ -97,14 +96,14 @@ export default function DetalleProyectoScreen() {
     if (!puedeEliminarProyecto) {
       Alert.alert(
         'No puedes eliminar este proyecto',
-        'Primero deben salir todos los demás miembros. El líder debe ser el único miembro del proyecto.'
+        'Primero deben salir todos los dem s miembros. El l der debe ser el  nico miembro del proyecto.'
       )
       return
     }
 
     Alert.alert(
       'Eliminar proyecto',
-      'Se eliminarán definitivamente sus tableros, listas, tareas, asignaciones y demás información asociada.',
+      'Se eliminar n definitivamente sus tableros, listas, tareas, asignaciones y dem s informaci n asociada.',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -150,6 +149,7 @@ export default function DetalleProyectoScreen() {
                 <Text style={styles.statusText}>{proyecto.proyecto_estado}</Text>
               </View>
             </View>
+
             {esLider ? (
               <Pressable
                 accessibilityLabel="Eliminar proyecto"
@@ -184,12 +184,24 @@ export default function DetalleProyectoScreen() {
             </View>
             <View style={styles.dateDivider} />
             <View style={styles.dateItem}>
-              <Text style={styles.dateLabel}>Término</Text>
+              <Text style={styles.dateLabel}>T rmino</Text>
               <Text style={styles.dateValue}>
                 {formatearFecha(proyecto.proyecto_fecha_fin)}
               </Text>
             </View>
           </View>
+
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push(`/carta-gantt/${proyecto.proyecto_id}`)}
+            style={({ pressed }) => [
+              styles.ganttButton,
+              pressed && styles.ganttButtonPressed,
+            ]}
+          >
+            <Ionicons name="list" size={20} color="#FFFFFF" />
+            <Text style={styles.ganttButtonText}>Ir a la Carta Gantt</Text>
+          </Pressable>
         </View>
 
         <EquipoProyecto
@@ -200,9 +212,10 @@ export default function DetalleProyectoScreen() {
 
         <View style={styles.workspaceHeader}>
           <View style={styles.workspaceText}>
-            <Text style={styles.eyebrow}>ORGANIZACIÓN DEL TRABAJO</Text>
+            <Text style={styles.eyebrow}>ORGANIZACI N DEL TRABAJO</Text>
             <Text style={styles.workspaceTitle}>Tableros</Text>
           </View>
+
           {esLider ? (
             <Pressable
               accessibilityRole="button"
@@ -225,7 +238,7 @@ export default function DetalleProyectoScreen() {
             </View>
             <Text style={styles.stateTitle}>Proyecto sin tableros</Text>
             <Text style={styles.stateText}>
-              Cuando se cree un tablero aparecerá en este espacio.
+              Cuando se cree un tablero aparecer  en este espacio.
             </Text>
           </View>
         ) : (
@@ -342,6 +355,25 @@ const styles = StyleSheet.create({
     color: '#4F2D7F',
     fontSize: 14,
     fontWeight: '600',
+  },
+  ganttButton: {
+    minHeight: 46,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 8,
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    backgroundColor: '#6F45A5',
+  },
+  ganttButtonPressed: {
+    backgroundColor: '#4F2D7F',
+  },
+  ganttButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
   },
   workspaceHeader: {
     flexDirection: 'row',
