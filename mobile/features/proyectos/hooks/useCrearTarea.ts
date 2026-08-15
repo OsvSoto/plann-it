@@ -4,32 +4,19 @@ import {
   actualizarTarea,
   crearTarea as crearTareaService,
 } from '../services/proyecto.service'
+import {
+  fechaIsoAVisual,
+  fechaVisualAIso,
+} from '../utils/fecha'
 
 import type { EstadoTarea, Tarea } from '../types'
-
-function esFechaValida(fecha: string) {
-  const coincidencia = /^(\d{4})-(\d{2})-(\d{2})$/.exec(fecha)
-
-  if (!coincidencia) {
-    return false
-  }
-
-  const [, anio, mes, dia] = coincidencia
-  const fechaUtc = new Date(Date.UTC(Number(anio), Number(mes) - 1, Number(dia)))
-
-  return (
-    fechaUtc.getUTCFullYear() === Number(anio) &&
-    fechaUtc.getUTCMonth() === Number(mes) - 1 &&
-    fechaUtc.getUTCDate() === Number(dia)
-  )
-}
 
 function valoresIniciales(tarea?: Tarea | null) {
   return {
     nombre: tarea?.tarea_nombre ?? '',
     descripcion: tarea?.tarea_desc ?? '',
     estado: (tarea?.tarea_estado as EstadoTarea | undefined) ?? 'PENDIENTE',
-    fechaEntrega: tarea?.tarea_fecha_entrega ?? '',
+    fechaEntrega: tarea ? fechaIsoAVisual(tarea.tarea_fecha_entrega) : '',
   }
 }
 
@@ -70,7 +57,7 @@ export function useFormularioTarea(tarea?: Tarea | null) {
     }
 
     const nombreLimpio = nombre.trim()
-    const fechaLimpia = fechaEntrega.trim()
+    const fechaVisual = fechaEntrega.trim()
     const descripcionLimpia = descripcion.trim()
 
     if (!nombreLimpio) {
@@ -78,8 +65,10 @@ export function useFormularioTarea(tarea?: Tarea | null) {
       return false
     }
 
-    if (!esFechaValida(fechaLimpia)) {
-      setError('Ingresa una fecha válida con el formato AAAA-MM-DD.')
+    const fechaIso = fechaVisualAIso(fechaVisual)
+
+    if (!fechaIso) {
+      setError('Ingresa una fecha válida con el formato DD-MM-AAAA.')
       return false
     }
 
@@ -90,7 +79,7 @@ export function useFormularioTarea(tarea?: Tarea | null) {
         nombre: nombreLimpio,
         descripcion: descripcionLimpia || null,
         estado,
-        fechaEntrega: fechaLimpia,
+        fechaEntrega: fechaIso,
       }
 
       if (tarea) {

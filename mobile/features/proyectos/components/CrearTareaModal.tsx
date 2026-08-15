@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useFormularioTarea } from '../hooks/useCrearTarea'
+import { CampoFecha } from './CampoFecha'
 
 import { ESTADOS_TAREA } from '../types'
 import type { EstadoTarea, Tarea } from '../types'
@@ -186,22 +187,15 @@ export function TareaModal({
 
             <View style={styles.field}>
               <Text style={styles.label}>Fecha de entrega</Text>
-              <View style={styles.dateInputContainer}>
-                <Ionicons name="calendar-outline" size={20} color="#6F45A5" />
-                <TextInput
-                  editable={!guardando}
-                  keyboardType="numbers-and-punctuation"
-                  maxLength={10}
-                  placeholder="AAAA-MM-DD"
-                  placeholderTextColor="#8A918B"
-                  style={styles.dateInput}
-                  value={fechaEntrega}
-                  onChangeText={(valor) => {
-                    setFechaEntrega(valor)
-                    limpiarError()
-                  }}
-                />
-              </View>
+              <CampoFecha
+                accessibilityLabel="Fecha de entrega"
+                editable={!guardando}
+                valor={fechaEntrega}
+                onChange={(valor) => {
+                  setFechaEntrega(valor)
+                  limpiarError()
+                }}
+              />
             </View>
 
             {error ? (
@@ -315,18 +309,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   segmentTextSelected: { color: '#6F45A5', fontWeight: '700' },
-  dateInputContainer: {
-    minHeight: 50,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    borderWidth: 1,
-    borderColor: '#D9CEE8',
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    backgroundColor: '#FFFFFF',
-  },
-  dateInput: { flex: 1, paddingVertical: 12, color: '#342247', fontSize: 16 },
   error: {
     flexDirection: 'row',
     alignItems: 'flex-start',

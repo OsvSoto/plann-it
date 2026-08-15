@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import { crearProyecto } from '../services/proyecto.service'
+import { fechaVisualAIso } from '../utils/fecha'
 
 type FormularioProyecto = {
   nombre: string
@@ -12,23 +13,6 @@ const formularioInicial: FormularioProyecto = {
   nombre: '',
   descripcion: '',
   fechaFin: '',
-}
-
-function esFechaValida(fecha: string) {
-  const coincidencia = /^(\d{4})-(\d{2})-(\d{2})$/.exec(fecha)
-
-  if (!coincidencia) {
-    return false
-  }
-
-  const [, anio, mes, dia] = coincidencia
-  const fechaUtc = new Date(Date.UTC(Number(anio), Number(mes) - 1, Number(dia)))
-
-  return (
-    fechaUtc.getUTCFullYear() === Number(anio) &&
-    fechaUtc.getUTCMonth() === Number(mes) - 1 &&
-    fechaUtc.getUTCDate() === Number(dia)
-  )
 }
 
 export function useCrearProyecto() {
@@ -50,20 +34,22 @@ export function useCrearProyecto() {
   async function guardarProyecto() {
     const nombre = formulario.nombre.trim()
     const descripcion = formulario.descripcion.trim()
-    const fechaFin = formulario.fechaFin.trim()
+    const fechaFinVisual = formulario.fechaFin.trim()
 
     if (!nombre) {
       setError('Ingresa un nombre para el proyecto.')
       return false
     }
 
-    if (!fechaFin) {
+    if (!fechaFinVisual) {
       setError('Ingresa la fecha de término del proyecto.')
       return false
     }
 
-    if (!esFechaValida(fechaFin)) {
-      setError('Usa una fecha válida con el formato AAAA-MM-DD.')
+    const fechaFin = fechaVisualAIso(fechaFinVisual)
+
+    if (!fechaFin) {
+      setError('Usa una fecha válida con el formato DD-MM-AAAA.')
       return false
     }
 
