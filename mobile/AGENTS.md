@@ -667,14 +667,24 @@ No hagas commits ni pushes automáticamente salvo que se solicite explícitament
 
 # Convenciones de commits
 
+Usar el formato de Conventional Commits:
+
+```text
+<tipo>: <descripción en español>
+```
+
+Mantener el tipo convencional en inglés, por ejemplo `feat`, `fix`, `docs`,
+`refactor`, `test`, `chore` o `merge`, pero redactar siempre la descripción
+del cambio en español.
+
 Ejemplos:
 
 ```text
-feat: implement task management
-feat: add project creation
-fix: correct authentication redirect
-refactor: modularize project components
-chore: version Supabase database schema
+feat: implementar gestión de tareas
+feat: agregar creación de proyectos
+fix: corregir redirección de autenticación
+refactor: modularizar componentes de proyectos
+chore: versionar esquema de base de datos de Supabase
 ```
 
 ---
