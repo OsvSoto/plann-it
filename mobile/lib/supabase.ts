@@ -7,6 +7,9 @@ import type { Database } from './database.types'
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL
 const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_KEY
+const authStorage = typeof localStorage === 'undefined'
+  ? undefined
+  : localStorage
 
 if (!supabaseUrl) {
   throw new Error('Falta EXPO_PUBLIC_SUPABASE_URL')
@@ -21,7 +24,7 @@ export const supabase = createClient<Database>(
   supabaseKey,
   {
     auth: {
-      storage: localStorage,
+      storage: authStorage,
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: false,

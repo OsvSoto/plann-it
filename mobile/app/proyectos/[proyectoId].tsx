@@ -13,8 +13,9 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { EquipoProyecto } from '../../features/invitaciones/components/EquipoProyecto'
 import { CrearTableroModal } from '../../features/proyectos/components/CrearTableroModal'
-import { TableroProyecto } from '../../features/proyectos/components/TableroProyecto'
+import { TableroCard } from '../../features/proyectos/components/TableroCard'
 import { useDetalleProyecto } from '../../features/proyectos/hooks/useDetalleProyecto'
 import { useEliminarRecursosProyecto } from '../../features/proyectos/hooks/useEliminarRecursosProyecto'
 
@@ -46,7 +47,7 @@ export default function DetalleProyectoScreen() {
     return (
       <SafeAreaView style={styles.safeArea} edges={['right', 'bottom', 'left']}>
         <View style={styles.centerState}>
-          <ActivityIndicator size="large" color="#166534" />
+          <ActivityIndicator size="large" color="#6F45A5" />
           <Text style={styles.stateText}>Cargando proyecto...</Text>
         </View>
       </SafeAreaView>
@@ -115,6 +116,16 @@ export default function DetalleProyectoScreen() {
     )
   }
 
+  function abrirTablero(tableroId: string) {
+    router.push({
+      pathname: '/proyectos/[proyectoId]/tableros/[tableroId]',
+      params: {
+        proyectoId: proyecto.proyecto_id,
+        tableroId,
+      },
+    })
+  }
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['right', 'bottom', 'left']}>
       <ScrollView
@@ -122,7 +133,7 @@ export default function DetalleProyectoScreen() {
           <RefreshControl
             refreshing={cargando}
             onRefresh={cargarDetalle}
-            tintColor="#166534"
+            tintColor="#6F45A5"
           />
         )}
         contentContainerStyle={styles.content}
@@ -131,7 +142,7 @@ export default function DetalleProyectoScreen() {
         <View style={styles.projectHeader}>
           <View style={styles.titleRow}>
             <View style={styles.projectIcon}>
-              <Ionicons name="folder-open-outline" size={24} color="#166534" />
+              <Ionicons name="folder-open-outline" size={24} color="#6F45A5" />
             </View>
             <View style={styles.titleContent}>
               <Text style={styles.projectName}>{proyecto.proyecto_nombre}</Text>
@@ -181,6 +192,12 @@ export default function DetalleProyectoScreen() {
           </View>
         </View>
 
+        <EquipoProyecto
+          proyectoId={proyecto.proyecto_id}
+          proyectoNombre={proyecto.proyecto_nombre}
+          esLider={esLider}
+        />
+
         <View style={styles.workspaceHeader}>
           <View style={styles.workspaceText}>
             <Text style={styles.eyebrow}>ORGANIZACIÓN DEL TRABAJO</Text>
@@ -204,7 +221,7 @@ export default function DetalleProyectoScreen() {
         {tableros.length === 0 ? (
           <View style={styles.emptyWorkspace}>
             <View style={styles.emptyIcon}>
-              <Ionicons name="grid-outline" size={30} color="#166534" />
+              <Ionicons name="grid-outline" size={30} color="#6F45A5" />
             </View>
             <Text style={styles.stateTitle}>Proyecto sin tableros</Text>
             <Text style={styles.stateText}>
@@ -214,11 +231,10 @@ export default function DetalleProyectoScreen() {
         ) : (
           <View style={styles.boards}>
             {tableros.map((tablero) => (
-              <TableroProyecto
+              <TableroCard
                 key={tablero.tablero_id}
                 tablero={tablero}
-                esLider={esLider}
-                onChanged={cargarDetalle}
+                onPress={() => abrirTablero(tablero.tablero_id)}
               />
             ))}
           </View>
@@ -238,7 +254,7 @@ export default function DetalleProyectoScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F7F9F7',
+    backgroundColor: '#F8F5FB',
   },
   content: {
     paddingTop: 20,
@@ -260,7 +276,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
-    backgroundColor: '#DCFCE7',
+    backgroundColor: '#E9E1F3',
   },
   titleContent: {
     flex: 1,
@@ -278,7 +294,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEF3F2',
   },
   projectName: {
-    color: '#172019',
+    color: '#342247',
     fontSize: 25,
     fontWeight: '700',
     lineHeight: 31,
@@ -287,15 +303,15 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    backgroundColor: '#EAF4ED',
+    backgroundColor: '#FFF0E8',
   },
   statusText: {
-    color: '#166534',
+    color: '#D94D1C',
     fontSize: 11,
     fontWeight: '700',
   },
   description: {
-    color: '#59615B',
+    color: '#62566E',
     fontSize: 15,
     lineHeight: 22,
   },
@@ -304,7 +320,7 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#DDE2DE',
+    borderColor: '#D9CEE8',
     paddingVertical: 14,
   },
   dateItem: {
@@ -314,7 +330,7 @@ const styles = StyleSheet.create({
   dateDivider: {
     width: 1,
     marginHorizontal: 16,
-    backgroundColor: '#DDE2DE',
+    backgroundColor: '#D9CEE8',
   },
   dateLabel: {
     color: '#747C76',
@@ -323,7 +339,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   dateValue: {
-    color: '#273029',
+    color: '#4F2D7F',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -339,12 +355,12 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   eyebrow: {
-    color: '#667069',
+    color: '#766682',
     fontSize: 11,
     fontWeight: '700',
   },
   workspaceTitle: {
-    color: '#172019',
+    color: '#342247',
     fontSize: 22,
     fontWeight: '700',
   },
@@ -356,10 +372,10 @@ const styles = StyleSheet.create({
     gap: 6,
     borderRadius: 8,
     paddingHorizontal: 12,
-    backgroundColor: '#166534',
+    backgroundColor: '#FF6B2C',
   },
   createBoardButtonPressed: {
-    backgroundColor: '#14532D',
+    backgroundColor: '#E8521D',
   },
   createBoardButtonText: {
     color: '#FFFFFF',
@@ -367,7 +383,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   boards: {
-    gap: 30,
+    gap: 18,
+    paddingHorizontal: 20,
   },
   centerState: {
     flex: 1,
@@ -398,16 +415,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 8,
     marginBottom: 3,
-    backgroundColor: '#DCFCE7',
+    backgroundColor: '#E9E1F3',
   },
   stateTitle: {
-    color: '#172019',
+    color: '#342247',
     fontSize: 18,
     fontWeight: '700',
     textAlign: 'center',
   },
   stateText: {
-    color: '#667069',
+    color: '#766682',
     fontSize: 14,
     lineHeight: 20,
     textAlign: 'center',
@@ -418,12 +435,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingHorizontal: 18,
     borderWidth: 1,
-    borderColor: '#AAB2AC',
+    borderColor: '#D9CEE8',
     borderRadius: 8,
     backgroundColor: '#FFFFFF',
   },
   retryText: {
-    color: '#273029',
+    color: '#4F2D7F',
     fontWeight: '600',
   },
 })

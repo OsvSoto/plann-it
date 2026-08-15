@@ -62,7 +62,7 @@ export default function ProyectosScreen() {
 
       {cargando && proyectos.length === 0 ? (
         <View style={styles.centerState}>
-          <ActivityIndicator size="large" color="#166534" />
+          <ActivityIndicator size="large" color="#6F45A5" />
           <Text style={styles.stateText}>Cargando proyectos...</Text>
         </View>
       ) : error && proyectos.length === 0 ? (
@@ -79,7 +79,7 @@ export default function ProyectosScreen() {
       ) : proyectos.length === 0 ? (
         <View style={styles.centerState}>
           <View style={styles.emptyIcon}>
-            <Ionicons name="folder-open-outline" size={32} color="#166534" />
+            <Ionicons name="folder-open-outline" size={32} color="#6F45A5" />
           </View>
           <Text style={styles.stateTitle}>Aún no tienes proyectos</Text>
           <Text style={styles.stateText}>
@@ -114,7 +114,7 @@ export default function ProyectosScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F9F7',
+    backgroundColor: '#F8F5FB',
   },
   header: {
     flexDirection: 'row',
@@ -129,12 +129,12 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   eyebrow: {
-    color: '#667069',
+    color: '#766682',
     fontSize: 11,
     fontWeight: '700',
   },
   title: {
-    color: '#172019',
+    color: '#342247',
     fontSize: 28,
     fontWeight: '700',
   },
@@ -144,10 +144,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#166534',
+    backgroundColor: '#FF6B2C',
   },
   addButtonPressed: {
-    backgroundColor: '#14532D',
+    backgroundColor: '#E8521D',
   },
   centerState: {
     flex: 1,
@@ -173,16 +173,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
-    backgroundColor: '#DCFCE7',
+    backgroundColor: '#E9E1F3',
   },
   stateTitle: {
-    color: '#172019',
+    color: '#342247',
     fontSize: 19,
     fontWeight: '700',
     textAlign: 'center',
   },
   stateText: {
-    color: '#667069',
+    color: '#766682',
     fontSize: 14,
     lineHeight: 20,
     textAlign: 'center',
@@ -193,12 +193,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingHorizontal: 18,
     borderWidth: 1,
-    borderColor: '#AAB2AC',
+    borderColor: '#D9CEE8',
     borderRadius: 8,
     backgroundColor: '#FFFFFF',
   },
   retryText: {
-    color: '#273029',
+    color: '#4F2D7F',
     fontWeight: '600',
   },
   primaryButton: {
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingHorizontal: 18,
     borderRadius: 8,
-    backgroundColor: '#166534',
+    backgroundColor: '#FF6B2C',
   },
   primaryButtonText: {
     color: '#FFFFFF',

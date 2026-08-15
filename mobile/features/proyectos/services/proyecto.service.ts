@@ -6,6 +6,7 @@ import type {
   CrearTableroInput,
   CrearTareaInput,
   DetalleProyecto,
+  EditarTareaInput,
   Proyecto,
   TableroDetalle,
 } from '../types'
@@ -202,6 +203,26 @@ export async function crearTarea(
       tarea_estado: tarea.estado,
       tarea_fecha_entrega: tarea.fechaEntrega,
     })
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function actualizarTarea(
+  tarea: EditarTareaInput
+): Promise<void> {
+  const { error } = await supabase
+    .from('tarea')
+    .update({
+      tarea_nombre: tarea.nombre.trim(),
+      tarea_desc: tarea.descripcion,
+      tarea_estado: tarea.estado,
+      tarea_fecha_entrega: tarea.fechaEntrega,
+    })
+    .eq('tarea_id', tarea.tareaId)
+    .select('tarea_id')
+    .single()
 
   if (error) {
     throw error

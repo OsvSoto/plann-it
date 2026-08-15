@@ -50,3 +50,7 @@ export type CrearTareaInput = {
   estado: EstadoTarea
   fechaEntrega: string
 }
+
+export type EditarTareaInput = Omit<CrearTareaInput, 'listaId'> & {
+  tareaId: string
+}

@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -12,45 +14,47 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { useCrearLista } from '../hooks/useCrearLista'
+import { useInvitarMiembro } from '../hooks/useInvitarMiembro'
 
 type Props = {
   visible: boolean
-  tableroId: string
-  siguienteOrden: number
+  proyectoId: string
+  proyectoNombre: string
   onClose: () => void
-  onCreated: () => Promise<void>
 }
 
-export function CrearListaModal({
+export function InvitarMiembroModal({
   visible,
-  tableroId,
-  siguienteOrden,
+  proyectoId,
+  proyectoNombre,
   onClose,
-  onCreated,
 }: Props) {
+  const [correo, setCorreo] = useState('')
   const {
-    nombre,
-    guardando,
+    enviando,
     error,
-    actualizarNombre,
-    reiniciar,
-    guardar,
-  } = useCrearLista()
+    limpiarError,
+    invitar,
+  } = useInvitarMiembro()
 
   function cerrar() {
-    if (!guardando) {
-      reiniciar()
+    if (!enviando) {
+      setCorreo('')
+      limpiarError()
       onClose()
     }
   }
 
-  async function crear() {
-    const creada = await guardar(tableroId, siguienteOrden)
+  async function enviar() {
+    const enviada = await invitar(proyectoId, correo)
 
-    if (creada) {
+    if (enviada) {
+      setCorreo('')
       onClose()
-      await onCreated()
+      Alert.alert(
+        'Invitación enviada',
+        'La persona podrá aceptar o rechazar desde su cuenta.'
+      )
     }
   }
 
@@ -68,39 +72,48 @@ export function CrearListaModal({
         >
           <View style={styles.header}>
             <View style={styles.headerText}>
-              <Text style={styles.title}>Nueva lista</Text>
-              <Text style={styles.subtitle}>Agrega una etapa al tablero</Text>
+              <Text style={styles.title}>Invitar al proyecto</Text>
+              <Text style={styles.subtitle} numberOfLines={1}>
+                {proyectoNombre}
+              </Text>
             </View>
             <Pressable
               accessibilityLabel="Cerrar"
               accessibilityRole="button"
-              disabled={guardando}
+              disabled={enviando}
               hitSlop={8}
               onPress={cerrar}
-              style={({ pressed }) => [
-                styles.iconButton,
-                pressed && styles.iconButtonPressed,
-              ]}
+              style={styles.iconButton}
             >
               <Ionicons name="close" size={23} color="#4F2D7F" />
             </Pressable>
           </View>
 
-          <View style={styles.form}>
+          <View style={styles.content}>
+            <View style={styles.info}>
+              <Ionicons name="information-circle-outline" size={21} color="#6F45A5" />
+              <Text style={styles.infoText}>
+                Usa el correo exacto de una persona que ya tenga una cuenta en Plann-It.
+              </Text>
+            </View>
+
             <View style={styles.field}>
-              <Text style={styles.label}>Nombre</Text>
+              <Text style={styles.label}>Correo electrónico</Text>
               <TextInput
-                autoFocus
+                autoCapitalize="none"
                 autoCorrect={false}
-                editable={!guardando}
-                maxLength={80}
-                placeholder="Ej. Pendientes"
+                autoFocus
+                editable={!enviando}
+                keyboardType="email-address"
+                placeholder="persona@correo.com"
                 placeholderTextColor="#8A918B"
-                returnKeyType="done"
+                value={correo}
+                onChangeText={(valor) => {
+                  setCorreo(valor)
+                  limpiarError()
+                }}
+                onSubmitEditing={() => void enviar()}
                 style={styles.input}
-                value={nombre}
-                onChangeText={actualizarNombre}
-                onSubmitEditing={() => void crear()}
               />
             </View>
 
@@ -113,24 +126,28 @@ export function CrearListaModal({
           </View>
 
           <View style={styles.actions}>
-            <Pressable style={styles.secondaryButton} onPress={cerrar}>
+            <Pressable
+              disabled={enviando}
+              onPress={cerrar}
+              style={styles.secondaryButton}
+            >
               <Text style={styles.secondaryText}>Cancelar</Text>
             </Pressable>
             <Pressable
-              disabled={guardando}
-              onPress={() => void crear()}
+              disabled={enviando}
+              onPress={() => void enviar()}
               style={({ pressed }) => [
                 styles.primaryButton,
-                pressed && !guardando && styles.primaryButtonPressed,
-                guardando && styles.disabled,
+                pressed && !enviando && styles.primaryButtonPressed,
+                enviando && styles.disabled,
               ]}
             >
-              {guardando ? (
+              {enviando ? (
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
                 <>
-                  <Ionicons name="add" size={20} color="#FFFFFF" />
-                  <Text style={styles.primaryText}>Crear lista</Text>
+                  <Ionicons name="paper-plane-outline" size={18} color="#FFFFFF" />
+                  <Text style={styles.primaryText}>Enviar invitación</Text>
                 </>
               )}
             </Pressable>
@@ -151,11 +168,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 18,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 16,
-  },
+  header: { flexDirection: 'row', alignItems: 'flex-start', gap: 16 },
   headerText: { flex: 1, gap: 4 },
   title: { color: '#342247', fontSize: 23, fontWeight: '700' },
   subtitle: { color: '#766682', fontSize: 14 },
@@ -166,8 +179,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 8,
   },
-  iconButtonPressed: { backgroundColor: '#E8ECE9' },
-  form: { flex: 1, paddingTop: 34, gap: 18 },
+  content: { flex: 1, gap: 22, paddingTop: 30 },
+  info: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 9,
+    borderWidth: 1,
+    borderColor: '#D9CEE8',
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: '#F0EAF6',
+  },
+  infoText: { flex: 1, color: '#5D4D68', fontSize: 13, lineHeight: 19 },
   field: { gap: 8 },
   label: { color: '#4F2D7F', fontSize: 15, fontWeight: '600' },
   input: {
@@ -176,7 +199,6 @@ const styles = StyleSheet.create({
     borderColor: '#D9CEE8',
     borderRadius: 8,
     paddingHorizontal: 14,
-    paddingVertical: 12,
     color: '#342247',
     backgroundColor: '#FFFFFF',
     fontSize: 16,
@@ -192,7 +214,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEF3F2',
   },
   errorText: { flex: 1, color: '#912018', fontSize: 14, lineHeight: 20 },
-  actions: { flexDirection: 'row', gap: 10, paddingTop: 16 },
+  actions: { flexDirection: 'row', gap: 10, paddingTop: 14 },
   secondaryButton: {
     minHeight: 48,
     flex: 1,
@@ -206,7 +228,7 @@ const styles = StyleSheet.create({
   secondaryText: { color: '#4F2D7F', fontSize: 15, fontWeight: '600' },
   primaryButton: {
     minHeight: 48,
-    flex: 1.3,
+    flex: 1.4,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -215,6 +237,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF6B2C',
   },
   primaryButtonPressed: { backgroundColor: '#E8521D' },
-  primaryText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
+  primaryText: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' },
   disabled: { opacity: 0.65 },
 })

@@ -583,20 +583,26 @@ export type Database = {
       }
       usuario: {
         Row: {
+          usuario_bio: string | null
           usuario_correo: string
           usuario_fecharegistro: string
+          usuario_foto: string | null
           usuario_id: string
           usuario_nombre: string
         }
         Insert: {
+          usuario_bio?: string | null
           usuario_correo: string
           usuario_fecharegistro?: string
+          usuario_foto?: string | null
           usuario_id: string
           usuario_nombre: string
         }
         Update: {
+          usuario_bio?: string | null
           usuario_correo?: string
           usuario_fecharegistro?: string
+          usuario_foto?: string | null
           usuario_id?: string
           usuario_nombre?: string
         }
@@ -613,9 +619,38 @@ export type Database = {
       }
       es_lider_proyecto: { Args: { p_proyecto_id: string }; Returns: boolean }
       es_miembro_proyecto: { Args: { p_proyecto_id: string }; Returns: boolean }
+      invitar_usuario_proyecto: {
+        Args: { p_correo: string; p_proyecto_id: string }
+        Returns: string
+      }
+      obtener_invitaciones_pendientes: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          invitacion_fecha: string
+          invitacion_id: string
+          proyecto_id: string
+          proyecto_nombre: string
+        }[]
+      }
+      obtener_miembros_proyecto: {
+        Args: { p_proyecto_id: string }
+        Returns: {
+          miembro_fecha_ingreso: string
+          miembro_permisos: string
+          miembro_proyecto_id: string
+          miembro_rol: string
+          usuario_correo: string
+          usuario_id: string
+          usuario_nombre: string
+        }[]
+      }
       puede_eliminar_proyecto: {
         Args: { p_proyecto_id: string }
         Returns: boolean
+      }
+      responder_invitacion: {
+        Args: { p_invitacion_id: string; p_respuesta: string }
+        Returns: string
       }
     }
     Enums: {

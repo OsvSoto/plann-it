@@ -1,269 +1,360 @@
-import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
-import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { supabase } from '../../lib/supabase';
+import { Ionicons } from '@expo/vector-icons'
+import { router } from 'expo-router'
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+
+import { AppColors } from '../../constants/theme'
+import { useEditarPerfil } from '../../features/perfil/hooks/useEditarPerfil'
+
+function obtenerMensajeError(error: unknown, alternativo: string) {
+  return error instanceof Error && error.message
+    ? error.message
+    : alternativo
+}
 
 export default function EditarPerfilScreen() {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [correo, setCorreo] = useState('');
-  const [nombre, setNombre] = useState('');
-  const [biografia, setBiografia] = useState('');
-  const [fotoPerfil, setFotoPerfil] = useState('https://cdn-icons-png.flaticon.com/512/3135/3135715.png');
-  const [cargando, setCargando] = useState(true);
-  const [guardando, setGuardando] = useState(false);
+  const {
+    nombre,
+    setNombre,
+    correo,
+    biografia,
+    setBiografia,
+    fotoUri,
+    cargando,
+    guardando,
+    error,
+    seleccionarFoto,
+    guardarPerfil,
+  } = useEditarPerfil()
 
-  useEffect(() => {
-    cargarDatos();
-  }, []);
-
-  const cargarDatos = async () => {
+  async function elegirFoto() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserId(user.id);
-        setCorreo(user.email || '');
-
-        const { data } = await supabase
-          .from('usuario')
-          .select('usuario_nombre, usuario_correo, usuario_bio, usuario_foto')
-          .eq('usuario_id', user.id)
-          .single();
-
-        if (data) {
-          const usuarioData = data as any;
-          if (usuarioData.usuario_nombre) setNombre(usuarioData.usuario_nombre);
-          if (usuarioData.usuario_correo) setCorreo(usuarioData.usuario_correo);
-          if (usuarioData.usuario_bio) setBiografia(usuarioData.usuario_bio);
-          if (usuarioData.usuario_foto) setFotoPerfil(usuarioData.usuario_foto);
-        }
-      }
+      await seleccionarFoto()
     } catch (error) {
-      console.log('Error al cargar datos:', error);
-    } finally {
-      setCargando(false);
+      Alert.alert(
+        'No fue posible seleccionar la foto',
+        obtenerMensajeError(error, 'Intenta nuevamente.')
+      )
     }
-  };
+  }
 
-  const seleccionarFoto = async () => {
-    const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permiso.granted) {
-      Alert.alert('Permiso denegado', 'Necesitamos acceso a tus fotos para cambiar la imagen de perfil.');
-      return;
-    }
-
-    const resultado = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
-
-    if (!resultado.canceled && resultado.assets[0].uri) {
-      setFotoPerfil(resultado.assets[0].uri);
-    }
-  };
-
-  const guardarCambios = async () => {
-    if (!userId) return;
-    setGuardando(true);
+  async function guardar() {
     try {
-      const { error } = await supabase
-        .from('usuario')
-        .upsert({
-          usuario_id: userId,
-          usuario_correo: correo,
-          usuario_nombre: nombre,
-          usuario_bio: biografia,
-          usuario_foto: fotoPerfil,
-        } as any);
-
-      if (error) {
-        throw error;
-      }
-
-      Alert.alert('Éxito', 'Perfil actualizado correctamente');
-      router.replace('/perfil');
-    } catch (error: any) {
-      console.log('Error al guardar:', error);
-      Alert.alert('Error', error.message || 'No se pudieron guardar los cambios');
-    } finally {
-      setGuardando(false);
+      await guardarPerfil()
+      Alert.alert('Perfil actualizado', 'Tus cambios fueron guardados.')
+      router.back()
+    } catch (error) {
+      Alert.alert(
+        'No fue posible guardar el perfil',
+        obtenerMensajeError(error, 'Intenta nuevamente.')
+      )
     }
-  };
-
-  if (cargando) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#166534" />
-      </View>
-    );
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.card}>
-        
-        {/* BOTÓN REGRESAR */}
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => router.replace('/perfil')}
-          hitSlop={10}
-        >
-          <Ionicons name="arrow-back" size={26} color="#166534" />
-        </TouchableOpacity>
-
-        <Text style={styles.title}>Editar Perfil</Text>
-
-        {/* FOTO DE PERFIL */}
-        <View style={styles.avatarSection}>
-          <TouchableOpacity onPress={seleccionarFoto} activeOpacity={0.8} style={styles.avatarContainer}>
-            <Image source={{ uri: fotoPerfil }} style={styles.avatar} />
-            <View style={styles.cameraIconBadge}>
-              <Ionicons name="camera" size={18} color="white" />
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={seleccionarFoto} style={styles.changePhotoButton}>
-            <Text style={styles.changePhotoText}>Cambiar foto de perfil</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* NOMBRE DE USUARIO */}
-        <Text style={styles.label}>Nombre de usuario</Text>
-        <TextInput
-          style={styles.input}
-          value={nombre}
-          onChangeText={setNombre}
-          placeholder="Tu nombre"
-        />
-
-        {/* BIOGRAFÍA */}
-        <Text style={styles.label}>Biografía</Text>
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          value={biografia}
-          onChangeText={setBiografia}
-          placeholder="Escribe algo sobre ti..."
-          multiline
-          numberOfLines={4}
-        />
-
-        {/* BOTÓN GUARDAR */}
-        <TouchableOpacity 
-          style={styles.saveButton} 
-          onPress={guardarCambios}
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.header}>
+        <Pressable
+          accessibilityLabel="Volver al perfil"
+          accessibilityRole="button"
           disabled={guardando}
+          hitSlop={8}
+          onPress={() => router.back()}
+          style={({ pressed }) => [
+            styles.headerButton,
+            pressed && styles.buttonPressed,
+          ]}
         >
-          {guardando ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text style={styles.saveButtonText}>Guardar Cambios</Text>
-          )}
-        </TouchableOpacity>
-
+          <Ionicons name="arrow-back" size={24} color={AppColors.text} />
+        </Pressable>
+        <Text style={styles.headerTitle}>Editar perfil</Text>
+        <View style={styles.headerSpacer} />
       </View>
-    </ScrollView>
-  );
+
+      {cargando ? (
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={AppColors.brand} />
+        </View>
+      ) : (
+        <KeyboardAvoidingView
+          style={styles.keyboardView}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <ScrollView
+            automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+            contentContainerStyle={styles.content}
+            keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.form}>
+              <View style={styles.avatarSection}>
+                <Pressable
+                  accessibilityLabel="Seleccionar foto de perfil"
+                  accessibilityRole="button"
+                  onPress={() => void elegirFoto()}
+                  style={({ pressed }) => [
+                    styles.avatarFrame,
+                    pressed && styles.avatarPressed,
+                  ]}
+                >
+                  {fotoUri ? (
+                    <Image source={{ uri: fotoUri }} style={styles.avatar} />
+                  ) : (
+                    <Ionicons name="person" size={58} color={AppColors.brand} />
+                  )}
+                  <View style={styles.cameraBadge}>
+                    <Ionicons name="camera" size={17} color={AppColors.surface} />
+                  </View>
+                </Pressable>
+                <Pressable onPress={() => void elegirFoto()}>
+                  <Text style={styles.changePhotoText}>Cambiar foto</Text>
+                </Pressable>
+              </View>
+
+              <View style={styles.field}>
+                <Text style={styles.label}>Nombre de usuario</Text>
+                <TextInput
+                  accessibilityLabel="Nombre de usuario"
+                  autoCapitalize="words"
+                  autoComplete="name"
+                  autoCorrect={false}
+                  maxLength={80}
+                  onChangeText={setNombre}
+                  placeholder="Tu nombre"
+                  placeholderTextColor={AppColors.textMuted}
+                  style={styles.input}
+                  value={nombre}
+                />
+              </View>
+
+              <View style={styles.field}>
+                <Text style={styles.label}>Correo electrónico</Text>
+                <TextInput
+                  accessibilityLabel="Correo electrónico"
+                  editable={false}
+                  style={[styles.input, styles.inputDisabled]}
+                  value={correo}
+                />
+                <Text style={styles.helperText}>
+                  El correo de acceso no se modifica desde el perfil.
+                </Text>
+              </View>
+
+              <View style={styles.field}>
+                <View style={styles.labelRow}>
+                  <Text style={styles.label}>Biografía</Text>
+                  <Text style={styles.characterCount}>{biografia.length}/250</Text>
+                </View>
+                <TextInput
+                  accessibilityLabel="Biografía"
+                  maxLength={250}
+                  multiline
+                  numberOfLines={5}
+                  onChangeText={setBiografia}
+                  placeholder="Cuéntale algo sobre ti al equipo"
+                  placeholderTextColor={AppColors.textMuted}
+                  style={[styles.input, styles.textArea]}
+                  textAlignVertical="top"
+                  value={biografia}
+                />
+              </View>
+
+              {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+              <Pressable
+                accessibilityRole="button"
+                disabled={guardando}
+                onPress={() => void guardar()}
+                style={({ pressed }) => [
+                  styles.saveButton,
+                  pressed && styles.saveButtonPressed,
+                  guardando && styles.buttonDisabled,
+                ]}
+              >
+                {guardando ? (
+                  <ActivityIndicator color={AppColors.surface} />
+                ) : (
+                  <Text style={styles.saveButtonText}>Guardar cambios</Text>
+                )}
+              </Pressable>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      )}
+    </SafeAreaView>
+  )
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
+    flex: 1,
+    backgroundColor: AppColors.background,
+  },
+  header: {
+    height: 56,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: AppColors.border,
+    backgroundColor: AppColors.surface,
+  },
+  headerButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+  },
+  buttonPressed: {
+    backgroundColor: AppColors.brandSoft,
+  },
+  headerTitle: {
+    color: AppColors.text,
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  headerSpacer: {
+    width: 40,
+  },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  content: {
     flexGrow: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f7fa',
-    paddingVertical: 30,
+    padding: 24,
   },
-  card: {
-    backgroundColor: 'white',
-    padding: 25,
-    borderRadius: 20,
-    width: '85%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-    position: 'relative',
-  },
-  backButton: {
-    position: 'absolute',
-    top: 15,
-    left: 15,
-    zIndex: 999,
-    elevation: 10,
-    padding: 10,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#166534',
-    textAlign: 'center',
-    marginTop: 10,
-    marginBottom: 15,
+  form: {
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
+    gap: 16,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: AppColors.border,
+    borderRadius: 12,
+    backgroundColor: AppColors.surface,
   },
   avatarSection: {
     alignItems: 'center',
-    marginBottom: 15,
+    gap: 8,
+    marginBottom: 4,
   },
-  avatarContainer: {
-    position: 'relative',
+  avatarFrame: {
+    width: 104,
+    height: 104,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: AppColors.brand,
+    borderRadius: 52,
+    backgroundColor: AppColors.brandSoft,
+  },
+  avatarPressed: {
+    opacity: 0.82,
   },
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 3,
-    borderColor: '#166534',
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden',
+    borderRadius: 49,
   },
-  cameraIconBadge: {
+  cameraBadge: {
     position: 'absolute',
+    right: -2,
     bottom: 0,
-    right: 0,
-    backgroundColor: '#166534',
-    padding: 6,
-    borderRadius: 20,
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 2,
-    borderColor: 'white',
-  },
-  changePhotoButton: {
-    marginTop: 8,
+    borderColor: AppColors.surface,
+    borderRadius: 16,
+    backgroundColor: AppColors.brand,
   },
   changePhotoText: {
-    color: '#166534',
-    fontWeight: 'bold',
+    color: AppColors.brand,
     fontSize: 14,
+    fontWeight: '700',
+  },
+  field: {
+    gap: 7,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   label: {
+    color: AppColors.brandDark,
     fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 6,
-    marginTop: 10,
+    fontWeight: '600',
+  },
+  characterCount: {
+    color: AppColors.textMuted,
+    fontSize: 12,
   },
   input: {
+    padding: 14,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: AppColors.border,
     borderRadius: 8,
-    padding: 12,
-    fontSize: 14,
-    backgroundColor: '#fff',
-  },
-  textArea: {
-    height: 90,
-    textAlignVertical: 'top',
-  },
-  saveButton: {
-    backgroundColor: '#166534',
-    paddingVertical: 14,
-    borderRadius: 10,
-    marginTop: 25,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: AppColors.text,
+    backgroundColor: AppColors.surface,
     fontSize: 16,
   },
-});
+  inputDisabled: {
+    color: AppColors.textMuted,
+    backgroundColor: AppColors.background,
+  },
+  helperText: {
+    color: AppColors.textMuted,
+    fontSize: 12,
+  },
+  textArea: {
+    minHeight: 112,
+  },
+  errorText: {
+    color: AppColors.danger,
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  saveButton: {
+    minHeight: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 14,
+    borderRadius: 8,
+    backgroundColor: AppColors.accent,
+  },
+  saveButtonPressed: {
+    backgroundColor: AppColors.accentPressed,
+  },
+  buttonDisabled: {
+    opacity: 0.55,
+  },
+  saveButtonText: {
+    color: AppColors.surface,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+})

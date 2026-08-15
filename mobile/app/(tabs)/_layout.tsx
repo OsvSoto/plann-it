@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native'
 
+import { AppColors } from '../../constants/theme'
 import { useCerrarSesion } from '../../features/auth/hooks/useCerrarSesion'
 
 export default function TabLayout() {
@@ -49,26 +50,38 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-headerRight: () => (
-          // Contenedor principal que pone todo en fila
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 15 }}>
-            
-            {/* NUESTRO NUEVO BOTÓN DE PERFIL */}
+        headerStyle: {
+          backgroundColor: AppColors.surface,
+        },
+        headerTintColor: AppColors.text,
+        headerTitleStyle: {
+          fontWeight: '700',
+        },
+        tabBarActiveTintColor: AppColors.brand,
+        tabBarInactiveTintColor: AppColors.textMuted,
+        tabBarStyle: {
+          borderTopColor: AppColors.border,
+          backgroundColor: AppColors.surface,
+        },
+        headerRight: () => (
+          <View style={styles.headerActions}>
             <Pressable
-              accessibilityLabel="Mi Perfil"
+              accessibilityLabel="Abrir mi perfil"
               accessibilityRole="button"
               hitSlop={8}
               onPress={() => router.push('/perfil')}
               style={({ pressed }) => [
-                styles.logoutButton, // Usamos el mismo estilo base para que sean consistentes
-                pressed && styles.logoutButtonPressed,
-                { marginRight: 10 } // Espacio entre el ícono de perfil y el de salir
+                styles.headerButton,
+                pressed && styles.profileButtonPressed,
               ]}
             >
-              <Ionicons name="person-circle-outline" size={26} color="#166534" />
+              <Ionicons
+                name="person-circle-outline"
+                size={25}
+                color={AppColors.brand}
+              />
             </Pressable>
 
-            {/* EL BOTÓN ORIGINAL DE SALIR (Intacto) */}
             <Pressable
               accessibilityLabel="Cerrar sesión"
               accessibilityRole="button"
@@ -76,18 +89,21 @@ headerRight: () => (
               hitSlop={8}
               onPress={confirmarCierreDeSesion}
               style={({ pressed }) => [
-                styles.logoutButton,
+                styles.headerButton,
                 pressed && styles.logoutButtonPressed,
-                cerrandoSesion && styles.logoutButtonDisabled,
+                cerrandoSesion && styles.headerButtonDisabled,
               ]}
             >
               {cerrandoSesion ? (
-                <ActivityIndicator size="small" color="#842318" />
+                <ActivityIndicator size="small" color={AppColors.danger} />
               ) : (
-                <Ionicons name="log-out-outline" size={26} color="#842318" />
+                <Ionicons
+                  name="log-out-outline"
+                  size={23}
+                  color={AppColors.danger}
+                />
               )}
             </Pressable>
-
           </View>
         ),
       }}
@@ -96,6 +112,9 @@ headerRight: () => (
         name="index"
         options={{
           title: 'Inicio',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home-outline" size={size} color={color} />
+          ),
         }}
       />
 
@@ -103,6 +122,19 @@ headerRight: () => (
         name="proyectos"
         options={{
           title: 'Proyectos',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="folder-open-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="invitaciones"
+        options={{
+          title: 'Invitaciones',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="mail-outline" size={size} color={color} />
+          ),
         }}
       />
     </Tabs>
@@ -110,18 +142,26 @@ headerRight: () => (
 }
 
 const styles = StyleSheet.create({
-  logoutButton: {
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    marginRight: 8,
+  },
+  headerButton: {
     width: 40,
     height: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
     borderRadius: 8,
   },
-  logoutButtonPressed: {
-    backgroundColor: '#FEF3F2',
+  profileButtonPressed: {
+    backgroundColor: AppColors.brandSoft,
   },
-  logoutButtonDisabled: {
+  logoutButtonPressed: {
+    backgroundColor: AppColors.dangerSoft,
+  },
+  headerButtonDisabled: {
     opacity: 0.6,
   },
 })

@@ -13,17 +13,18 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { useCrearTarea } from '../hooks/useCrearTarea'
+import { useFormularioTarea } from '../hooks/useCrearTarea'
 
 import { ESTADOS_TAREA } from '../types'
-import type { EstadoTarea } from '../types'
+import type { EstadoTarea, Tarea } from '../types'
 
 type Props = {
   visible: boolean
   listaId: string
   listaNombre: string
+  tarea?: Tarea | null
   onClose: () => void
-  onCreated: () => Promise<void>
+  onSaved: () => Promise<void>
 }
 
 const ETIQUETAS_ESTADO: Record<EstadoTarea, string> = {
@@ -32,12 +33,13 @@ const ETIQUETAS_ESTADO: Record<EstadoTarea, string> = {
   COMPLETADA: 'Completada',
 }
 
-export function CrearTareaModal({
+export function TareaModal({
   visible,
   listaId,
   listaNombre,
+  tarea,
   onClose,
-  onCreated,
+  onSaved,
 }: Props) {
   const {
     nombre,
@@ -53,7 +55,7 @@ export function CrearTareaModal({
     limpiarError,
     reiniciar,
     guardar,
-  } = useCrearTarea()
+  } = useFormularioTarea(tarea)
 
   function cerrar() {
     if (!guardando) {
@@ -62,12 +64,12 @@ export function CrearTareaModal({
     }
   }
 
-  async function crear() {
-    const creada = await guardar(listaId)
+  async function guardarCambios() {
+    const guardada = await guardar(listaId)
 
-    if (creada) {
+    if (guardada) {
       onClose()
-      await onCreated()
+      await onSaved()
     }
   }
 
@@ -85,7 +87,9 @@ export function CrearTareaModal({
         >
           <View style={styles.header}>
             <View style={styles.headerText}>
-              <Text style={styles.title}>Nueva tarea</Text>
+              <Text style={styles.title}>
+                {tarea ? 'Editar tarea' : 'Nueva tarea'}
+              </Text>
               <Text style={styles.subtitle} numberOfLines={1}>
                 Lista: {listaNombre}
               </Text>
@@ -98,7 +102,7 @@ export function CrearTareaModal({
               onPress={cerrar}
               style={styles.iconButton}
             >
-              <Ionicons name="close" size={23} color="#273029" />
+              <Ionicons name="close" size={23} color="#4F2D7F" />
             </Pressable>
           </View>
 
@@ -148,7 +152,7 @@ export function CrearTareaModal({
             </View>
 
             <View style={styles.field}>
-              <Text style={styles.label}>Estado inicial</Text>
+              <Text style={styles.label}>Estado</Text>
               <View style={styles.segmentedControl}>
                 {ESTADOS_TAREA.map((opcion) => {
                   const seleccionada = estado === opcion
@@ -183,7 +187,7 @@ export function CrearTareaModal({
             <View style={styles.field}>
               <Text style={styles.label}>Fecha de entrega</Text>
               <View style={styles.dateInputContainer}>
-                <Ionicons name="calendar-outline" size={20} color="#59615B" />
+                <Ionicons name="calendar-outline" size={20} color="#6F45A5" />
                 <TextInput
                   editable={!guardando}
                   keyboardType="numbers-and-punctuation"
@@ -214,7 +218,7 @@ export function CrearTareaModal({
             </Pressable>
             <Pressable
               disabled={guardando}
-              onPress={() => void crear()}
+              onPress={() => void guardarCambios()}
               style={({ pressed }) => [
                 styles.primaryButton,
                 pressed && !guardando && styles.primaryButtonPressed,
@@ -225,8 +229,14 @@ export function CrearTareaModal({
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
                 <>
-                  <Ionicons name="add" size={20} color="#FFFFFF" />
-                  <Text style={styles.primaryText}>Crear tarea</Text>
+                  <Ionicons
+                    name={tarea ? 'save-outline' : 'add'}
+                    size={20}
+                    color="#FFFFFF"
+                  />
+                  <Text style={styles.primaryText}>
+                    {tarea ? 'Guardar cambios' : 'Crear tarea'}
+                  </Text>
                 </>
               )}
             </Pressable>
@@ -238,7 +248,7 @@ export function CrearTareaModal({
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F7F9F7' },
+  safeArea: { flex: 1, backgroundColor: '#F8F5FB' },
   container: {
     flex: 1,
     width: '100%',
@@ -249,8 +259,8 @@ const styles = StyleSheet.create({
   },
   header: { flexDirection: 'row', alignItems: 'flex-start', gap: 16 },
   headerText: { flex: 1, gap: 4 },
-  title: { color: '#172019', fontSize: 23, fontWeight: '700' },
-  subtitle: { color: '#667069', fontSize: 14 },
+  title: { color: '#342247', fontSize: 23, fontWeight: '700' },
+  subtitle: { color: '#766682', fontSize: 14 },
   iconButton: {
     width: 40,
     height: 40,
@@ -265,16 +275,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  label: { color: '#273029', fontSize: 15, fontWeight: '600' },
+  label: { color: '#4F2D7F', fontSize: 15, fontWeight: '600' },
   optional: { color: '#747C76', fontSize: 12 },
   input: {
     minHeight: 50,
     borderWidth: 1,
-    borderColor: '#CDD3CE',
+    borderColor: '#D9CEE8',
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: '#172019',
+    color: '#342247',
     backgroundColor: '#FFFFFF',
     fontSize: 16,
   },
@@ -283,7 +293,7 @@ const styles = StyleSheet.create({
     minHeight: 48,
     flexDirection: 'row',
     borderWidth: 1,
-    borderColor: '#CDD3CE',
+    borderColor: '#D9CEE8',
     borderRadius: 8,
     padding: 3,
     backgroundColor: '#FFFFFF',
@@ -297,26 +307,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     paddingVertical: 7,
   },
-  segmentSelected: { backgroundColor: '#EAF4ED' },
+  segmentSelected: { backgroundColor: '#E9E1F3' },
   segmentText: {
-    color: '#667069',
+    color: '#766682',
     fontSize: 11,
     fontWeight: '600',
     textAlign: 'center',
   },
-  segmentTextSelected: { color: '#166534', fontWeight: '700' },
+  segmentTextSelected: { color: '#6F45A5', fontWeight: '700' },
   dateInputContainer: {
     minHeight: 50,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
     borderWidth: 1,
-    borderColor: '#CDD3CE',
+    borderColor: '#D9CEE8',
     borderRadius: 8,
     paddingHorizontal: 14,
     backgroundColor: '#FFFFFF',
   },
-  dateInput: { flex: 1, paddingVertical: 12, color: '#172019', fontSize: 16 },
+  dateInput: { flex: 1, paddingVertical: 12, color: '#342247', fontSize: 16 },
   error: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -335,11 +345,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#AAB2AC',
+    borderColor: '#D9CEE8',
     borderRadius: 8,
     backgroundColor: '#FFFFFF',
   },
-  secondaryText: { color: '#273029', fontSize: 15, fontWeight: '600' },
+  secondaryText: { color: '#4F2D7F', fontSize: 15, fontWeight: '600' },
   primaryButton: {
     minHeight: 48,
     flex: 1.3,
@@ -348,9 +358,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 7,
     borderRadius: 8,
-    backgroundColor: '#166534',
+    backgroundColor: '#FF6B2C',
   },
-  primaryButtonPressed: { backgroundColor: '#14532D' },
+  primaryButtonPressed: { backgroundColor: '#E8521D' },
   primaryText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
   disabled: { opacity: 0.65 },
 })
