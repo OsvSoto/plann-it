@@ -617,8 +617,16 @@ export type Database = {
         Args: { p_miembro_id: string; p_permisos: string; p_rol: string }
         Returns: string
       }
+      asignar_miembro_tarea: {
+        Args: { p_miembro_id: string; p_tarea_id: string }
+        Returns: string
+      }
       crear_proyecto: {
         Args: { p_descripcion: string; p_fecha_fin: string; p_nombre: string }
+        Returns: string
+      }
+      desasignar_miembro_tarea: {
+        Args: { p_asignacion_id: string }
         Returns: string
       }
       es_lider_proyecto: { Args: { p_proyecto_id: string }; Returns: boolean }
@@ -638,6 +646,17 @@ export type Database = {
           invitacion_id: string
           proyecto_id: string
           proyecto_nombre: string
+        }[]
+      }
+      obtener_asignaciones_proyecto: {
+        Args: { p_proyecto_id: string }
+        Returns: {
+          asignacion_id: string
+          miembro_proyecto_id: string
+          tarea_id: string
+          usuario_correo: string
+          usuario_id: string
+          usuario_nombre: string
         }[]
       }
       obtener_miembros_proyecto: {

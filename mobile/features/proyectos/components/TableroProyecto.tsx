@@ -67,6 +67,7 @@ export function TableroProyecto({ tablero, esLider, onChanged }: Props) {
           {tablero.listas.map((lista) => (
             <ListaProyecto
               key={lista.lista_id}
+              proyectoId={tablero.tablero_proyecto_id}
               lista={lista}
               esLider={esLider}
               onChanged={onChanged}
