@@ -10,6 +10,9 @@ node_modules/
 dist/
 build/
 
+# Documentación local
+/Documentacion/
+
 # Expo
 .expo/
 

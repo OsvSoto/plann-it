@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import {
   crearProyecto,
@@ -38,10 +38,6 @@ export function useProyectos() {
     await crearProyecto(proyecto)
     await cargarProyectos()
   }
-
-  useEffect(() => {
-    cargarProyectos()
-  }, [cargarProyectos])
 
   return {
     proyectos,

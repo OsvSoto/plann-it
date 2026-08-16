@@ -1,10 +1,34 @@
-export type Proyecto = {
-  proyecto_id: string
-  proyecto_nombre: string
-  proyecto_descripcion: string | null
-  proyecto_fecha_inicio: string
-  proyecto_fecha_fin: string
-  proyecto_estado: string
+import type { Tables } from '../../lib/database.types'
+
+export type Proyecto = Tables<'proyecto'>
+
+export type AsignacionTarea = {
+  asignacion_id: string
+  tarea_id: string
+  miembro_proyecto_id: string
+  usuario_id: string
+  usuario_nombre: string
+  usuario_correo: string
+}
+
+export type Tarea = Tables<'tarea'> & {
+  asignaciones: AsignacionTarea[]
+}
+
+export type ListaDetalle = Tables<'lista'> & {
+  tareas: Tarea[]
+}
+
+export type TableroDetalle = Tables<'tablero'> & {
+  listas: ListaDetalle[]
+}
+
+export type DetalleProyecto = {
+  proyecto: Proyecto
+  tableros: TableroDetalle[]
+  esLider: boolean
+  puedeEliminarProyecto: boolean
+  miUsuarioId: string | null
 }
 
 export type CrearProyectoInput = {
@@ -12,3 +36,53 @@ export type CrearProyectoInput = {
   descripcion: string
   fechaFin: string
 }
+
+export type EditarProyectoInput = {
+  proyectoId: string
+  nombre: string
+  descripcion: string
+  fechaFin: string
+  estado: EstadoProyecto
+}
+
+export type CrearTableroInput = {
+  proyectoId: string
+  nombre: string
+}
+
+export type CrearListaInput = {
+  tableroId: string
+  nombre: string
+  orden: number
+}
+
+export const ESTADOS_TAREA = [
+  'PENDIENTE',
+  'EN_PROGRESO',
+  'COMPLETADA',
+] as const
+
+export type EstadoTarea = (typeof ESTADOS_TAREA)[number]
+
+export const ESTADOS_PROYECTO = [
+  'ACTIVO',
+  'PAUSADO',
+  'COMPLETADO',
+  'ARCHIVADO',
+] as const
+
+export type EstadoProyecto = (typeof ESTADOS_PROYECTO)[number]
+
+export type CrearTareaInput = {
+  listaId: string
+  nombre: string
+  descripcion: string | null
+  estado: EstadoTarea
+  fechaEntrega: string
+}
+
+export type EditarTareaInput = Omit<CrearTareaInput, 'listaId'> & {
+  tareaId: string
+}
+
+

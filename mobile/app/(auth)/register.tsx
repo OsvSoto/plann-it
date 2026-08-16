@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import {
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -16,16 +19,30 @@ export default function RegisterScreen() {
   const [nombre, setNombre] = useState('')
   const [correo, setCorreo] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmacionPassword, setConfirmacionPassword] = useState('')
   const [cargando, setCargando] = useState(false)
 
   async function registrarse() {
     const nombreLimpio = nombre.trim()
     const correoLimpio = correo.trim().toLowerCase()
 
-    if (!nombreLimpio || !correoLimpio || !password) {
+    if (
+      !nombreLimpio
+      || !correoLimpio
+      || !password
+      || !confirmacionPassword
+    ) {
       Alert.alert(
         'Error',
         'Completa todos los campos'
+      )
+      return
+    }
+
+    if (password !== confirmacionPassword) {
+      Alert.alert(
+        'Las contraseñas no coinciden',
+        'Revisa ambos campos e intenta nuevamente.'
       )
       return
     }
@@ -92,61 +109,114 @@ export default function RegisterScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.form}>
-        <Text style={styles.title}>
-          Crear cuenta
-        </Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Nombre"
-          value={nombre}
-          onChangeText={setNombre}
-          autoCorrect={false}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Correo"
-          value={correo}
-          onChangeText={setCorreo}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Contraseña"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-
-        <Pressable
-          style={[
-            styles.button,
-            cargando && styles.buttonDisabled,
-          ]}
-          onPress={registrarse}
-          disabled={cargando}
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView
+          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+          contentContainerStyle={styles.scrollContent}
+          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.buttonText}>
-            {cargando
-              ? 'Registrando...'
-              : 'Registrarse'}
-          </Text>
-        </Pressable>
+          <View style={styles.form}>
+            <Text style={styles.title}>
+              Crear cuenta
+            </Text>
 
-        <Link
-          href="/(auth)/login"
-          style={styles.link}
-        >
-          Ya tengo una cuenta
-        </Link>
-      </View>
+            <View style={styles.field}>
+              <Text style={styles.label}>Nombre de usuario</Text>
+              <TextInput
+                accessibilityLabel="Nombre de usuario"
+                style={styles.input}
+                placeholder="Cómo quieres que te llamemos"
+                placeholderTextColor="#8A918B"
+                value={nombre}
+                onChangeText={setNombre}
+                autoCapitalize="words"
+                autoCorrect={false}
+                autoComplete="name"
+                textContentType="name"
+              />
+            </View>
+
+            <View style={styles.field}>
+              <Text style={styles.label}>Correo electrónico</Text>
+              <TextInput
+                accessibilityLabel="Correo electrónico"
+                style={styles.input}
+                placeholder="nombre@correo.com"
+                placeholderTextColor="#8A918B"
+                value={correo}
+                onChangeText={setCorreo}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="email"
+                textContentType="emailAddress"
+              />
+            </View>
+
+            <View style={styles.field}>
+              <Text style={styles.label}>Contraseña</Text>
+              <TextInput
+                accessibilityLabel="Contraseña"
+                style={styles.input}
+                placeholder="Crea una contraseña"
+                placeholderTextColor="#8A918B"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="new-password"
+                textContentType="newPassword"
+              />
+            </View>
+
+            <View style={styles.field}>
+              <Text style={styles.label}>Confirmar contraseña</Text>
+              <TextInput
+                accessibilityLabel="Confirmar contraseña"
+                style={styles.input}
+                placeholder="Repite tu contraseña"
+                placeholderTextColor="#8A918B"
+                value={confirmacionPassword}
+                onChangeText={setConfirmacionPassword}
+                secureTextEntry
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="new-password"
+                textContentType="newPassword"
+                onSubmitEditing={() => void registrarse()}
+              />
+            </View>
+
+            <Pressable
+              style={[
+                styles.button,
+                cargando && styles.buttonDisabled,
+              ]}
+              onPress={registrarse}
+              disabled={cargando}
+            >
+              <Text style={styles.buttonText}>
+                {cargando
+                  ? 'Registrando...'
+                  : 'Registrarse'}
+              </Text>
+            </Pressable>
+
+            <Link
+              href="/(auth)/login"
+              style={styles.link}
+            >
+              Ya tengo una cuenta
+            </Link>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   )
 }
@@ -154,30 +224,55 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F8F5FB',
+  },
+
+  keyboardView: {
+    flex: 1,
+  },
+
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
     padding: 24,
   },
 
   form: {
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
     gap: 16,
   },
 
   title: {
+    color: '#342247',
     fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 16,
   },
 
+  field: {
+    gap: 7,
+  },
+
+  label: {
+    color: '#4F2D7F',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
   input: {
     borderWidth: 1,
-    borderColor: '#aaa',
+    borderColor: '#D9CEE8',
     borderRadius: 8,
     padding: 14,
+    color: '#342247',
+    backgroundColor: '#FFFFFF',
     fontSize: 16,
   },
 
   button: {
-    backgroundColor: '#111',
+    backgroundColor: '#FF6B2C',
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
@@ -193,6 +288,8 @@ const styles = StyleSheet.create({
   },
 
   link: {
+    color: '#6F45A5',
+    fontWeight: '700',
     textAlign: 'center',
     marginTop: 12,
   },
