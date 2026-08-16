@@ -36,6 +36,14 @@ export type CrearProyectoInput = {
   fechaFin: string
 }
 
+export type EditarProyectoInput = {
+  proyectoId: string
+  nombre: string
+  descripcion: string
+  fechaFin: string
+  estado: EstadoProyecto
+}
+
 export type CrearTableroInput = {
   proyectoId: string
   nombre: string
@@ -55,6 +63,15 @@ export const ESTADOS_TAREA = [
 
 export type EstadoTarea = (typeof ESTADOS_TAREA)[number]
 
+export const ESTADOS_PROYECTO = [
+  'ACTIVO',
+  'PAUSADO',
+  'COMPLETADO',
+  'ARCHIVADO',
+] as const
+
+export type EstadoProyecto = (typeof ESTADOS_PROYECTO)[number]
+
 export type CrearTareaInput = {
   listaId: string
   nombre: string
@@ -66,3 +83,5 @@ export type CrearTareaInput = {
 export type EditarTareaInput = Omit<CrearTareaInput, 'listaId'> & {
   tareaId: string
 }
+
+
