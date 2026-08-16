@@ -3,10 +3,11 @@ import { useState } from 'react'
 import {
   eliminarLista as eliminarListaService,
   eliminarProyecto as eliminarProyectoService,
+  eliminarTablero as eliminarTableroService,
   eliminarTarea as eliminarTareaService,
 } from '../services/proyecto.service'
 
-type TipoRecurso = 'lista' | 'proyecto' | 'tarea'
+type TipoRecurso = 'lista' | 'proyecto' | 'tablero' | 'tarea'
 
 export function useEliminarRecursosProyecto() {
   const [eliminando, setEliminando] = useState<string | null>(null)
@@ -44,10 +45,15 @@ export function useEliminarRecursosProyecto() {
     return ejecutar('proyecto', proyectoId, eliminarProyectoService)
   }
 
+  function eliminarTablero(tableroId: string) {
+    return ejecutar('tablero', tableroId, eliminarTableroService)
+  }
+
   return {
     eliminando,
     eliminarTarea,
     eliminarLista,
     eliminarProyecto,
+    eliminarTablero,
   }
 }

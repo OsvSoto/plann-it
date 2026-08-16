@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
+import { router } from 'expo-router'
 import {
+  ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,7 +14,9 @@ import {
 import { useAppColors } from '../../../hooks/use-app-colors'
 import type { AppColorsShape } from '../../../constants/theme'
 import { CrearListaModal } from './CrearListaModal'
+import { CrearTableroModal } from './CrearTableroModal'
 import { ListaProyecto } from './ListaProyecto'
+import { useEliminarRecursosProyecto } from '../hooks/useEliminarRecursosProyecto'
 
 import type { TableroDetalle } from '../types'
 
@@ -26,9 +31,44 @@ export function TableroProyecto({ tablero, esLider, miUsuarioId, onChanged }: Pr
   const colors = useAppColors()
   const styles = createStyles(colors)
   const [creandoLista, setCreandoLista] = useState(false)
+  const [editandoTablero, setEditandoTablero] = useState(false)
+  const { eliminando, eliminarTablero } = useEliminarRecursosProyecto()
   const siguienteOrden = tablero.listas.length === 0
     ? 0
     : Math.max(...tablero.listas.map((lista) => lista.lista_orden)) + 1
+
+  async function ejecutarEliminacionTablero() {
+    const eliminado = await eliminarTablero(tablero.tablero_id)
+
+    if (eliminado) {
+      router.back()
+      return
+    }
+
+    Alert.alert('No fue posible eliminar el tablero', 'Intenta nuevamente.')
+  }
+
+  function solicitarEliminacionTablero() {
+    const cantidadListas = tablero.listas.length
+    const mensaje = cantidadListas === 0
+      ? `¿Quieres eliminar el tablero "${tablero.tablero_nombre}" definitivamente?`
+      : `El tablero "${tablero.tablero_nombre}" tiene ${cantidadListas} ${
+        cantidadListas === 1 ? 'lista' : 'listas'
+      }. Se eliminarán definitivamente, incluidas todas sus tareas y asignaciones.`
+
+    Alert.alert(
+      'Eliminar tablero',
+      mensaje,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar todo',
+          style: 'destructive',
+          onPress: () => void ejecutarEliminacionTablero(),
+        },
+      ]
+    )
+  }
 
   return (
     <View style={styles.section}>
@@ -38,18 +78,49 @@ export function TableroProyecto({ tablero, esLider, miUsuarioId, onChanged }: Pr
           <Text style={styles.boardLabelText}>ESPACIO DE TRABAJO</Text>
         </View>
         {esLider ? (
-          <Pressable
-            accessibilityLabel={`Crear lista en ${tablero.tablero_nombre}`}
-            accessibilityRole="button"
-            onPress={() => setCreandoLista(true)}
-            style={({ pressed }) => [
-              styles.addListButton,
-              pressed && styles.addListButtonPressed,
-            ]}
-          >
-            <Ionicons name="add" size={18} color="#FFFFFF" />
-            <Text style={styles.addListText}>Añadir lista</Text>
-          </Pressable>
+          <View style={styles.headerActions}>
+            <Pressable
+              accessibilityLabel={`Editar tablero ${tablero.tablero_nombre}`}
+              accessibilityRole="button"
+              hitSlop={6}
+              onPress={() => setEditandoTablero(true)}
+              style={({ pressed }) => [
+                styles.iconButton,
+                pressed && styles.iconButtonPressed,
+              ]}
+            >
+              <Ionicons name="create-outline" size={19} color="#F6F8F6" />
+            </Pressable>
+            <Pressable
+              accessibilityLabel={`Eliminar tablero ${tablero.tablero_nombre}`}
+              accessibilityRole="button"
+              disabled={eliminando === tablero.tablero_id}
+              hitSlop={6}
+              onPress={solicitarEliminacionTablero}
+              style={({ pressed }) => [
+                styles.iconButton,
+                pressed && styles.iconButtonPressed,
+              ]}
+            >
+              {eliminando === tablero.tablero_id ? (
+                <ActivityIndicator size="small" color="#F6F8F6" />
+              ) : (
+                <Ionicons name="trash-outline" size={18} color="#F6F8F6" />
+              )}
+            </Pressable>
+            <Pressable
+              accessibilityLabel={`Crear lista en ${tablero.tablero_nombre}`}
+              accessibilityRole="button"
+              onPress={() => setCreandoLista(true)}
+              style={({ pressed }) => [
+                styles.addListButton,
+                pressed && styles.addListButtonPressed,
+              ]}
+            >
+              <Ionicons name="add" size={18} color="#FFFFFF" />
+              <Text style={styles.addListText}>Añadir lista</Text>
+            </Pressable>
+          </View>
         ) : null}
       </View>
 
@@ -90,6 +161,13 @@ export function TableroProyecto({ tablero, esLider, miUsuarioId, onChanged }: Pr
         onClose={() => setCreandoLista(false)}
         onCreated={onChanged}
       />
+      <CrearTableroModal
+        visible={editandoTablero}
+        proyectoId={tablero.tablero_proyecto_id}
+        tablero={tablero}
+        onClose={() => setEditandoTablero(false)}
+        onCreated={onChanged}
+      />
     </View>
   )
 }
@@ -128,6 +206,21 @@ function createStyles(colors: AppColorsShape) {
     color: '#F6F8F6',
     fontSize: 11,
     fontWeight: '800',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  iconButton: {
+    width: 34,
+    height: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+  },
+  iconButtonPressed: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
   addListButton: {
     minHeight: 38,

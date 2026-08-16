@@ -8,6 +8,7 @@ import type {
   CrearTableroInput,
   CrearTareaInput,
   DetalleProyecto,
+  EditarTableroInput,
   EditarTareaInput,
   Proyecto,
   TableroDetalle,
@@ -192,6 +193,36 @@ export async function crearTablero(
   return {
     ...data,
     listas: [],
+  }
+}
+
+export async function editarTablero(
+  tablero: EditarTableroInput
+): Promise<void> {
+  const { error } = await supabase
+    .from('tablero')
+    .update({
+      tablero_nombre: tablero.nombre.trim(),
+    })
+    .eq('tablero_id', tablero.tableroId)
+    .select('tablero_id')
+    .single()
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function eliminarTablero(tableroId: string): Promise<void> {
+  const { error } = await supabase
+    .from('tablero')
+    .delete()
+    .eq('tablero_id', tableroId)
+    .select('tablero_id')
+    .single()
+
+  if (error) {
+    throw error
   }
 }
 

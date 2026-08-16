@@ -14,11 +14,14 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useAppColors } from '../../../hooks/use-app-colors'
 import type { AppColorsShape } from '../../../constants/theme'
-import { useCrearTablero } from '../hooks/useCrearTablero'
+import { useFormularioTablero } from '../hooks/useCrearTablero'
+
+import type { TableroDetalle } from '../types'
 
 type Props = {
   visible: boolean
   proyectoId: string
+  tablero?: TableroDetalle | null
   onClose: () => void
   onCreated: () => Promise<void>
 }
@@ -26,11 +29,13 @@ type Props = {
 export function CrearTableroModal({
   visible,
   proyectoId,
+  tablero,
   onClose,
   onCreated,
 }: Props) {
   const colors = useAppColors()
   const styles = createStyles(colors)
+  const editando = Boolean(tablero)
   const {
     nombre,
     guardando,
@@ -38,7 +43,7 @@ export function CrearTableroModal({
     actualizarNombre,
     reiniciar,
     guardar,
-  } = useCrearTablero()
+  } = useFormularioTablero(tablero)
 
   function cerrar() {
     if (guardando) {
@@ -50,9 +55,9 @@ export function CrearTableroModal({
   }
 
   async function crear() {
-    const creado = await guardar(proyectoId)
+    const guardado = await guardar(proyectoId)
 
-    if (creado) {
+    if (guardado) {
       onClose()
       await onCreated()
     }
@@ -72,8 +77,10 @@ export function CrearTableroModal({
         >
           <View style={styles.header}>
             <View>
-              <Text style={styles.title}>Nuevo tablero</Text>
-              <Text style={styles.subtitle}>Organiza las listas del proyecto</Text>
+              <Text style={styles.title}>{editando ? 'Editar tablero' : 'Nuevo tablero'}</Text>
+              <Text style={styles.subtitle}>
+                {editando ? 'Cambia el nombre del tablero' : 'Organiza las listas del proyecto'}
+              </Text>
             </View>
             <Pressable
               accessibilityLabel="Cerrar"
@@ -144,8 +151,10 @@ export function CrearTableroModal({
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
                 <>
-                  <Ionicons name="add" size={20} color="#FFFFFF" />
-                  <Text style={styles.primaryButtonText}>Crear tablero</Text>
+                  <Ionicons name={editando ? 'save-outline' : 'add'} size={20} color="#FFFFFF" />
+                  <Text style={styles.primaryButtonText}>
+                    {editando ? 'Guardar cambios' : 'Crear tablero'}
+                  </Text>
                 </>
               )}
             </Pressable>
