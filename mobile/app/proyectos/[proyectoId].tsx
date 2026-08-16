@@ -136,7 +136,7 @@ export default function DetalleProyectoScreen() {
     if (!puedeEliminarProyecto) {
       Alert.alert(
         'No puedes eliminar este proyecto',
-        'Primero deben salir todos los dem s miembros. El l der debe ser el  nico miembro del proyecto.'
+        'Primero deben salir todos los demás miembros. El líder debe ser el único miembro del proyecto.'
       )
 
       return
@@ -144,7 +144,7 @@ export default function DetalleProyectoScreen() {
 
     Alert.alert(
       'Eliminar proyecto',
-      'Se eliminar n definitivamente sus tableros, listas, tareas, asignaciones y dem s informaci n asociada.',
+      'Se eliminarán definitivamente sus tableros, listas, tareas, asignaciones y demás información asociada.',
       [
         {
           text: 'Cancelar',
