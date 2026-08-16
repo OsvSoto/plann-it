@@ -1,5 +1,4 @@
 export type RespuestaInvitacion = 'ACEPTADA' | 'RECHAZADA'
-
 export type RolMiembro = 'LIDER' | 'MIEMBRO'
 export type PermisosMiembro = 'TOTAL' | 'COLABORAR'
 
@@ -24,4 +23,11 @@ export type ActualizarMiembroInput = {
   miembroId: string
   rol: RolMiembro
   permisos: PermisosMiembro
+}
+
+export type UsuarioBusqueda = {
+  usuario_id: string
+  usuario_nombre: string
+  usuario_correo: string
+  usuario_foto: string | null
 }
