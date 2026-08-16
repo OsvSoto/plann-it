@@ -509,6 +509,7 @@ export type Database = {
           tarea_id: string
           tarea_lista_id: string
           tarea_nombre: string
+          tarea_orden: number
         }
         Insert: {
           tarea_creado_por?: string | null
@@ -518,6 +519,7 @@ export type Database = {
           tarea_id?: string
           tarea_lista_id: string
           tarea_nombre: string
+          tarea_orden?: number
         }
         Update: {
           tarea_creado_por?: string | null
@@ -527,6 +529,7 @@ export type Database = {
           tarea_id?: string
           tarea_lista_id?: string
           tarea_nombre?: string
+          tarea_orden?: number
         }
         Relationships: [
           {
@@ -689,9 +692,21 @@ export type Database = {
           usuario_nombre: string
         }[]
       }
+      obtener_resumen_proyecto_ia: {
+        Args: { p_proyecto_id: string }
+        Returns: Json
+      }
       puede_eliminar_proyecto: {
         Args: { p_proyecto_id: string }
         Returns: boolean
+      }
+      reordenar_listas: {
+        Args: { p_orden: Json; p_tablero_id: string }
+        Returns: undefined
+      }
+      reordenar_tareas: {
+        Args: { p_lista_id: string; p_orden: Json }
+        Returns: undefined
       }
       responder_invitacion: {
         Args: { p_invitacion_id: string; p_respuesta: string }

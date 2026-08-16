@@ -61,6 +61,16 @@ export type CrearListaInput = {
   orden: number
 }
 
+export type OrdenLista = {
+  listaId: string
+  orden: number
+}
+
+export type OrdenTarea = {
+  tareaId: string
+  orden: number
+}
+
 export const ESTADOS_TAREA = [
   'PENDIENTE',
   'EN_PROGRESO',
@@ -94,9 +104,10 @@ export type CrearTareaInput = {
   descripcion: string | null
   estado: EstadoTarea
   fechaEntrega: string
+  orden: number
 }
 
-export type EditarTareaInput = Omit<CrearTareaInput, 'listaId'> & {
+export type EditarTareaInput = Omit<CrearTareaInput, 'listaId' | 'orden'> & {
   tareaId: string
 }
 

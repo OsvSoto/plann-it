@@ -26,6 +26,7 @@ type Props = {
   visible: boolean
   listaId: string
   listaNombre: string
+  siguienteOrden: number
   tarea?: Tarea | null
   onClose: () => void
   onSaved: () => Promise<void>
@@ -41,6 +42,7 @@ export function TareaModal({
   visible,
   listaId,
   listaNombre,
+  siguienteOrden,
   tarea,
   onClose,
   onSaved,
@@ -71,7 +73,7 @@ export function TareaModal({
   }
 
   async function guardarCambios() {
-    const guardada = await guardar(listaId)
+    const guardada = await guardar(listaId, siguienteOrden)
 
     if (guardada) {
       onClose()

@@ -1,15 +1,17 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 import {
   ActivityIndicator,
   Alert,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native'
+import DraggableFlatList, {
+  type RenderItemParams,
+} from 'react-native-draggable-flatlist'
 
 import { useAppColors } from '../../../hooks/use-app-colors'
 import type { AppColorsShape } from '../../../constants/theme'
@@ -17,8 +19,9 @@ import { CrearListaModal } from './CrearListaModal'
 import { CrearTableroModal } from './CrearTableroModal'
 import { ListaProyecto } from './ListaProyecto'
 import { useEliminarRecursosProyecto } from '../hooks/useEliminarRecursosProyecto'
+import { reordenarListas } from '../services/proyecto.service'
 
-import type { TableroDetalle } from '../types'
+import type { ListaDetalle, TableroDetalle } from '../types'
 
 type Props = {
   tablero: TableroDetalle
@@ -32,10 +35,31 @@ export function TableroProyecto({ tablero, esLider, miUsuarioId, onChanged }: Pr
   const styles = createStyles(colors)
   const [creandoLista, setCreandoLista] = useState(false)
   const [editandoTablero, setEditandoTablero] = useState(false)
+  const [listas, setListas] = useState(tablero.listas)
   const { eliminando, eliminarTablero } = useEliminarRecursosProyecto()
-  const siguienteOrden = tablero.listas.length === 0
+  const siguienteOrden = listas.length === 0
     ? 0
-    : Math.max(...tablero.listas.map((lista) => lista.lista_orden)) + 1
+    : Math.max(...listas.map((lista) => lista.lista_orden)) + 1
+
+  useEffect(() => {
+    setListas(tablero.listas)
+  }, [tablero.listas])
+
+  async function manejarReordenListas(data: ListaDetalle[]) {
+    setListas(data)
+
+    try {
+      await reordenarListas(
+        tablero.tablero_id,
+        data.map((lista, indice) => ({ listaId: lista.lista_id, orden: indice }))
+      )
+      await onChanged()
+    } catch (error) {
+      console.error('Error al reordenar listas:', error)
+      Alert.alert('No fue posible reordenar las listas', 'Intenta nuevamente.')
+      await onChanged()
+    }
+  }
 
   async function ejecutarEliminacionTablero() {
     const eliminado = await eliminarTablero(tablero.tablero_id)
@@ -125,7 +149,7 @@ export function TableroProyecto({ tablero, esLider, miUsuarioId, onChanged }: Pr
       </View>
 
       <View style={styles.boardSurface}>
-        {tablero.listas.length === 0 ? (
+        {listas.length === 0 ? (
           <View style={styles.vacio}>
             <View style={styles.emptyPaper}>
               <View style={styles.emptyPin} />
@@ -135,22 +159,26 @@ export function TableroProyecto({ tablero, esLider, miUsuarioId, onChanged }: Pr
             </View>
           </View>
         ) : (
-          <ScrollView
+          <DraggableFlatList
             horizontal
-            contentContainerStyle={styles.listas}
+            data={listas}
+            keyExtractor={(lista) => lista.lista_id}
             showsHorizontalScrollIndicator={false}
-          >
-          {tablero.listas.map((lista) => (
-            <ListaProyecto
-              key={lista.lista_id}
-              proyectoId={tablero.tablero_proyecto_id}
-              lista={lista}
-              esLider={esLider}
-              miUsuarioId={miUsuarioId}
-              onChanged={onChanged}
-            />
-          ))}
-          </ScrollView>
+            activationDistance={10}
+            contentContainerStyle={styles.listas}
+            onDragEnd={({ data }) => void manejarReordenListas(data)}
+            renderItem={({ item: lista, drag, isActive }: RenderItemParams<ListaDetalle>) => (
+              <ListaProyecto
+                proyectoId={tablero.tablero_proyecto_id}
+                lista={lista}
+                esLider={esLider}
+                miUsuarioId={miUsuarioId}
+                isActive={isActive}
+                onDragHandle={drag}
+                onChanged={onChanged}
+              />
+            )}
+          />
         )}
       </View>
 
