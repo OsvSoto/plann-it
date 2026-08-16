@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -179,29 +179,6 @@ export type Database = {
           },
         ]
       }
-      chat: {
-        Row: {
-          chat_id: string
-          chat_proyecto_id: string
-        }
-        Insert: {
-          chat_id?: string
-          chat_proyecto_id: string
-        }
-        Update: {
-          chat_id?: string
-          chat_proyecto_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "chat_proyecto_id_fkey"
-            columns: ["chat_proyecto_id"]
-            isOneToOne: false
-            referencedRelation: "proyecto"
-            referencedColumns: ["proyecto_id"]
-          },
-        ]
-      }
       etiqueta: {
         Row: {
           etiqueta_color: string
@@ -323,30 +300,40 @@ export type Database = {
       }
       mensaje: {
         Row: {
-          mensaje_chat_id: string
           mensaje_fecha_envio: string
           mensaje_id: string
+          mensaje_proyecto_id: string
           mensaje_texto: string
+          mensaje_usuario_id: string | null
         }
         Insert: {
-          mensaje_chat_id: string
           mensaje_fecha_envio?: string
           mensaje_id?: string
+          mensaje_proyecto_id: string
           mensaje_texto: string
+          mensaje_usuario_id?: string | null
         }
         Update: {
-          mensaje_chat_id?: string
           mensaje_fecha_envio?: string
           mensaje_id?: string
+          mensaje_proyecto_id?: string
           mensaje_texto?: string
+          mensaje_usuario_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "mensaje_chat_id_fkey"
-            columns: ["mensaje_chat_id"]
+            foreignKeyName: "mensaje_mensaje_proyecto_id_fkey"
+            columns: ["mensaje_proyecto_id"]
             isOneToOne: false
-            referencedRelation: "chat"
-            referencedColumns: ["chat_id"]
+            referencedRelation: "proyecto"
+            referencedColumns: ["proyecto_id"]
+          },
+          {
+            foreignKeyName: "mensaje_mensaje_usuario_id_fkey"
+            columns: ["mensaje_usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuario"
+            referencedColumns: ["usuario_id"]
           },
         ]
       }
@@ -629,24 +616,25 @@ export type Database = {
         Args: { p_asignacion_id: string }
         Returns: string
       }
-      es_lider_proyecto: { Args: { p_proyecto_id: string }; Returns: boolean }
-      es_miembro_proyecto: { Args: { p_proyecto_id: string }; Returns: boolean }
+      editar_proyecto: {
+        Args: {
+          p_descripcion: string
+          p_estado: string
+          p_fecha_fin: string
+          p_nombre: string
+          p_proyecto_id: string
+        }
+        Returns: undefined
+      }
       eliminar_miembro_proyecto: {
         Args: { p_miembro_id: string }
         Returns: string
       }
+      es_lider_proyecto: { Args: { p_proyecto_id: string }; Returns: boolean }
+      es_miembro_proyecto: { Args: { p_proyecto_id: string }; Returns: boolean }
       invitar_usuario_proyecto: {
         Args: { p_correo: string; p_proyecto_id: string }
         Returns: string
-      }
-      obtener_invitaciones_pendientes: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          invitacion_fecha: string
-          invitacion_id: string
-          proyecto_id: string
-          proyecto_nombre: string
-        }[]
       }
       obtener_asignaciones_proyecto: {
         Args: { p_proyecto_id: string }
@@ -657,6 +645,26 @@ export type Database = {
           usuario_correo: string
           usuario_id: string
           usuario_nombre: string
+        }[]
+      }
+      obtener_datos_gantt: {
+        Args: { p_id_proyecto: string }
+        Returns: {
+          asignado: string
+          color: string
+          fecha_fin: string
+          fecha_inicio: string
+          id_tarea: string
+          nombre_tarea: string
+        }[]
+      }
+      obtener_invitaciones_pendientes: {
+        Args: never
+        Returns: {
+          invitacion_fecha: string
+          invitacion_id: string
+          proyecto_id: string
+          proyecto_nombre: string
         }[]
       }
       obtener_miembros_proyecto: {

@@ -4,12 +4,14 @@ import { obtenerAsignacionesProyecto } from './asignacion.service'
 import type {
   CrearListaInput,
   CrearProyectoInput,
+  EditarProyectoInput,
   CrearTableroInput,
   CrearTareaInput,
   DetalleProyecto,
   EditarTareaInput,
   Proyecto,
   TableroDetalle,
+
 } from '../types'
 
 export async function obtenerProyectos(): Promise<Proyecto[]> {
@@ -276,6 +278,25 @@ export async function eliminarProyecto(proyectoId: string): Promise<void> {
     .eq('proyecto_id', proyectoId)
     .select('proyecto_id')
     .single()
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function editarProyecto(
+  proyecto: EditarProyectoInput
+): Promise<void> {
+  const { error } = await supabase.rpc(
+    'editar_proyecto',
+    {
+      p_proyecto_id: proyecto.proyectoId,
+      p_nombre: proyecto.nombre,
+      p_descripcion: proyecto.descripcion,
+      p_fecha_fin: proyecto.fechaFin,
+      p_estado: proyecto.estado,
+    }
+  )
 
   if (error) {
     throw error
