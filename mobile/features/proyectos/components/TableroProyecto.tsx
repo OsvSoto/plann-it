@@ -16,10 +16,11 @@ import type { TableroDetalle } from '../types'
 type Props = {
   tablero: TableroDetalle
   esLider: boolean
+  miUsuarioId: string | null
   onChanged: () => Promise<void>
 }
 
-export function TableroProyecto({ tablero, esLider, onChanged }: Props) {
+export function TableroProyecto({ tablero, esLider, miUsuarioId, onChanged }: Props) {
   const [creandoLista, setCreandoLista] = useState(false)
   const siguienteOrden = tablero.listas.length === 0
     ? 0
@@ -70,6 +71,7 @@ export function TableroProyecto({ tablero, esLider, onChanged }: Props) {
               proyectoId={tablero.tablero_proyecto_id}
               lista={lista}
               esLider={esLider}
+              miUsuarioId={miUsuarioId}
               onChanged={onChanged}
             />
           ))}

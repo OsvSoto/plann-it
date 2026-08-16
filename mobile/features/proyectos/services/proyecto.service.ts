@@ -68,6 +68,7 @@ export async function obtenerDetalleProyecto(
     liderResultado,
     puedeEliminarResultado,
     asignacionesResultado,
+    usuarioResultado,
   ] = await Promise.all([
     supabase
       .from('proyecto')
@@ -98,7 +99,8 @@ export async function obtenerDetalleProyecto(
             tarea_nombre,
             tarea_desc,
             tarea_estado,
-            tarea_fecha_entrega
+            tarea_fecha_entrega,
+            tarea_creado_por
           )
         )
       `)
@@ -111,6 +113,7 @@ export async function obtenerDetalleProyecto(
       p_proyecto_id: proyectoId,
     }),
     obtenerAsignacionesProyecto(proyectoId),
+    supabase.auth.getUser(),
   ])
 
   if (proyectoResultado.error) {
@@ -162,6 +165,7 @@ export async function obtenerDetalleProyecto(
     tableros,
     esLider: liderResultado.data,
     puedeEliminarProyecto: puedeEliminarResultado.data,
+    miUsuarioId: usuarioResultado.data.user?.id ?? null,
   }
 }
 

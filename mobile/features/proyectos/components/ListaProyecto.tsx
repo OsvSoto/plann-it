@@ -19,6 +19,7 @@ type Props = {
   proyectoId: string
   lista: ListaDetalle
   esLider: boolean
+  miUsuarioId: string | null
   onChanged: () => Promise<void>
 }
 
@@ -36,6 +37,7 @@ type TareaItemProps = {
   indice: number
   eliminando: boolean
   esLider: boolean
+  puedeEliminar: boolean
   onOpen: () => void
   onAssign: () => void
   onDelete: () => void
@@ -46,6 +48,7 @@ function TareaItem({
   indice,
   eliminando,
   esLider,
+  puedeEliminar,
   onOpen,
   onAssign,
   onDelete,
@@ -77,26 +80,28 @@ function TareaItem({
             {tarea.tarea_estado.replace('_', ' ')}
           </Text>
         </View>
-        <Pressable
-          accessibilityLabel={`Eliminar tarea ${tarea.tarea_nombre}`}
-          accessibilityRole="button"
-          disabled={eliminando}
-          hitSlop={6}
-          onPress={(event) => {
-            event.stopPropagation()
-            onDelete()
-          }}
-          style={({ pressed }) => [
-            styles.deleteTaskButton,
-            pressed && styles.deleteButtonPressed,
-          ]}
-        >
-          {eliminando ? (
-            <ActivityIndicator size="small" color="#7A271A" />
-          ) : (
-            <Ionicons name="trash-outline" size={17} color="#7A271A" />
-          )}
-        </Pressable>
+        {puedeEliminar ? (
+          <Pressable
+            accessibilityLabel={`Eliminar tarea ${tarea.tarea_nombre}`}
+            accessibilityRole="button"
+            disabled={eliminando}
+            hitSlop={6}
+            onPress={(event) => {
+              event.stopPropagation()
+              onDelete()
+            }}
+            style={({ pressed }) => [
+              styles.deleteTaskButton,
+              pressed && styles.deleteButtonPressed,
+            ]}
+          >
+            {eliminando ? (
+              <ActivityIndicator size="small" color="#7A271A" />
+            ) : (
+              <Ionicons name="trash-outline" size={17} color="#7A271A" />
+            )}
+          </Pressable>
+        ) : null}
       </View>
 
       <Text style={styles.tareaNombre} numberOfLines={3}>
@@ -159,7 +164,7 @@ function TareaItem({
   )
 }
 
-export function ListaProyecto({ proyectoId, lista, esLider, onChanged }: Props) {
+export function ListaProyecto({ proyectoId, lista, esLider, miUsuarioId, onChanged }: Props) {
   const [creandoTarea, setCreandoTarea] = useState(false)
   const [tareaEditando, setTareaEditando] = useState<Tarea | null>(null)
   const [tareaAsignando, setTareaAsignando] = useState<Tarea | null>(null)
@@ -284,6 +289,7 @@ export function ListaProyecto({ proyectoId, lista, esLider, onChanged }: Props) 
               indice={indice}
               eliminando={eliminando === tarea.tarea_id}
               esLider={esLider}
+              puedeEliminar={esLider || tarea.tarea_creado_por === miUsuarioId}
               onOpen={() => setTareaEditando(tarea)}
               onAssign={() => setTareaAsignando(tarea)}
               onDelete={() => confirmarEliminacionTarea(tarea)}

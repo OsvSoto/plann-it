@@ -113,6 +113,7 @@ export default function DetalleTableroScreen() {
         <TableroProyecto
           tablero={tablero}
           esLider={detalle.esLider}
+          miUsuarioId={detalle.miUsuarioId}
           onChanged={cargarDetalle}
         />
       </ScrollView>

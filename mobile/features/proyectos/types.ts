@@ -28,6 +28,7 @@ export type DetalleProyecto = {
   tableros: TableroDetalle[]
   esLider: boolean
   puedeEliminarProyecto: boolean
+  miUsuarioId: string | null
 }
 
 export type CrearProyectoInput = {

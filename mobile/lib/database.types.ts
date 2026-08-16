@@ -502,6 +502,7 @@ export type Database = {
       }
       tarea: {
         Row: {
+          tarea_creado_por: string | null
           tarea_desc: string | null
           tarea_estado: string
           tarea_fecha_entrega: string
@@ -510,6 +511,7 @@ export type Database = {
           tarea_nombre: string
         }
         Insert: {
+          tarea_creado_por?: string | null
           tarea_desc?: string | null
           tarea_estado: string
           tarea_fecha_entrega: string
@@ -518,6 +520,7 @@ export type Database = {
           tarea_nombre: string
         }
         Update: {
+          tarea_creado_por?: string | null
           tarea_desc?: string | null
           tarea_estado?: string
           tarea_fecha_entrega?: string
@@ -526,6 +529,13 @@ export type Database = {
           tarea_nombre?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tarea_creado_por_fkey"
+            columns: ["tarea_creado_por"]
+            isOneToOne: false
+            referencedRelation: "usuario"
+            referencedColumns: ["usuario_id"]
+          },
           {
             foreignKeyName: "tarea_lista_id_fkey"
             columns: ["tarea_lista_id"]
