@@ -9,6 +9,8 @@ import {
   View,
 } from 'react-native'
 
+import { useAppColors } from '../../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../../constants/theme'
 import { TareaModal } from './CrearTareaModal'
 import { AsignarMiembrosModal } from './AsignarMiembrosModal'
 import { useEliminarRecursosProyecto } from '../hooks/useEliminarRecursosProyecto'
@@ -53,6 +55,8 @@ function TareaItem({
   onAssign,
   onDelete,
 }: TareaItemProps) {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const colorNota = tarea.tarea_estado === 'COMPLETADA'
     ? styles.notaCompletada
     : tarea.tarea_estado === 'EN_PROGRESO'
@@ -96,9 +100,9 @@ function TareaItem({
             ]}
           >
             {eliminando ? (
-              <ActivityIndicator size="small" color="#7A271A" />
+              <ActivityIndicator size="small" color={colors.accentStrong} />
             ) : (
-              <Ionicons name="trash-outline" size={17} color="#7A271A" />
+              <Ionicons name="trash-outline" size={17} color={colors.accentStrong} />
             )}
           </Pressable>
         ) : null}
@@ -115,7 +119,7 @@ function TareaItem({
       ) : null}
 
       <View style={styles.tareaMeta}>
-        <Ionicons name="calendar-outline" size={14} color="#5D4D68" />
+        <Ionicons name="calendar-outline" size={14} color={colors.textMuted} />
         <Text style={styles.tareaFecha}>
           {formatearFecha(tarea.tarea_fecha_entrega)}
         </Text>
@@ -156,7 +160,7 @@ function TareaItem({
               pressed && styles.assignButtonPressed,
             ]}
           >
-            <Ionicons name="people-outline" size={17} color="#4F2D7F" />
+            <Ionicons name="people-outline" size={17} color={colors.brandDark} />
           </Pressable>
         ) : null}
       </View>
@@ -165,6 +169,8 @@ function TareaItem({
 }
 
 export function ListaProyecto({ proyectoId, lista, esLider, miUsuarioId, onChanged }: Props) {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const [creandoTarea, setCreandoTarea] = useState(false)
   const [tareaEditando, setTareaEditando] = useState<Tarea | null>(null)
   const [tareaAsignando, setTareaAsignando] = useState<Tarea | null>(null)
@@ -252,7 +258,7 @@ export function ListaProyecto({ proyectoId, lista, esLider, miUsuarioId, onChang
             pressed && styles.addTaskButtonPressed,
           ]}
         >
-          <Ionicons name="add" size={19} color="#6F45A5" />
+          <Ionicons name="add" size={19} color={colors.brand} />
         </Pressable>
         {esLider ? (
           <Pressable
@@ -267,9 +273,9 @@ export function ListaProyecto({ proyectoId, lista, esLider, miUsuarioId, onChang
             ]}
           >
             {eliminando === lista.lista_id ? (
-              <ActivityIndicator size="small" color="#B42318" />
+              <ActivityIndicator size="small" color={colors.accentStrong} />
             ) : (
-              <Ionicons name="trash-outline" size={18} color="#B42318" />
+              <Ionicons name="trash-outline" size={18} color={colors.accentStrong} />
             )}
           </Pressable>
         ) : null}
@@ -319,16 +325,17 @@ export function ListaProyecto({ proyectoId, lista, esLider, miUsuarioId, onChang
   )
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
   lista: {
     width: 292,
     alignSelf: 'flex-start',
     borderTopWidth: 6,
-    borderTopColor: '#6F45A5',
+    borderTopColor: colors.brand,
     padding: 14,
-    backgroundColor: '#FCFAFE',
+    backgroundColor: colors.surface,
     gap: 14,
-    shadowColor: '#4F2D7F',
+    shadowColor: colors.brandDark,
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.25,
     shadowRadius: 6,
@@ -342,7 +349,7 @@ const styles = StyleSheet.create({
   },
   nombre: {
     flex: 1,
-    color: '#342247',
+    color: colors.text,
     fontSize: 16,
     fontWeight: '700',
     lineHeight: 21,
@@ -354,10 +361,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 8,
     paddingHorizontal: 7,
-    backgroundColor: '#E9E1F3',
+    backgroundColor: colors.brandSoft,
   },
   contadorText: {
-    color: '#6F45A5',
+    color: colors.brand,
     fontSize: 12,
     fontWeight: '700',
   },
@@ -369,7 +376,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   addTaskButtonPressed: {
-    backgroundColor: '#EEE7F6',
+    backgroundColor: colors.brandSoft,
   },
   deleteListButton: {
     width: 28,
@@ -386,7 +393,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   deleteButtonPressed: {
-    backgroundColor: '#FEF3F2',
+    backgroundColor: colors.accentStrongSoft,
   },
   tareas: {
     gap: 14,
@@ -398,7 +405,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingTop: 18,
     paddingBottom: 13,
-    shadowColor: '#4F2D7F',
+    shadowColor: colors.brandDark,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -408,13 +415,13 @@ const styles = StyleSheet.create({
     opacity: 0.82,
   },
   notaPendiente: {
-    backgroundColor: '#FFE0B8',
+    backgroundColor: colors.notePending,
   },
   notaEnProgreso: {
-    backgroundColor: '#DCCEF0',
+    backgroundColor: colors.noteInProgress,
   },
   notaCompletada: {
-    backgroundColor: '#FFD0C4',
+    backgroundColor: colors.noteCompleted,
   },
   notaInclinadaIzquierda: {
     transform: [{ rotate: '-0.7deg' }],
@@ -429,8 +436,8 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#FF6B2C',
-    shadowColor: '#A73812',
+    backgroundColor: colors.accent,
+    shadowColor: '#8C3D64',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.35,
     shadowRadius: 1,
@@ -444,13 +451,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   tareaNombre: {
-    color: '#342247',
+    color: colors.text,
     fontSize: 16,
     fontWeight: '700',
     lineHeight: 21,
   },
   tareaDescripcion: {
-    color: '#55475F',
+    color: colors.textMuted,
     fontSize: 13,
     lineHeight: 18,
   },
@@ -472,31 +479,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  noAssignees: { color: '#766682', fontSize: 11, fontWeight: '600' },
+  noAssignees: { color: colors.textMuted, fontSize: 11, fontWeight: '600' },
   assigneeAvatar: {
     width: 26,
     height: 26,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: colors.surface,
     borderRadius: 13,
     marginRight: -5,
-    backgroundColor: '#6F45A5',
+    backgroundColor: colors.brand,
   },
   assigneeAvatarText: { color: '#FFFFFF', fontSize: 10, fontWeight: '800' },
-  moreAssignees: { marginLeft: 9, color: '#4F2D7F', fontSize: 11, fontWeight: '700' },
+  moreAssignees: { marginLeft: 9, color: colors.brandDark, fontSize: 11, fontWeight: '700' },
   assignButton: {
     width: 30,
     height: 30,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
-    backgroundColor: '#FFFFFF80',
+    backgroundColor: colors.overlaySoft,
   },
-  assignButtonPressed: { backgroundColor: '#FFFFFF' },
+  assignButtonPressed: { backgroundColor: colors.surface },
   tareaFecha: {
-    color: '#5D4D68',
+    color: colors.textMuted,
     fontSize: 12,
     fontWeight: '600',
   },
@@ -504,7 +511,7 @@ const styles = StyleSheet.create({
     maxWidth: 125,
   },
   estadoText: {
-    color: '#503A63',
+    color: colors.text,
     fontSize: 10,
     fontWeight: '800',
     textTransform: 'uppercase',
@@ -516,11 +523,12 @@ const styles = StyleSheet.create({
     gap: 6,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: '#CDBDDF',
-    backgroundColor: '#F0EAF6',
+    borderColor: colors.border,
+    backgroundColor: colors.brandSoft,
   },
   vacioText: {
-    color: '#766682',
+    color: colors.textMuted,
     fontSize: 13,
   },
 })
+}

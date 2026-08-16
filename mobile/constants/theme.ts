@@ -9,9 +9,11 @@ export const AppColors = {
   brand: '#6F45A5',
   brandDark: '#4F2D7F',
   brandSoft: '#E9E1F3',
-  accent: '#FF6B2C',
-  accentPressed: '#E8521D',
-  accentSoft: '#FFF0E8',
+  accent: '#C15A93',
+  accentPressed: '#9E4276',
+  accentSoft: '#F5E2ED',
+  accentStrong: '#A83D77',
+  accentStrongSoft: '#EFCBE0',
   background: '#F8F5FB',
   surface: '#FFFFFF',
   text: '#342247',
@@ -19,10 +21,42 @@ export const AppColors = {
   border: '#D9CEE8',
   danger: '#B42318',
   dangerSoft: '#FEF3F2',
+  notePending: '#E3A0C6',
+  noteInProgress: '#DCCEF0',
+  noteCompleted: '#FFD0C4',
+  noteLineStrong: 'rgba(39, 48, 41, 0.42)',
+  noteLineSoft: 'rgba(39, 48, 41, 0.28)',
+  overlaySoft: 'rgba(255, 255, 255, 0.5)',
 } as const
 
+export type AppColorsShape = Record<keyof typeof AppColors, string>
+
+export const AppColorsDark: AppColorsShape = {
+  brand: '#B497DD',
+  brandDark: '#8C68C4',
+  brandSoft: '#2A2038',
+  accent: '#E58AB8',
+  accentPressed: '#F0A8CB',
+  accentSoft: '#3A2430',
+  accentStrong: '#E85FA0',
+  accentStrongSoft: '#3D2130',
+  background: '#17121F',
+  surface: '#221A2E',
+  text: '#F2EDF7',
+  textMuted: '#B3A6C4',
+  border: '#3A2E4A',
+  danger: '#FF6B6B',
+  dangerSoft: '#3A1F1F',
+  notePending: '#5C3752',
+  noteInProgress: '#3E3357',
+  noteCompleted: '#5A3B30',
+  noteLineStrong: 'rgba(0, 0, 0, 0.42)',
+  noteLineSoft: 'rgba(0, 0, 0, 0.28)',
+  overlaySoft: 'rgba(0, 0, 0, 0.35)',
+}
+
 const tintColorLight = AppColors.brand
-const tintColorDark = '#FFFFFF'
+const tintColorDark = AppColorsDark.brand
 
 export const Colors = {
   light: {
@@ -34,11 +68,11 @@ export const Colors = {
     tabIconSelected: tintColorLight,
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
+    text: AppColorsDark.text,
+    background: AppColorsDark.background,
     tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
+    icon: AppColorsDark.textMuted,
+    tabIconDefault: AppColorsDark.textMuted,
     tabIconSelected: tintColorDark,
   },
 }

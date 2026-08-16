@@ -6,7 +6,8 @@ import {
   View,
 } from 'react-native'
 
-import { AppColors } from '../../../constants/theme'
+import { useAppColors } from '../../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../../constants/theme'
 import type { TableroDetalle } from '../types'
 
 type Props = {
@@ -14,9 +15,14 @@ type Props = {
   onPress: () => void
 }
 
-const COLORES_NOTA = ['#FFE0B8', '#DCCEF0', '#FFD0C4']
+function coloresNota(colors: AppColorsShape) {
+  return [colors.notePending, colors.noteInProgress, colors.noteCompleted]
+}
 
 export function TableroCard({ tablero, onPress }: Props) {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
+  const coloresNotaActuales = coloresNota(colors)
   const cantidadTareas = tablero.listas.reduce(
     (total, lista) => total + lista.tareas.length,
     0
@@ -42,7 +48,7 @@ export function TableroCard({ tablero, onPress }: Props) {
             <Ionicons
               name="documents-outline"
               size={25}
-              color={AppColors.brand}
+              color={colors.brand}
             />
           </View>
         ) : (
@@ -52,7 +58,7 @@ export function TableroCard({ tablero, onPress }: Props) {
                 key={tarea.tarea_id}
                 style={[
                   styles.previewNote,
-                  { backgroundColor: COLORES_NOTA[index] },
+                  { backgroundColor: coloresNotaActuales[index] },
                   index === 0 && styles.previewNoteLeft,
                   index === 2 && styles.previewNoteRight,
                 ]}
@@ -75,7 +81,7 @@ export function TableroCard({ tablero, onPress }: Props) {
             <Ionicons
               name="arrow-forward"
               size={18}
-              color={AppColors.surface}
+              color={colors.surface}
             />
           </View>
         </View>
@@ -84,7 +90,7 @@ export function TableroCard({ tablero, onPress }: Props) {
             <Ionicons
               name="albums-outline"
               size={15}
-              color={AppColors.brand}
+              color={colors.brand}
             />
             <Text style={styles.metaText}>
               {tablero.listas.length} {tablero.listas.length === 1 ? 'lista' : 'listas'}
@@ -94,7 +100,7 @@ export function TableroCard({ tablero, onPress }: Props) {
             <Ionicons
               name="document-text-outline"
               size={15}
-              color={AppColors.accent}
+              color={colors.accent}
             />
             <Text style={styles.metaText}>
               {cantidadTareas} {cantidadTareas === 1 ? 'tarea' : 'tareas'}
@@ -106,13 +112,14 @@ export function TableroCard({ tablero, onPress }: Props) {
   )
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
   card: {
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: AppColors.border,
+    borderColor: colors.border,
     borderRadius: 8,
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
   },
   cardPressed: {
     opacity: 0.86,
@@ -121,12 +128,12 @@ const styles = StyleSheet.create({
     height: 132,
     overflow: 'hidden',
     borderBottomWidth: 1,
-    borderBottomColor: AppColors.border,
-    backgroundColor: AppColors.brandSoft,
+    borderBottomColor: colors.border,
+    backgroundColor: colors.brandSoft,
   },
   previewTopBar: {
     height: 9,
-    backgroundColor: AppColors.brandDark,
+    backgroundColor: colors.brandDark,
   },
   emptyPreview: {
     flex: 1,
@@ -145,7 +152,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 72,
     padding: 12,
-    shadowColor: AppColors.brandDark,
+    shadowColor: colors.brandDark,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.24,
     shadowRadius: 4,
@@ -164,18 +171,18 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 4,
-    backgroundColor: AppColors.accent,
+    backgroundColor: colors.accent,
   },
   previewLineLong: {
     height: 4,
     marginTop: 13,
-    backgroundColor: 'rgba(39, 48, 41, 0.42)',
+    backgroundColor: colors.noteLineStrong,
   },
   previewLineShort: {
     width: '65%',
     height: 4,
     marginTop: 8,
-    backgroundColor: 'rgba(39, 48, 41, 0.28)',
+    backgroundColor: colors.noteLineSoft,
   },
   content: {
     gap: 13,
@@ -189,7 +196,7 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
-    color: AppColors.text,
+    color: colors.text,
     fontSize: 18,
     fontWeight: '700',
     lineHeight: 23,
@@ -200,7 +207,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
-    backgroundColor: AppColors.accent,
+    backgroundColor: colors.accent,
   },
   metaRow: {
     flexDirection: 'row',
@@ -213,8 +220,9 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   metaText: {
-    color: AppColors.textMuted,
+    color: colors.textMuted,
     fontSize: 12,
     fontWeight: '600',
   },
 })
+}

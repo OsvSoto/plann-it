@@ -13,7 +13,11 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { useAppColors } from '../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../constants/theme'
 import { EquipoProyecto } from '../../features/invitaciones/components/EquipoProyecto'
+import { ESTADO_PROYECTO_COLORS } from '../../features/proyectos/types'
+import type { EstadoProyecto } from '../../features/proyectos/types'
 import { CrearTableroModal } from '../../features/proyectos/components/CrearTableroModal'
 import { EditarProyectoModal } from '../../features/proyectos/components/EditarProyectoModal'
 import { TableroCard } from '../../features/proyectos/components/TableroCard'
@@ -30,6 +34,8 @@ function formatearFecha(fecha: string) {
 }
 
 export default function DetalleProyectoScreen() {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const { proyectoId } = useLocalSearchParams<{
     proyectoId: string
   }>()
@@ -58,7 +64,7 @@ export default function DetalleProyectoScreen() {
         <View style={styles.centerState}>
           <ActivityIndicator
             size="large"
-            color="#6F45A5"
+            color={colors.brand}
           />
 
           <Text style={styles.stateText}>
@@ -80,7 +86,7 @@ export default function DetalleProyectoScreen() {
             <Ionicons
               name="alert-circle-outline"
               size={30}
-              color="#B42318"
+              color={colors.danger}
             />
           </View>
 
@@ -182,7 +188,7 @@ export default function DetalleProyectoScreen() {
           <RefreshControl
             refreshing={cargando}
             onRefresh={cargarDetalle}
-            tintColor="#6F45A5"
+            tintColor={colors.brand}
           />
         }
         contentContainerStyle={styles.content}
@@ -194,7 +200,7 @@ export default function DetalleProyectoScreen() {
               <Ionicons
                 name="folder-open-outline"
                 size={24}
-                color="#6F45A5"
+                color={colors.brand}
               />
             </View>
 
@@ -203,8 +209,18 @@ export default function DetalleProyectoScreen() {
                 {proyecto.proyecto_nombre}
               </Text>
 
-              <View style={styles.status}>
-                <Text style={styles.statusText}>
+              <View
+                style={[
+                  styles.status,
+                  { backgroundColor: ESTADO_PROYECTO_COLORS[proyecto.proyecto_estado as EstadoProyecto].background },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.statusText,
+                    { color: ESTADO_PROYECTO_COLORS[proyecto.proyecto_estado as EstadoProyecto].color },
+                  ]}
+                >
                   {proyecto.proyecto_estado}
                 </Text>
               </View>
@@ -228,7 +244,7 @@ export default function DetalleProyectoScreen() {
                   <Ionicons
                     name="create-outline"
                     size={21}
-                    color="#6F45A5"
+                    color={colors.brand}
                   />
                 </Pressable>
 
@@ -253,13 +269,13 @@ export default function DetalleProyectoScreen() {
                   proyecto.proyecto_id ? (
                     <ActivityIndicator
                       size="small"
-                      color="#B42318"
+                      color={colors.accentStrong}
                     />
                   ) : (
                     <Ionicons
                       name="trash-outline"
                       size={21}
-                      color="#B42318"
+                      color={colors.accentStrong}
                     />
                   )}
                 </Pressable>
@@ -368,7 +384,7 @@ export default function DetalleProyectoScreen() {
               <Ionicons
                 name="grid-outline"
                 size={30}
-                color="#6F45A5"
+                color={colors.brand}
               />
             </View>
 
@@ -419,10 +435,11 @@ export default function DetalleProyectoScreen() {
   )
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8F5FB',
+    backgroundColor: colors.background,
   },
 
   content: {
@@ -448,7 +465,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
-    backgroundColor: '#E9E1F3',
+    backgroundColor: colors.brandSoft,
   },
 
   titleContent: {
@@ -458,7 +475,7 @@ const styles = StyleSheet.create({
   },
 
   projectName: {
-    color: '#342247',
+    color: colors.text,
     fontSize: 25,
     fontWeight: '700',
     lineHeight: 31,
@@ -468,11 +485,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    backgroundColor: '#FFF0E8',
+    backgroundColor: colors.accentSoft,
   },
 
   statusText: {
-    color: '#D94D1C',
+    color: colors.accentPressed,
     fontSize: 11,
     fontWeight: '700',
   },
@@ -504,11 +521,11 @@ const styles = StyleSheet.create({
   },
 
   deleteProjectButtonPressed: {
-    backgroundColor: '#FEF3F2',
+    backgroundColor: colors.accentStrongSoft,
   },
 
   description: {
-    color: '#62566E',
+    color: colors.textMuted,
     fontSize: 15,
     lineHeight: 22,
   },
@@ -518,7 +535,7 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     paddingVertical: 14,
   },
 
@@ -530,7 +547,7 @@ const styles = StyleSheet.create({
   dateDivider: {
     width: 1,
     marginHorizontal: 16,
-    backgroundColor: '#D9CEE8',
+    backgroundColor: colors.border,
   },
 
   dateLabel: {
@@ -541,7 +558,7 @@ const styles = StyleSheet.create({
   },
 
   dateValue: {
-    color: '#4F2D7F',
+    color: colors.brandDark,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -555,10 +572,10 @@ const styles = StyleSheet.create({
     marginTop: 8,
     borderRadius: 8,
     paddingHorizontal: 20,
-    backgroundColor: '#6F45A5',
+    backgroundColor: colors.brand,
   },
   ganttButtonPressed: {
-    backgroundColor: '#4F2D7F',
+    backgroundColor: colors.brandDark,
   },
   ganttButtonText: {
     color: '#FFFFFF',
@@ -580,13 +597,13 @@ const styles = StyleSheet.create({
   },
 
   eyebrow: {
-    color: '#766682',
+    color: colors.textMuted,
     fontSize: 11,
     fontWeight: '700',
   },
 
   workspaceTitle: {
-    color: '#342247',
+    color: colors.text,
     fontSize: 22,
     fontWeight: '700',
   },
@@ -599,11 +616,11 @@ const styles = StyleSheet.create({
     gap: 6,
     borderRadius: 8,
     paddingHorizontal: 12,
-    backgroundColor: '#FF6B2C',
+    backgroundColor: colors.accent,
   },
 
   createBoardButtonPressed: {
-    backgroundColor: '#E8521D',
+    backgroundColor: colors.accentPressed,
   },
 
   createBoardButtonText: {
@@ -632,7 +649,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 8,
     marginBottom: 4,
-    backgroundColor: '#FEF3F2',
+    backgroundColor: colors.dangerSoft,
   },
 
   emptyWorkspace: {
@@ -649,18 +666,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 8,
     marginBottom: 3,
-    backgroundColor: '#E9E1F3',
+    backgroundColor: colors.brandSoft,
   },
 
   stateTitle: {
-    color: '#342247',
+    color: colors.text,
     fontSize: 18,
     fontWeight: '700',
     textAlign: 'center',
   },
 
   stateText: {
-    color: '#766682',
+    color: colors.textMuted,
     fontSize: 14,
     lineHeight: 20,
     textAlign: 'center',
@@ -672,13 +689,14 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingHorizontal: 18,
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     borderRadius: 8,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
 
   retryText: {
-    color: '#4F2D7F',
+    color: colors.brandDark,
     fontWeight: '600',
   },
 })
+}

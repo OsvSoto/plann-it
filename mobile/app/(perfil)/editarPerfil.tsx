@@ -15,7 +15,8 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { AppColors } from '../../constants/theme'
+import { useAppColors } from '../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../constants/theme'
 import { useEditarPerfil } from '../../features/perfil/hooks/useEditarPerfil'
 
 function obtenerMensajeError(error: unknown, alternativo: string) {
@@ -25,6 +26,8 @@ function obtenerMensajeError(error: unknown, alternativo: string) {
 }
 
 export default function EditarPerfilScreen() {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const {
     nombre,
     setNombre,
@@ -77,7 +80,7 @@ export default function EditarPerfilScreen() {
             pressed && styles.buttonPressed,
           ]}
         >
-          <Ionicons name="arrow-back" size={24} color={AppColors.text} />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
         <Text style={styles.headerTitle}>Editar perfil</Text>
         <View style={styles.headerSpacer} />
@@ -85,7 +88,7 @@ export default function EditarPerfilScreen() {
 
       {cargando ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={AppColors.brand} />
+          <ActivityIndicator size="large" color={colors.brand} />
         </View>
       ) : (
         <KeyboardAvoidingView
@@ -113,10 +116,10 @@ export default function EditarPerfilScreen() {
                   {fotoUri ? (
                     <Image source={{ uri: fotoUri }} style={styles.avatar} />
                   ) : (
-                    <Ionicons name="person" size={58} color={AppColors.brand} />
+                    <Ionicons name="person" size={58} color={colors.brand} />
                   )}
                   <View style={styles.cameraBadge}>
-                    <Ionicons name="camera" size={17} color={AppColors.surface} />
+                    <Ionicons name="camera" size={17} color={colors.surface} />
                   </View>
                 </Pressable>
                 <Pressable onPress={() => void elegirFoto()}>
@@ -134,7 +137,7 @@ export default function EditarPerfilScreen() {
                   maxLength={80}
                   onChangeText={setNombre}
                   placeholder="Tu nombre"
-                  placeholderTextColor={AppColors.textMuted}
+                  placeholderTextColor={colors.textMuted}
                   style={styles.input}
                   value={nombre}
                 />
@@ -165,7 +168,7 @@ export default function EditarPerfilScreen() {
                   numberOfLines={5}
                   onChangeText={setBiografia}
                   placeholder="Cuéntale algo sobre ti al equipo"
-                  placeholderTextColor={AppColors.textMuted}
+                  placeholderTextColor={colors.textMuted}
                   style={[styles.input, styles.textArea]}
                   textAlignVertical="top"
                   value={biografia}
@@ -185,7 +188,7 @@ export default function EditarPerfilScreen() {
                 ]}
               >
                 {guardando ? (
-                  <ActivityIndicator color={AppColors.surface} />
+                  <ActivityIndicator color={colors.surface} />
                 ) : (
                   <Text style={styles.saveButtonText}>Guardar cambios</Text>
                 )}
@@ -198,10 +201,11 @@ export default function EditarPerfilScreen() {
   )
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: AppColors.background,
+    backgroundColor: colors.background,
   },
   header: {
     height: 56,
@@ -210,8 +214,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: AppColors.border,
-    backgroundColor: AppColors.surface,
+    borderBottomColor: colors.border,
+    backgroundColor: colors.surface,
   },
   headerButton: {
     width: 40,
@@ -221,10 +225,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   buttonPressed: {
-    backgroundColor: AppColors.brandSoft,
+    backgroundColor: colors.brandSoft,
   },
   headerTitle: {
-    color: AppColors.text,
+    color: colors.text,
     fontSize: 18,
     fontWeight: '700',
   },
@@ -251,9 +255,9 @@ const styles = StyleSheet.create({
     gap: 16,
     padding: 24,
     borderWidth: 1,
-    borderColor: AppColors.border,
+    borderColor: colors.border,
     borderRadius: 12,
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
   },
   avatarSection: {
     alignItems: 'center',
@@ -266,9 +270,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,
-    borderColor: AppColors.brand,
+    borderColor: colors.brand,
     borderRadius: 52,
-    backgroundColor: AppColors.brandSoft,
+    backgroundColor: colors.brandSoft,
   },
   avatarPressed: {
     opacity: 0.82,
@@ -288,12 +292,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: AppColors.surface,
+    borderColor: colors.surface,
     borderRadius: 16,
-    backgroundColor: AppColors.brand,
+    backgroundColor: colors.brand,
   },
   changePhotoText: {
-    color: AppColors.brand,
+    color: colors.brand,
     fontSize: 14,
     fontWeight: '700',
   },
@@ -305,36 +309,36 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   label: {
-    color: AppColors.brandDark,
+    color: colors.brandDark,
     fontSize: 14,
     fontWeight: '600',
   },
   characterCount: {
-    color: AppColors.textMuted,
+    color: colors.textMuted,
     fontSize: 12,
   },
   input: {
     padding: 14,
     borderWidth: 1,
-    borderColor: AppColors.border,
+    borderColor: colors.border,
     borderRadius: 8,
-    color: AppColors.text,
-    backgroundColor: AppColors.surface,
+    color: colors.text,
+    backgroundColor: colors.surface,
     fontSize: 16,
   },
   inputDisabled: {
-    color: AppColors.textMuted,
-    backgroundColor: AppColors.background,
+    color: colors.textMuted,
+    backgroundColor: colors.background,
   },
   helperText: {
-    color: AppColors.textMuted,
+    color: colors.textMuted,
     fontSize: 12,
   },
   textArea: {
     minHeight: 112,
   },
   errorText: {
-    color: AppColors.danger,
+    color: colors.danger,
     fontSize: 14,
     textAlign: 'center',
   },
@@ -344,17 +348,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 14,
     borderRadius: 8,
-    backgroundColor: AppColors.accent,
+    backgroundColor: colors.accent,
   },
   saveButtonPressed: {
-    backgroundColor: AppColors.accentPressed,
+    backgroundColor: colors.accentPressed,
   },
   buttonDisabled: {
     opacity: 0.55,
   },
   saveButtonText: {
-    color: AppColors.surface,
+    color: colors.surface,
     fontSize: 16,
     fontWeight: '700',
   },
 })
+}

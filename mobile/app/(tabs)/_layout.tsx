@@ -8,10 +8,13 @@ import {
   View,
 } from 'react-native'
 
-import { AppColors } from '../../constants/theme'
+import { useAppColors } from '../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../constants/theme'
 import { useCerrarSesion } from '../../features/auth/hooks/useCerrarSesion'
 
 export default function TabLayout() {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const router = useRouter()
   const { cerrandoSesion, cerrarSesion } = useCerrarSesion()
 
@@ -51,17 +54,17 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerStyle: {
-          backgroundColor: AppColors.surface,
+          backgroundColor: colors.surface,
         },
-        headerTintColor: AppColors.text,
+        headerTintColor: colors.text,
         headerTitleStyle: {
           fontWeight: '700',
         },
-        tabBarActiveTintColor: AppColors.brand,
-        tabBarInactiveTintColor: AppColors.textMuted,
+        tabBarActiveTintColor: colors.brand,
+        tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: {
-          borderTopColor: AppColors.border,
-          backgroundColor: AppColors.surface,
+          borderTopColor: colors.border,
+          backgroundColor: colors.surface,
         },
         headerRight: () => (
           <View style={styles.headerActions}>
@@ -78,7 +81,7 @@ export default function TabLayout() {
               <Ionicons
                 name="person-circle-outline"
                 size={25}
-                color={AppColors.brand}
+                color={colors.brand}
               />
             </Pressable>
 
@@ -95,12 +98,12 @@ export default function TabLayout() {
               ]}
             >
               {cerrandoSesion ? (
-                <ActivityIndicator size="small" color={AppColors.danger} />
+                <ActivityIndicator size="small" color={colors.danger} />
               ) : (
                 <Ionicons
                   name="log-out-outline"
                   size={23}
-                  color={AppColors.danger}
+                  color={colors.danger}
                 />
               )}
             </Pressable>
@@ -141,7 +144,8 @@ export default function TabLayout() {
   )
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -156,12 +160,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   profileButtonPressed: {
-    backgroundColor: AppColors.brandSoft,
+    backgroundColor: colors.brandSoft,
   },
   logoutButtonPressed: {
-    backgroundColor: AppColors.dangerSoft,
+    backgroundColor: colors.dangerSoft,
   },
   headerButtonDisabled: {
     opacity: 0.6,
   },
-})
+  })
+}

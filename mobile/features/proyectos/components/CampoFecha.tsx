@@ -7,7 +7,8 @@ import {
   View,
 } from 'react-native'
 
-import { AppColors } from '../../../constants/theme'
+import { useAppColors } from '../../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../../constants/theme'
 import { formatearEntradaFecha } from '../utils/fecha'
 import { CalendarioModal } from './CalendarioModal'
 
@@ -24,6 +25,8 @@ export function CampoFecha({
   valor,
   onChange,
 }: Props) {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const [calendarioVisible, setCalendarioVisible] = useState(false)
 
   return (
@@ -51,7 +54,7 @@ export function CampoFecha({
             pressed && styles.calendarButtonPressed,
           ]}
         >
-          <Ionicons name="calendar-outline" size={21} color={AppColors.brand} />
+          <Ionicons name="calendar-outline" size={21} color={colors.brand} />
         </Pressable>
       </View>
 
@@ -65,22 +68,23 @@ export function CampoFecha({
   )
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
   container: {
     minHeight: 50,
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: AppColors.border,
+    borderColor: colors.border,
     borderRadius: 8,
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
   },
   input: {
     minWidth: 0,
     flex: 1,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: AppColors.text,
+    color: colors.text,
     fontSize: 16,
   },
   calendarButton: {
@@ -89,7 +93,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderLeftWidth: 1,
-    borderLeftColor: AppColors.border,
+    borderLeftColor: colors.border,
   },
-  calendarButtonPressed: { backgroundColor: AppColors.brandSoft },
+  calendarButtonPressed: { backgroundColor: colors.brandSoft },
 })
+}

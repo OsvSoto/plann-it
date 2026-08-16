@@ -7,6 +7,8 @@ import {
   View,
 } from 'react-native'
 
+import { useAppColors } from '../../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../../constants/theme'
 import type { InvitacionPendiente } from '../types'
 
 type Props = {
@@ -32,10 +34,12 @@ export function InvitacionCard({
   onAccept,
   onReject,
 }: Props) {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   return (
     <View style={styles.card}>
       <View style={styles.icon}>
-        <Ionicons name="people-outline" size={25} color="#6F45A5" />
+        <Ionicons name="people-outline" size={25} color={colors.brand} />
       </View>
       <View style={styles.content}>
         <Text style={styles.projectName}>{invitacion.proyecto_nombre}</Text>
@@ -75,16 +79,17 @@ export function InvitacionCard({
   )
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 13,
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   icon: {
     width: 46,
@@ -92,11 +97,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
-    backgroundColor: '#E9E1F3',
+    backgroundColor: colors.brandSoft,
   },
   content: { minWidth: 0, flex: 1, gap: 6 },
-  projectName: { color: '#342247', fontSize: 17, fontWeight: '700' },
-  description: { color: '#62566E', fontSize: 13, lineHeight: 18 },
+  projectName: { color: colors.text, fontSize: 17, fontWeight: '700' },
+  description: { color: colors.textMuted, fontSize: 13, lineHeight: 18 },
   date: { color: '#8A918B', fontSize: 11 },
   actions: { flexDirection: 'row', gap: 9, paddingTop: 8 },
   rejectButton: {
@@ -105,19 +110,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     borderRadius: 8,
   },
-  rejectText: { color: '#766682', fontSize: 13, fontWeight: '700' },
+  rejectText: { color: colors.textMuted, fontSize: 13, fontWeight: '700' },
   acceptButton: {
     minHeight: 40,
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
-    backgroundColor: '#FF6B2C',
+    backgroundColor: colors.accent,
   },
-  acceptButtonPressed: { backgroundColor: '#E8521D' },
+  acceptButtonPressed: { backgroundColor: colors.accentPressed },
   acceptText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
   disabled: { opacity: 0.65 },
-})
+  })
+}

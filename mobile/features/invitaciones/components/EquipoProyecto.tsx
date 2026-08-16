@@ -8,7 +8,8 @@ import {
   View,
 } from 'react-native'
 
-import { AppColors } from '../../../constants/theme'
+import { useAppColors } from '../../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../../constants/theme'
 import { useMiembrosProyecto } from '../hooks/useMiembrosProyecto'
 import { AdministrarMiembroModal } from './AdministrarMiembroModal'
 import { InvitarMiembroModal } from './InvitarMiembroModal'
@@ -30,6 +31,8 @@ export function EquipoProyecto({
   proyectoNombre,
   esLider,
 }: Props) {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const [invitando, setInvitando] = useState(false)
   const [miembroSeleccionado, setMiembroSeleccionado] = useState<MiembroProyecto | null>(null)
   const {
@@ -66,7 +69,7 @@ export function EquipoProyecto({
       <View style={styles.card}>
         {cargando && miembros.length === 0 ? (
           <View style={styles.stateRow}>
-            <ActivityIndicator size="small" color="#6F45A5" />
+            <ActivityIndicator size="small" color={colors.brand} />
             <Text style={styles.stateText}>Cargando equipo...</Text>
           </View>
         ) : error ? (
@@ -124,7 +127,7 @@ export function EquipoProyecto({
                     pressed && styles.manageButtonPressed,
                   ]}
                 >
-                  <Ionicons name="settings-outline" size={19} color={AppColors.brandDark} />
+                  <Ionicons name="settings-outline" size={19} color={colors.brandDark} />
                 </Pressable>
               ) : null}
             </View>
@@ -147,7 +150,8 @@ export function EquipoProyecto({
   )
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
   section: { gap: 12, paddingHorizontal: 20 },
   header: {
     flexDirection: 'row',
@@ -156,8 +160,8 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   headerText: { flex: 1, gap: 4 },
-  eyebrow: { color: '#766682', fontSize: 11, fontWeight: '700' },
-  title: { color: '#342247', fontSize: 22, fontWeight: '700' },
+  eyebrow: { color: colors.textMuted, fontSize: 11, fontWeight: '700' },
+  title: { color: colors.text, fontSize: 22, fontWeight: '700' },
   inviteButton: {
     minHeight: 42,
     flexDirection: 'row',
@@ -166,16 +170,16 @@ const styles = StyleSheet.create({
     gap: 6,
     borderRadius: 8,
     paddingHorizontal: 13,
-    backgroundColor: '#6F45A5',
+    backgroundColor: colors.brand,
   },
-  inviteButtonPressed: { backgroundColor: '#4F2D7F' },
+  inviteButtonPressed: { backgroundColor: colors.brandDark },
   inviteText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
   card: {
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 14,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   stateRow: {
     minHeight: 72,
@@ -184,10 +188,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 9,
   },
-  stateText: { color: '#766682', fontSize: 13 },
+  stateText: { color: colors.textMuted, fontSize: 13 },
   errorRow: { minHeight: 72, justifyContent: 'center', gap: 5 },
   errorText: { color: '#912018', fontSize: 13 },
-  retryText: { color: '#6F45A5', fontSize: 13, fontWeight: '700' },
+  retryText: { color: colors.brand, fontSize: 13, fontWeight: '700' },
   member: {
     minHeight: 72,
     flexDirection: 'row',
@@ -202,21 +206,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 20,
-    backgroundColor: '#E9E1F3',
+    backgroundColor: colors.brandSoft,
   },
-  avatarText: { color: '#4F2D7F', fontSize: 16, fontWeight: '800' },
+  avatarText: { color: colors.brandDark, fontSize: 16, fontWeight: '800' },
   memberText: { minWidth: 0, flex: 1, gap: 2 },
-  memberName: { color: '#342247', fontSize: 14, fontWeight: '700' },
-  memberEmail: { color: '#766682', fontSize: 12 },
+  memberName: { color: colors.text, fontSize: 14, fontWeight: '700' },
+  memberEmail: { color: colors.textMuted, fontSize: 12 },
   role: {
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
     backgroundColor: '#F0EAF6',
   },
-  roleText: { color: '#6F45A5', fontSize: 10, fontWeight: '700' },
-  leaderRole: { backgroundColor: '#FFF0E8' },
-  leaderRoleText: { color: '#D94D1C' },
+  roleText: { color: colors.brand, fontSize: 10, fontWeight: '700' },
+  leaderRole: { backgroundColor: colors.accentSoft },
+  leaderRoleText: { color: colors.accentPressed },
   manageButton: {
     width: 38,
     height: 38,
@@ -224,5 +228,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 8,
   },
-  manageButtonPressed: { backgroundColor: AppColors.brandSoft },
+  manageButtonPressed: { backgroundColor: colors.brandSoft },
 })
+}

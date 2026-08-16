@@ -8,6 +8,8 @@ import {
   View,
 } from 'react-native'
 
+import { useAppColors } from '../../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../../constants/theme'
 import { CrearListaModal } from './CrearListaModal'
 import { ListaProyecto } from './ListaProyecto'
 
@@ -21,6 +23,8 @@ type Props = {
 }
 
 export function TableroProyecto({ tablero, esLider, miUsuarioId, onChanged }: Props) {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const [creandoLista, setCreandoLista] = useState(false)
   const siguienteOrden = tablero.listas.length === 0
     ? 0
@@ -90,12 +94,13 @@ export function TableroProyecto({ tablero, esLider, miUsuarioId, onChanged }: Pr
   )
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
   section: {
     marginHorizontal: 12,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#4F2D7F',
+    borderColor: colors.brandDark,
     borderRadius: 8,
     backgroundColor: '#5B378D',
     shadowColor: '#3B205F',
@@ -132,10 +137,10 @@ const styles = StyleSheet.create({
     gap: 5,
     borderRadius: 8,
     paddingHorizontal: 10,
-    backgroundColor: '#FF6B2C',
+    backgroundColor: colors.accent,
   },
   addListButtonPressed: {
-    backgroundColor: '#E8521D',
+    backgroundColor: colors.accentPressed,
   },
   addListText: {
     color: '#FFFFFF',
@@ -146,7 +151,7 @@ const styles = StyleSheet.create({
     minHeight: 430,
     borderTopWidth: 1,
     borderTopColor: '#A98ACB',
-    backgroundColor: '#E9E1F3',
+    backgroundColor: colors.brandSoft,
   },
   listas: {
     alignItems: 'flex-start',
@@ -169,9 +174,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     padding: 24,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     transform: [{ rotate: '-1deg' }],
-    shadowColor: '#4F2D7F',
+    shadowColor: colors.brandDark,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.28,
     shadowRadius: 6,
@@ -183,17 +188,18 @@ const styles = StyleSheet.create({
     width: 11,
     height: 11,
     borderRadius: 6,
-    backgroundColor: '#FF6B2C',
+    backgroundColor: colors.accent,
   },
   vacioTitle: {
-    color: '#342247',
+    color: colors.text,
     fontSize: 17,
     fontWeight: '700',
   },
   vacioText: {
-    color: '#62566E',
+    color: colors.textMuted,
     fontSize: 13,
     lineHeight: 19,
     textAlign: 'center',
   },
 })
+}

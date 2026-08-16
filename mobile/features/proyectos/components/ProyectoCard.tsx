@@ -6,7 +6,11 @@ import {
   Text,
   View,
 } from 'react-native'
-import type { Proyecto } from '../types'
+
+import { useAppColors } from '../../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../../constants/theme'
+import { ESTADO_PROYECTO_COLORS } from '../types'
+import type { EstadoProyecto, Proyecto } from '../types'
 
 type Props = {
   proyecto: Proyecto
@@ -14,6 +18,8 @@ type Props = {
 }
 
 export function ProyectoCard({ proyecto, onPress }: Props) {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const router = useRouter()
 
   const handlePress = () => {
@@ -41,7 +47,7 @@ export function ProyectoCard({ proyecto, onPress }: Props) {
         <Text style={styles.nombre} numberOfLines={2}>
           {proyecto.proyecto_nombre}
         </Text>
-        <Ionicons name="chevron-forward" size={20} color="#6F45A5" />
+        <Ionicons name="chevron-forward" size={20} color={colors.brand} />
       </View>
 
       {proyecto.proyecto_descripcion ? (
@@ -51,8 +57,20 @@ export function ProyectoCard({ proyecto, onPress }: Props) {
       ) : null}
 
       <View style={styles.footer}>
-        <View style={styles.estado}>
-          <Text style={styles.estadoText}>{proyecto.proyecto_estado}</Text>
+        <View
+          style={[
+            styles.estado,
+            { backgroundColor: ESTADO_PROYECTO_COLORS[proyecto.proyecto_estado as EstadoProyecto].background },
+          ]}
+        >
+          <Text
+            style={[
+              styles.estadoText,
+              { color: ESTADO_PROYECTO_COLORS[proyecto.proyecto_estado as EstadoProyecto].color },
+            ]}
+          >
+            {proyecto.proyecto_estado}
+          </Text>
         </View>
         <Text style={styles.fecha}>Hasta {proyecto.proyecto_fecha_fin}</Text>
       </View>
@@ -60,17 +78,18 @@ export function ProyectoCard({ proyecto, onPress }: Props) {
   )
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
   card: {
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     gap: 12,
   },
   cardPressed: {
-    backgroundColor: '#F4EFF8',
+    backgroundColor: colors.brandSoft,
   },
   header: {
     flexDirection: 'row',
@@ -79,12 +98,12 @@ const styles = StyleSheet.create({
   },
   nombre: {
     flex: 1,
-    color: '#342247',
+    color: colors.text,
     fontSize: 18,
     fontWeight: '700',
   },
   descripcion: {
-    color: '#62566E',
+    color: colors.textMuted,
     fontSize: 15,
     lineHeight: 21,
   },
@@ -98,21 +117,19 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    backgroundColor: '#FFF0E8',
   },
   estadoText: {
-    color: '#D94D1C',
     fontSize: 11,
     fontWeight: '700',
   },
   fecha: {
     flexShrink: 1,
-    color: '#766682',
+    color: colors.textMuted,
     fontSize: 12,
     textAlign: 'right',
   },
   btnGantt: {
-    backgroundColor: '#6F45A5',
+    backgroundColor: colors.brand,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 8,
@@ -121,11 +138,12 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   btnGanttPressed: {
-    backgroundColor: '#583685',
+    backgroundColor: colors.brandDark,
   },
   btnGanttText: {
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '700',
   },
-})
+  })
+}

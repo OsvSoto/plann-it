@@ -73,6 +73,16 @@ export const ESTADOS_PROYECTO = [
 
 export type EstadoProyecto = (typeof ESTADOS_PROYECTO)[number]
 
+export const ESTADO_PROYECTO_COLORS: Record<
+  EstadoProyecto,
+  { color: string; background: string }
+> = {
+  ACTIVO: { color: '#2E9B5F', background: '#E3F3E9' },
+  PAUSADO: { color: '#B8860B', background: '#FBF0DA' },
+  COMPLETADO: { color: '#3B6FC4', background: '#E4EBFA' },
+  ARCHIVADO: { color: '#6B6470', background: '#ECE8EF' },
+}
+
 export type CrearTareaInput = {
   listaId: string
   nombre: string
