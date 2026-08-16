@@ -50,6 +50,11 @@ export type CrearTableroInput = {
   nombre: string
 }
 
+export type EditarTableroInput = {
+  tableroId: string
+  nombre: string
+}
+
 export type CrearListaInput = {
   tableroId: string
   nombre: string
