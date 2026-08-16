@@ -31,7 +31,8 @@ begin
 
   if p_estado not in (
     'ACTIVO',
-    'FINALIZADO',
+    'PAUSADO',
+    'COMPLETADO',
     'ARCHIVADO'
   ) then
     raise exception 'Estado inválido';
