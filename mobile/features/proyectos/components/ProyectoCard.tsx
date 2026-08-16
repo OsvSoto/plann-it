@@ -1,24 +1,37 @@
+import { Ionicons } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
 import {
   Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
-
 import type { Proyecto } from '../types'
 
 type Props = {
   proyecto: Proyecto
-  onPress: () => void
+  onPress?: () => void
 }
 
 export function ProyectoCard({ proyecto, onPress }: Props) {
+  const router = useRouter()
+
+  const handlePress = () => {
+    if (onPress) {
+      onPress()
+      return
+    }
+  }
+
+  const handleIrGantt = () => {
+    router.push(`/carta-gantt/${proyecto.proyecto_id}`)
+  }
+
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`Abrir proyecto ${proyecto.proyecto_nombre}`}
-      onPress={onPress}
+      onPress={handlePress}
       style={({ pressed }) => [
         styles.card,
         pressed && styles.cardPressed,
@@ -97,5 +110,22 @@ const styles = StyleSheet.create({
     color: '#766682',
     fontSize: 12,
     textAlign: 'right',
+  },
+  btnGantt: {
+    backgroundColor: '#6F45A5',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+  },
+  btnGanttPressed: {
+    backgroundColor: '#583685',
+  },
+  btnGanttText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
   },
 })

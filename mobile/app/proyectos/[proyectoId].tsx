@@ -1,6 +1,6 @@
-import { useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { router, useLocalSearchParams } from 'expo-router'
+import { useState } from 'react'
 import {
   ActivityIndicator,
   Alert,
@@ -22,7 +22,6 @@ import { useEliminarRecursosProyecto } from '../../features/proyectos/hooks/useE
 
 function formatearFecha(fecha: string) {
   const [anio, mes, dia] = fecha.split('-').map(Number)
-
   return new Intl.DateTimeFormat('es-CL', {
     day: '2-digit',
     month: 'short',
@@ -35,11 +34,8 @@ export default function DetalleProyectoScreen() {
     proyectoId: string
   }>()
 
-  const [creandoTablero, setCreandoTablero] =
-    useState(false)
-
-  const [editandoProyecto, setEditandoProyecto] =
-    useState(false)
+  const [creandoTablero, setCreandoTablero] = useState(false)
+  const [editandoProyecto, setEditandoProyecto] = useState(false)
 
   const {
     eliminando,
@@ -121,10 +117,9 @@ export default function DetalleProyectoScreen() {
   } = detalle
 
   async function ejecutarEliminacionProyecto() {
-    const eliminado =
-      await eliminarProyecto(
-        proyecto.proyecto_id
-      )
+    const eliminado = await eliminarProyecto(
+      proyecto.proyecto_id
+    )
 
     if (eliminado) {
       router.replace('/(tabs)/proyectos')
@@ -141,7 +136,7 @@ export default function DetalleProyectoScreen() {
     if (!puedeEliminarProyecto) {
       Alert.alert(
         'No puedes eliminar este proyecto',
-        'Primero deben salir todos los demás miembros. El líder debe ser el único miembro del proyecto.'
+        'Primero deben salir todos los dem s miembros. El l der debe ser el  nico miembro del proyecto.'
       )
 
       return
@@ -149,7 +144,7 @@ export default function DetalleProyectoScreen() {
 
     Alert.alert(
       'Eliminar proyecto',
-      'Se eliminarán definitivamente sus tableros, listas, tareas, asignaciones y demás información asociada.',
+      'Se eliminar n definitivamente sus tableros, listas, tareas, asignaciones y dem s informaci n asociada.',
       [
         {
           text: 'Cancelar',
@@ -307,6 +302,18 @@ export default function DetalleProyectoScreen() {
               </Text>
             </View>
           </View>
+
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push(`/carta-gantt/${proyecto.proyecto_id}`)}
+            style={({ pressed }) => [
+              styles.ganttButton,
+              pressed && styles.ganttButtonPressed,
+            ]}
+          >
+            <Ionicons name="list" size={20} color="#FFFFFF" />
+            <Text style={styles.ganttButtonText}>Ir a la Carta Gantt</Text>
+          </Pressable>
         </View>
 
         <EquipoProyecto
@@ -347,9 +354,7 @@ export default function DetalleProyectoScreen() {
               />
 
               <Text
-                style={
-                  styles.createBoardButtonText
-                }
+                style={styles.createBoardButtonText}
               >
                 Nuevo tablero
               </Text>
@@ -539,6 +544,26 @@ const styles = StyleSheet.create({
     color: '#4F2D7F',
     fontSize: 14,
     fontWeight: '600',
+  },
+
+  ganttButton: {
+    minHeight: 46,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 8,
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    backgroundColor: '#6F45A5',
+  },
+  ganttButtonPressed: {
+    backgroundColor: '#4F2D7F',
+  },
+  ganttButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
   },
 
   workspaceHeader: {
