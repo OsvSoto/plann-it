@@ -4,12 +4,17 @@ import { obtenerAsignacionesProyecto } from './asignacion.service'
 import type {
   CrearListaInput,
   CrearProyectoInput,
+  EditarProyectoInput,
   CrearTableroInput,
   CrearTareaInput,
   DetalleProyecto,
+  EditarTableroInput,
   EditarTareaInput,
+  OrdenLista,
+  OrdenTarea,
   Proyecto,
   TableroDetalle,
+
 } from '../types'
 
 export async function obtenerProyectos(): Promise<Proyecto[]> {
@@ -66,6 +71,7 @@ export async function obtenerDetalleProyecto(
     liderResultado,
     puedeEliminarResultado,
     asignacionesResultado,
+    usuarioResultado,
   ] = await Promise.all([
     supabase
       .from('proyecto')
@@ -96,7 +102,9 @@ export async function obtenerDetalleProyecto(
             tarea_nombre,
             tarea_desc,
             tarea_estado,
-            tarea_fecha_entrega
+            tarea_fecha_entrega,
+            tarea_creado_por,
+            tarea_orden
           )
         )
       `)
@@ -109,6 +117,7 @@ export async function obtenerDetalleProyecto(
       p_proyecto_id: proyectoId,
     }),
     obtenerAsignacionesProyecto(proyectoId),
+    supabase.auth.getUser(),
   ])
 
   if (proyectoResultado.error) {
@@ -147,10 +156,12 @@ export async function obtenerDetalleProyecto(
           lista_tablero_id: lista.lista_tablero_id,
           lista_nombre: lista.lista_nombre,
           lista_orden: lista.lista_orden,
-          tareas: lista.tarea.map((tarea) => ({
-            ...tarea,
-            asignaciones: asignacionesPorTarea.get(tarea.tarea_id) ?? [],
-          })),
+          tareas: [...lista.tarea]
+            .sort((a, b) => a.tarea_orden - b.tarea_orden)
+            .map((tarea) => ({
+              ...tarea,
+              asignaciones: asignacionesPorTarea.get(tarea.tarea_id) ?? [],
+            })),
         })),
     })
   )
@@ -160,6 +171,7 @@ export async function obtenerDetalleProyecto(
     tableros,
     esLider: liderResultado.data,
     puedeEliminarProyecto: puedeEliminarResultado.data,
+    miUsuarioId: usuarioResultado.data.user?.id ?? null,
   }
 }
 
@@ -186,6 +198,36 @@ export async function crearTablero(
   return {
     ...data,
     listas: [],
+  }
+}
+
+export async function editarTablero(
+  tablero: EditarTableroInput
+): Promise<void> {
+  const { error } = await supabase
+    .from('tablero')
+    .update({
+      tablero_nombre: tablero.nombre.trim(),
+    })
+    .eq('tablero_id', tablero.tableroId)
+    .select('tablero_id')
+    .single()
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function eliminarTablero(tableroId: string): Promise<void> {
+  const { error } = await supabase
+    .from('tablero')
+    .delete()
+    .eq('tablero_id', tableroId)
+    .select('tablero_id')
+    .single()
+
+  if (error) {
+    throw error
   }
 }
 
@@ -216,7 +258,42 @@ export async function crearTarea(
       tarea_desc: tarea.descripcion,
       tarea_estado: tarea.estado,
       tarea_fecha_entrega: tarea.fechaEntrega,
+      tarea_orden: tarea.orden,
     })
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function reordenarListas(
+  tableroId: string,
+  orden: OrdenLista[]
+): Promise<void> {
+  const { error } = await supabase.rpc('reordenar_listas', {
+    p_tablero_id: tableroId,
+    p_orden: orden.map((item) => ({
+      lista_id: item.listaId,
+      orden: item.orden,
+    })),
+  })
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function reordenarTareas(
+  listaId: string,
+  orden: OrdenTarea[]
+): Promise<void> {
+  const { error } = await supabase.rpc('reordenar_tareas', {
+    p_lista_id: listaId,
+    p_orden: orden.map((item) => ({
+      tarea_id: item.tareaId,
+      orden: item.orden,
+    })),
+  })
 
   if (error) {
     throw error
@@ -276,6 +353,25 @@ export async function eliminarProyecto(proyectoId: string): Promise<void> {
     .eq('proyecto_id', proyectoId)
     .select('proyecto_id')
     .single()
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function editarProyecto(
+  proyecto: EditarProyectoInput
+): Promise<void> {
+  const { error } = await supabase.rpc(
+    'editar_proyecto',
+    {
+      p_proyecto_id: proyecto.proyectoId,
+      p_nombre: proyecto.nombre,
+      p_descripcion: proyecto.descripcion,
+      p_fecha_fin: proyecto.fechaFin,
+      p_estado: proyecto.estado,
+    }
+  )
 
   if (error) {
     throw error

@@ -17,6 +17,8 @@ import {
     View
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useAppColors } from '../../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../../constants/theme'
 import { supabase } from '../../../lib/supabase'
 import { useChatGlobal } from '../context/ChatContext'
 import { ArchivoAdjunto, enviarMensajeChat, obtenerMensajes, obtenerProyectosChat } from '../services/chat.service'
@@ -55,6 +57,8 @@ function esMismoDia(iso1: string, iso2: string) {
 }
 
 export function ChatGlobal() {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const { chatAbierto, setChatAbierto } = useChatGlobal()
   const [proyectos, setProyectos] = useState<any[]>([])
   const [proyectoActivo, setProyectoActivo] = useState<any>(null)
@@ -221,7 +225,7 @@ export function ChatGlobal() {
                 style={styles.archivoBurbuja} 
                 onPress={() => Linking.openURL(dataArchivo.archivo_url)}
               >
-                <Ionicons name="document" size={24} color={esMio ? "#FFFFFF" : "#6F45A5"} />
+                <Ionicons name="document" size={24} color={esMio ? "#FFFFFF" : colors.brand} />
                 <View style={styles.archivoDetalle}>
                   <Text style={[styles.archivoNombre, esMio && styles.textoMensajeMio]} numberOfLines={1}>
                     {dataArchivo.archivo_nombre}
@@ -230,7 +234,7 @@ export function ChatGlobal() {
                     {formatBytes(dataArchivo.archivo_tamano)}
                   </Text>
                 </View>
-                <Ionicons name="download-outline" size={20} color={esMio ? "#FFFFFF" : "#6F45A5"} />
+                <Ionicons name="download-outline" size={20} color={esMio ? "#FFFFFF" : colors.brand} />
               </Pressable>
             )}
           </View>
@@ -266,7 +270,7 @@ export function ChatGlobal() {
               <Text style={styles.headerTitle}>Chat de Proyecto</Text>
             </View>
             <Pressable onPress={() => setChatAbierto(false)} hitSlop={10} style={styles.closeBtn}>
-              <Ionicons name="close" size={24} color="#342247" />
+              <Ionicons name="close" size={24} color={colors.text} />
             </Pressable>
           </View>
 
@@ -294,7 +298,7 @@ export function ChatGlobal() {
 
           <View style={styles.chatArea}>
             {cargando && mensajes.length === 0 ? (
-              <ActivityIndicator size="large" color="#6F45A5" style={styles.loader} />
+              <ActivityIndicator size="large" color={colors.brand} style={styles.loader} />
             ) : proyectos.length === 0 ? (
               <View style={styles.emptyState}>
                 <Text style={styles.emptyStateText}>No tienes proyectos activos</Text>
@@ -316,7 +320,7 @@ export function ChatGlobal() {
             {archivoAdjunto && (
               <View style={styles.previewContainer}>
                 <View style={styles.previewIconBox}>
-                  <Ionicons name="document-text" size={24} color="#6F45A5" />
+                  <Ionicons name="document-text" size={24} color={colors.brand} />
                 </View>
                 <View style={styles.previewInfo}>
                   <View style={styles.previewNameRow}>
@@ -330,14 +334,14 @@ export function ChatGlobal() {
                   <Text style={styles.previewSize}>{formatBytes(archivoAdjunto.tamano)}</Text>
                 </View>
                 <Pressable onPress={() => setArchivoAdjunto(null)} style={styles.previewRemoveBtn}>
-                  <Ionicons name="close-circle" size={22} color="#B42318" />
+                  <Ionicons name="close-circle" size={22} color={colors.danger} />
                 </Pressable>
               </View>
             )}
 
             <View style={styles.inputArea}>
               <Pressable onPress={seleccionarArchivo} style={styles.attachBtn} disabled={enviando}>
-                <Ionicons name="attach" size={26} color="#766682" />
+                <Ionicons name="attach" size={26} color={colors.textMuted} />
               </Pressable>
               <TextInput
                 style={styles.input}
@@ -367,7 +371,8 @@ export function ChatGlobal() {
   )
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
   fab: {
     position: 'absolute',
     bottom: 90,
@@ -375,7 +380,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#6F45A5',
+    backgroundColor: colors.brand,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -387,7 +392,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#F8F5FB',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -395,9 +400,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#D9CEE8',
+    borderBottomColor: colors.border,
   },
   headerTitleContainer: {
     flex: 1,
@@ -405,15 +410,15 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#342247',
+    color: colors.text,
   },
   closeBtn: {
     padding: 4,
   },
   projectSelector: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#D9CEE8',
+    borderBottomColor: colors.border,
     paddingVertical: 10,
   },
   scrollSelector: {
@@ -423,14 +428,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#E9E1F3',
+    backgroundColor: colors.brandSoft,
     marginHorizontal: 5,
   },
   projectPillActive: {
-    backgroundColor: '#6F45A5',
+    backgroundColor: colors.brand,
   },
   projectPillText: {
-    color: '#4F2D7F',
+    color: colors.brandDark,
     fontWeight: '600',
     fontSize: 14,
   },
@@ -439,7 +444,7 @@ const styles = StyleSheet.create({
   },
   chatArea: {
     flex: 1,
-    backgroundColor: '#F8F5FB',
+    backgroundColor: colors.background,
   },
   loader: {
     marginTop: 40,
@@ -450,7 +455,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   emptyStateText: {
-    color: '#766682',
+    color: colors.textMuted,
     fontSize: 15,
   },
   listContent: {
@@ -464,11 +469,11 @@ const styles = StyleSheet.create({
   dateLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#D9CEE8',
+    backgroundColor: colors.border,
   },
   dateText: {
     marginHorizontal: 10,
-    color: '#766682',
+    color: colors.textMuted,
     fontSize: 12,
     fontWeight: '600',
     textTransform: 'capitalize',
@@ -484,7 +489,7 @@ const styles = StyleSheet.create({
   },
   nombreUsuario: {
     fontSize: 12,
-    color: '#766682',
+    color: colors.textMuted,
     marginBottom: 4,
     marginLeft: 4,
   },
@@ -494,18 +499,18 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   burbujaMiaBg: {
-    backgroundColor: '#6F45A5',
+    backgroundColor: colors.brand,
     borderBottomRightRadius: 4,
   },
   burbujaOtroBg: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     borderBottomLeftRadius: 4,
   },
   textoMensaje: {
     fontSize: 15,
-    color: '#342247',
+    color: colors.text,
   },
   textoMensajeMio: {
     color: '#FFFFFF',
@@ -539,20 +544,20 @@ const styles = StyleSheet.create({
   archivoNombre: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#342247',
+    color: colors.text,
   },
   archivoTamano: {
     fontSize: 11,
-    color: '#766682',
+    color: colors.textMuted,
     marginTop: 2,
   },
   inputArea: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     padding: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderTopWidth: 1,
-    borderTopColor: '#D9CEE8',
+    borderTopColor: colors.border,
   },
   attachBtn: {
     padding: 10,
@@ -562,43 +567,43 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 40,
     maxHeight: 100,
-    backgroundColor: '#F8F5FB',
+    backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingTop: 10,
     paddingBottom: 10,
     fontSize: 15,
-    color: '#342247',
+    color: colors.text,
   },
   sendBtn: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#FF6B2C',
+    backgroundColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 8,
     marginBottom: 2,
   },
   sendBtnDisabled: {
-    backgroundColor: '#D9CEE8',
+    backgroundColor: colors.border,
   },
   previewContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
-    backgroundColor: '#E9E1F3',
+    backgroundColor: colors.brandSoft,
     borderTopWidth: 1,
-    borderTopColor: '#D9CEE8',
+    borderTopColor: colors.border,
     gap: 12,
   },
   previewIconBox: {
     width: 40,
     height: 40,
     borderRadius: 8,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -608,31 +613,32 @@ const styles = StyleSheet.create({
   previewNameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     paddingHorizontal: 8,
     paddingVertical: 2,
   },
   previewInputName: {
     flex: 1,
     fontSize: 14,
-    color: '#342247',
+    color: colors.text,
     fontWeight: '600',
     paddingVertical: 2,
   },
   previewExt: {
     fontSize: 14,
-    color: '#766682',
+    color: colors.textMuted,
     fontWeight: '600',
   },
   previewSize: {
     fontSize: 12,
-    color: '#6F45A5',
+    color: colors.brand,
     marginTop: 4,
   },
   previewRemoveBtn: {
     padding: 4,
   },
-})
+  })
+}

@@ -11,7 +11,8 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { AppColors } from '../../../constants/theme'
+import { useAppColors } from '../../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../../constants/theme'
 import { useAdministrarMiembro } from '../hooks/useAdministrarMiembro'
 
 import type { MiembroProyecto, RolMiembro } from '../types'
@@ -47,6 +48,8 @@ export function AdministrarMiembroModal({
   onClose,
   onUpdated,
 }: Props) {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const [rol, setRol] = useState<RolMiembro>('MIEMBRO')
   const {
     procesando,
@@ -143,7 +146,7 @@ export function AdministrarMiembroModal({
               onPress={cerrar}
               style={styles.iconButton}
             >
-              <Ionicons name="close" size={23} color={AppColors.brandDark} />
+              <Ionicons name="close" size={23} color={colors.brandDark} />
             </Pressable>
           </View>
 
@@ -177,7 +180,7 @@ export function AdministrarMiembroModal({
                         <Ionicons
                           name={opcion.icono}
                           size={21}
-                          color={seleccionada ? AppColors.brand : AppColors.textMuted}
+                          color={seleccionada ? colors.brand : colors.textMuted}
                         />
                       </View>
                       <View style={styles.optionText}>
@@ -189,7 +192,7 @@ export function AdministrarMiembroModal({
                       <Ionicons
                         name={seleccionada ? 'radio-button-on' : 'radio-button-off'}
                         size={21}
-                        color={seleccionada ? AppColors.brand : AppColors.border}
+                        color={seleccionada ? colors.brand : colors.border}
                       />
                     </Pressable>
                   )
@@ -199,7 +202,7 @@ export function AdministrarMiembroModal({
 
             {error ? (
               <View style={styles.error} accessibilityRole="alert">
-                <Ionicons name="alert-circle-outline" size={19} color={AppColors.danger} />
+                <Ionicons name="alert-circle-outline" size={19} color={colors.danger} />
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             ) : null}
@@ -220,7 +223,7 @@ export function AdministrarMiembroModal({
                   pressed && styles.deleteButtonPressed,
                 ]}
               >
-                <Ionicons name="person-remove-outline" size={19} color={AppColors.danger} />
+                <Ionicons name="person-remove-outline" size={19} color={colors.accentStrong} />
                 <Text style={styles.deleteText}>Quitar</Text>
               </Pressable>
             </View>
@@ -244,7 +247,7 @@ export function AdministrarMiembroModal({
               ]}
             >
               {procesando ? (
-                <ActivityIndicator size="small" color={AppColors.surface} />
+                <ActivityIndicator size="small" color={colors.surface} />
               ) : (
                 <Text style={styles.primaryText}>Guardar cambios</Text>
               )}
@@ -256,8 +259,9 @@ export function AdministrarMiembroModal({
   )
 }
 
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: AppColors.background },
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: colors.background },
   container: {
     flex: 1,
     width: '100%',
@@ -268,8 +272,8 @@ const styles = StyleSheet.create({
   },
   header: { flexDirection: 'row', alignItems: 'flex-start', gap: 16 },
   headerText: { flex: 1, gap: 4 },
-  title: { color: AppColors.text, fontSize: 23, fontWeight: '700' },
-  subtitle: { color: AppColors.textMuted, fontSize: 14 },
+  title: { color: colors.text, fontSize: 23, fontWeight: '700' },
+  subtitle: { color: colors.textMuted, fontSize: 14 },
   iconButton: {
     width: 40,
     height: 40,
@@ -279,8 +283,8 @@ const styles = StyleSheet.create({
   },
   content: { flex: 1, gap: 22, paddingTop: 30 },
   field: { gap: 7 },
-  label: { color: AppColors.brandDark, fontSize: 15, fontWeight: '700' },
-  helpText: { color: AppColors.textMuted, fontSize: 13, lineHeight: 19 },
+  label: { color: colors.brandDark, fontSize: 15, fontWeight: '700' },
+  helpText: { color: colors.textMuted, fontSize: 13, lineHeight: 19 },
   options: { gap: 10, paddingTop: 7 },
   option: {
     minHeight: 76,
@@ -288,12 +292,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     borderWidth: 1,
-    borderColor: AppColors.border,
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 12,
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
   },
-  optionSelected: { borderColor: AppColors.brand, backgroundColor: AppColors.brandSoft },
+  optionSelected: { borderColor: colors.brand, backgroundColor: colors.brandSoft },
   optionPressed: { opacity: 0.82 },
   optionIcon: {
     width: 38,
@@ -301,45 +305,45 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
-    backgroundColor: AppColors.background,
+    backgroundColor: colors.background,
   },
   optionText: { flex: 1, gap: 3 },
-  optionTitle: { color: AppColors.text, fontSize: 14, fontWeight: '700' },
-  optionDescription: { color: AppColors.textMuted, fontSize: 12, lineHeight: 17 },
+  optionTitle: { color: colors.text, fontSize: 14, fontWeight: '700' },
+  optionDescription: { color: colors.textMuted, fontSize: 12, lineHeight: 17 },
   error: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 8,
     borderLeftWidth: 3,
-    borderLeftColor: AppColors.danger,
+    borderLeftColor: colors.danger,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: AppColors.dangerSoft,
+    backgroundColor: colors.dangerSoft,
   },
-  errorText: { flex: 1, color: AppColors.danger, fontSize: 14, lineHeight: 20 },
+  errorText: { flex: 1, color: colors.danger, fontSize: 14, lineHeight: 20 },
   dangerZone: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
     borderTopWidth: 1,
-    borderTopColor: AppColors.border,
+    borderTopColor: colors.border,
     paddingTop: 18,
   },
   dangerText: { flex: 1, gap: 3 },
-  dangerTitle: { color: AppColors.text, fontSize: 14, fontWeight: '700' },
-  dangerDescription: { color: AppColors.textMuted, fontSize: 12, lineHeight: 17 },
+  dangerTitle: { color: colors.text, fontSize: 14, fontWeight: '700' },
+  dangerDescription: { color: colors.textMuted, fontSize: 12, lineHeight: 17 },
   deleteButton: {
     minHeight: 42,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     borderWidth: 1,
-    borderColor: AppColors.danger,
+    borderColor: colors.accentStrong,
     borderRadius: 8,
     paddingHorizontal: 12,
   },
-  deleteButtonPressed: { backgroundColor: AppColors.dangerSoft },
-  deleteText: { color: AppColors.danger, fontSize: 13, fontWeight: '700' },
+  deleteButtonPressed: { backgroundColor: colors.accentStrongSoft },
+  deleteText: { color: colors.accentStrong, fontSize: 13, fontWeight: '700' },
   actions: { flexDirection: 'row', gap: 10, paddingTop: 14 },
   secondaryButton: {
     minHeight: 48,
@@ -347,20 +351,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: AppColors.border,
+    borderColor: colors.border,
     borderRadius: 8,
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
   },
-  secondaryText: { color: AppColors.brandDark, fontSize: 15, fontWeight: '600' },
+  secondaryText: { color: colors.brandDark, fontSize: 15, fontWeight: '600' },
   primaryButton: {
     minHeight: 48,
     flex: 1.4,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
-    backgroundColor: AppColors.accent,
+    backgroundColor: colors.accent,
   },
-  primaryButtonPressed: { backgroundColor: AppColors.accentPressed },
-  primaryText: { color: AppColors.surface, fontSize: 14, fontWeight: '700' },
+  primaryButtonPressed: { backgroundColor: colors.accentPressed },
+  primaryText: { color: colors.surface, fontSize: 14, fontWeight: '700' },
   disabled: { opacity: 0.5 },
 })
+}

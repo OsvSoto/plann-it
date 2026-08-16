@@ -1,30 +1,75 @@
-Estás trabajando en **Plann-It**, un proyecto universitario de Ingeniería de Software que actualmente se está implementando como una aplicación móvil colaborativa para gestión de proyectos, similar conceptualmente a Trello pero enfocada en una experiencia móvil más guiada y accesible.
+# AGENTS.md — Plann-It
 
-## Regla principal
+Estás trabajando en **Plann-It**, un proyecto universitario de Ingeniería de Software.
 
-Antes de modificar cualquier archivo:
+Plann-It es una aplicación móvil colaborativa de gestión de proyectos, conceptualmente similar a Trello, pero orientada a una experiencia móvil más guiada y accesible.
 
-1. Inspecciona el repositorio actual.
-2. Revisa la rama Git activa.
-3. Revisa la estructura real de `mobile/`, `features/` y `supabase/`.
-4. No asumas que este resumen reemplaza al código actual.
-5. No reintroduzcas tecnologías que ya fueron descartadas.
-6. Haz cambios pequeños, modulares y fáciles de revisar.
-7. Explica brevemente qué archivos vas a modificar antes de hacer cambios grandes.
+Este archivo entrega contexto técnico, decisiones de arquitectura, convenciones y estado funcional conocido.
+
+**El repositorio actual siempre tiene prioridad sobre este documento.**
 
 ---
 
-# Arquitectura actual
+# 1. Regla principal
 
-Se abandonó el backend anterior basado en:
+Antes de modificar cualquier archivo:
 
-- NestJS
-- TypeORM
-- servidor REST propio
+1. Ejecuta:
+   ```bash
+   git status
+   git branch --show-current
+   ```
 
-No volver a introducirlos salvo que se solicite explícitamente.
+2. Inspecciona la estructura real del repositorio.
 
-Actualmente la arquitectura es:
+3. Revisa específicamente cuando corresponda:
+   ```text
+   mobile/app/
+   mobile/features/
+   mobile/lib/
+   supabase/migrations/
+   ```
+
+4. Inspecciona los archivos relacionados con la funcionalidad solicitada antes de proponer cambios.
+
+5. Si la tarea afecta Supabase, revisa también:
+   - migraciones existentes;
+   - tablas actuales;
+   - constraints;
+   - foreign keys;
+   - funciones RPC;
+   - RLS;
+   - policies;
+   - tipos generados.
+
+6. No asumas que este documento reemplaza al código.
+
+7. No recrees entidades, funciones o componentes sin verificar primero si ya existen.
+
+8. Haz cambios pequeños, modulares y fáciles de revisar.
+
+9. Antes de un cambio amplio, explica brevemente:
+   - qué archivos intervienen;
+   - qué problema se resolverá;
+   - qué arquitectura se seguirá.
+
+10. No hagas commits, merges, pushes de Git ni `supabase db push` salvo que el usuario lo solicite explícitamente.
+
+---
+
+# 2. Arquitectura actual
+
+Se abandonó definitivamente el backend anterior basado en:
+
+```text
+NestJS
+TypeORM
+REST server propio
+```
+
+No reintroducir estas tecnologías salvo solicitud explícita.
+
+La arquitectura actual es:
 
 ```text
 React Native + Expo + TypeScript
@@ -37,98 +82,163 @@ React Native + Expo + TypeScript
         ├── Auth
         ├── PostgreSQL
         ├── Row Level Security
-        ├── RPC / PostgreSQL Functions
-        ├── Storage         [futuro]
-        ├── Realtime        [futuro]
-        └── Edge Functions  [futuro]
+        ├── PostgreSQL Functions / RPC
+        ├── Storage
+        └── Realtime
 ```
 
 Supabase es el backend principal.
 
+Las Edge Functions pueden utilizarse en funcionalidades futuras que realmente necesiten ejecución del lado servidor fuera de PostgreSQL, por ejemplo integración con servicios externos o IA.
+
+No introducir una capa backend adicional sin una necesidad concreta.
+
 ---
 
-# Frontend
+# 3. Frontend
 
-La aplicación móvil está en:
+La aplicación está en:
 
 ```text
 mobile/
 ```
 
-Tecnologías:
+Tecnologías principales:
 
 - React Native
 - Expo
 - TypeScript
 - Expo Router
-- `react-native-safe-area-context`
 - `@supabase/supabase-js`
+- `react-native-safe-area-context`
+- componentes nativos de Expo/React Native
 
-Se prueba actualmente principalmente con Expo Go en iPhone, pero el proyecto debe mantenerse compatible con:
+La aplicación se prueba principalmente mediante Expo Go en iPhone, pero debe mantenerse compatible con:
 
-- iOS
-- Android
-- web cuando sea posible
+```text
+iOS
+Android
+web cuando sea razonable
+```
 
-Para iniciar:
+Comandos habituales:
 
 ```bash
 cd mobile
 npx expo start
 ```
 
-Si Metro tiene problemas de caché:
+Si Metro tiene problemas:
 
 ```bash
 npx expo start --clear
 ```
 
-Para túnel:
+Para usar túnel:
 
 ```bash
 npx expo start --tunnel
 ```
 
+No añadir dependencias nuevas si la funcionalidad puede resolverse razonablemente con las ya existentes.
+
 ---
 
-# Supabase client
+# 4. Variables de entorno y Supabase Client
 
-El cliente está aproximadamente en:
+El cliente Supabase se encuentra en:
 
 ```text
 mobile/lib/supabase.ts
 ```
 
-Usa variables de entorno:
+Las variables utilizadas son:
 
 ```env
 EXPO_PUBLIC_SUPABASE_URL=
 EXPO_PUBLIC_SUPABASE_KEY=
 ```
 
-Nunca colocar en el código:
+El archivo:
 
-- service role key
-- secret key
-- database password
-- DATABASE_URL
+```text
+mobile/.env
+```
 
-El `.env` no debe subirse a Git.
+no debe versionarse.
+
+Nunca colocar en React Native:
+
+- `service_role`;
+- secret key;
+- contraseña PostgreSQL;
+- `DATABASE_URL`;
+- secretos de servicios externos.
+
+Las variables `EXPO_PUBLIC_*` forman parte del cliente y no deben contener secretos.
 
 ---
 
-# Autenticación
+# 5. Tipos de Supabase
 
-Ya está implementado y funcionando:
+Los tipos de la base se mantienen en:
 
-- registro
-- confirmación por correo
-- login
-- persistencia de sesión
-- logout
-- rutas protegidas
+```text
+mobile/lib/database.types.ts
+```
 
-Se usa:
+Este archivo se genera desde Supabase.
+
+No editarlo manualmente salvo una razón excepcional.
+
+Después de aplicar una migration que cambie:
+
+- tablas;
+- columnas;
+- funciones RPC;
+- enums;
+- relaciones relevantes;
+
+regenerar:
+
+```bash
+npx supabase gen types typescript --linked > mobile/lib/database.types.ts
+```
+
+Si se ejecuta desde `mobile/`, usar:
+
+```bash
+npx supabase gen types typescript --linked > lib/database.types.ts
+```
+
+Los tipos específicos de cada feature pueden derivarse de `database.types.ts`.
+
+Ejemplo:
+
+```ts
+import type { Tables } from '../../lib/database.types'
+
+export type Proyecto = Tables<'proyecto'>
+```
+
+Evitar duplicar manualmente tipos de tablas ya generados por Supabase.
+
+---
+
+# 6. Autenticación
+
+Actualmente están implementados y probados:
+
+- registro;
+- confirmación por correo;
+- inicio de sesión;
+- persistencia de sesión;
+- cierre de sesión;
+- protección de rutas;
+- perfil público de usuario;
+- fotografía de perfil.
+
+Se utilizan:
 
 ```ts
 supabase.auth.signUp()
@@ -138,21 +248,21 @@ supabase.auth.getSession()
 supabase.auth.onAuthStateChange()
 ```
 
-La metadata estándar que se decidió utilizar es:
+La metadata estándar elegida es:
 
 ```text
 usuario_nombre
 ```
 
-No reemplazarla por `full_name`.
+No sustituirla por `full_name`.
 
-Ejemplo conceptual:
+Ejemplo:
 
 ```ts
 options: {
   data: {
-    usuario_nombre: nombre.trim()
-  }
+    usuario_nombre: nombre.trim(),
+  },
 }
 ```
 
@@ -162,13 +272,11 @@ Supabase Auth mantiene:
 auth.users
 ```
 
-y existe una tabla pública:
+y la aplicación mantiene:
 
 ```text
 public.usuario
 ```
-
-relacionada mediante el mismo UUID.
 
 Conceptualmente:
 
@@ -180,104 +288,62 @@ auth.users.id
 public.usuario.usuario_id
 ```
 
-La tabla pública contiene información de aplicación como:
-
-- usuario_id
-- usuario_nombre
-- usuario_correo
-- usuario_fecharegistro
-
-Existe o se ha trabajado en un trigger PostgreSQL para crear automáticamente `public.usuario` cuando se crea un usuario en `auth.users`.
-
-Antes de modificar este trigger, inspecciona su definición real en Supabase/migraciones.
+Antes de modificar triggers asociados a creación de usuarios, inspeccionar las migraciones y la implementación actual.
 
 ---
 
-# Navegación
+# 7. Navegación actual
 
-Se usa Expo Router.
+Se utiliza Expo Router.
 
-Estructura aproximada:
+La estructura conocida actualmente es aproximadamente:
 
 ```text
 mobile/app/
 ├── _layout.tsx
+├── modal.tsx
 │
 ├── (auth)/
 │   ├── _layout.tsx
 │   ├── login.tsx
 │   └── register.tsx
 │
-└── (tabs)/
-    ├── _layout.tsx
-    ├── index.tsx
-    └── proyectos.tsx
+├── (tabs)/
+│   ├── _layout.tsx
+│   ├── index.tsx
+│   ├── invitaciones.tsx
+│   └── proyectos.tsx
+│
+└── proyectos/
+    ├── crear.tsx
+    ├── [proyectoId].tsx
+    │
+    └── [proyectoId]/
+        └── tableros/
+            └── [tableroId].tsx
 ```
 
-`app/_layout.tsx` controla la sesión global.
+Verificar siempre la estructura real antes de agregar rutas nuevas.
 
-Comportamiento esperado:
+`mobile/app/_layout.tsx` controla la sesión y las rutas protegidas.
 
-```text
-Sin sesión
-    |
-    v
-(auth)
-├── login
-└── register
-
-
-Con sesión
-    |
-    v
-(tabs)
-├── Inicio
-└── Proyectos
-```
-
-Las rutas privadas no deben ser accesibles sin sesión.
+No permitir que rutas privadas sean accesibles sin sesión.
 
 ---
 
-# Modularización
+# 8. Modularización
 
-No colocar toda la lógica en `index.tsx`.
+La aplicación utiliza organización por funcionalidad.
 
-La estrategia elegida es modularización por funcionalidad.
+No concentrar lógica de negocio ni consultas Supabase grandes dentro de pantallas de Expo Router.
 
-Ejemplo existente:
-
-```text
-mobile/features/
-└── proyectos/
-    ├── components/
-    │   └── ProyectoCard.tsx
-    ├── hooks/
-    │   └── useProyectos.ts
-    ├── services/
-    │   └── proyecto.service.ts
-    └── types.ts
-```
-
-Seguir este patrón para funcionalidades futuras:
-
-```text
-features/
-├── proyectos/
-├── miembros/
-├── tableros/
-├── listas/
-├── tareas/
-├── gantt/
-├── chat/
-├── notificaciones/
-└── invitaciones/
-```
-
-Separación deseada:
+Patrón esperado:
 
 ```text
 Pantalla
+   |
+   v
+Componente
    |
    v
 Hook
@@ -289,43 +355,90 @@ Service
 Supabase
 ```
 
-Una pantalla no debería contener directamente grandes bloques de consultas a Supabase.
+Estructura aproximada:
+
+```text
+mobile/features/
+├── proyectos/
+├── invitaciones/
+├── miembros/
+├── tareas/
+├── chat/
+├── gantt/
+└── ...
+```
+
+Una feature puede contener:
+
+```text
+components/
+hooks/
+services/
+utils/
+types.ts
+```
+
+Reutilizar módulos existentes antes de crear otros nuevos.
 
 ---
 
-# Proyectos
+# 9. Módulo de proyectos
 
-Ya está implementada y probada la creación de proyectos.
+El módulo de proyectos ya tiene una estructura modular.
 
-Existe una función PostgreSQL/RPC aproximadamente llamada:
+Actualmente existen componentes/hooks relacionados con:
+
+```text
+ProyectoCard
+CrearTableroModal
+EditarProyectoModal
+TableroCard
+ListaProyecto
+TableroProyecto
+CampoFecha
+useProyectos
+useCrearProyecto
+useEditarProyecto
+useDetalleProyecto
+useCrearTablero
+...
+```
+
+Inspeccionar los nombres y rutas reales antes de importar.
+
+---
+
+# 10. Creación de proyectos
+
+La creación de proyectos está implementada y probada.
+
+Se utiliza una RPC:
 
 ```text
 crear_proyecto
 ```
 
-Desde React Native se utiliza conceptualmente:
+Conceptualmente:
 
 ```ts
 supabase.rpc('crear_proyecto', {
-  p_nombre: ...,
-  p_descripcion: ...,
-  p_fecha_fin: ...
+  p_nombre,
+  p_descripcion,
+  p_fecha_fin,
 })
 ```
 
-La función debe:
+La RPC:
 
-1. Obtener el usuario autenticado mediante `auth.uid()`.
-2. Crear `public.proyecto`.
-3. Crear automáticamente una fila en `public.miembroproyecto`.
-4. Asignar al creador:
-   - rol `LIDER`
-   - permisos correspondientes.
-5. Devolver el ID del proyecto.
+1. obtiene al usuario mediante `auth.uid()`;
+2. crea el proyecto;
+3. crea la membresía correspondiente;
+4. asigna al creador como `LIDER`;
+5. devuelve el ID del proyecto.
 
-No mandar desde React Native un `usuario_id` para decidir quién es el creador.
+Nunca enviar desde React Native un `usuario_id` para decidir quién está creando el proyecto.
 
-La identidad debe salir de:
+La identidad debe derivarse de:
 
 ```sql
 auth.uid()
@@ -333,33 +446,382 @@ auth.uid()
 
 ---
 
-# Listado de proyectos
+# 11. Edición de proyectos
 
-Ya está funcionando el listado de proyectos del usuario.
+La edición de proyectos se implementó recientemente y fue probada funcionalmente.
 
-La seguridad no debe depender de algo como:
+Permite modificar:
 
-```ts
-.eq('usuario_id', usuarioActual)
+- nombre;
+- descripción;
+- fecha de término;
+- estado.
+
+Existe una RPC:
+
+```text
+editar_proyecto
 ```
 
-en el frontend como mecanismo principal.
+La edición debe estar restringida según los permisos definidos para el proyecto.
 
-La seguridad debe realizarse en PostgreSQL mediante RLS.
+La UI utiliza:
 
-El frontend consulta `proyecto`, y RLS determina qué filas puede recibir el usuario.
+```text
+EditarProyectoModal
+        |
+        v
+useEditarProyecto
+        |
+        v
+proyecto.service
+        |
+        v
+editar_proyecto RPC
+```
+
+Después de editar, la pantalla de detalle debe recargar la información del proyecto.
+
+La fecha utiliza el componente reutilizable:
+
+```text
+CampoFecha
+```
+
+y utilidades de:
+
+```text
+features/proyectos/utils/fecha.ts
+```
+
+Formato visual:
+
+```text
+DD-MM-AAAA
+```
+
+Formato PostgreSQL:
+
+```text
+AAAA-MM-DD
+```
+
+No duplicar conversiones de fecha dentro de hooks o componentes si ya existen en `utils/fecha.ts`.
+
+La edición se integró en:
+
+```text
+mobile/app/proyectos/[proyectoId].tsx
+```
+
+mediante un modal accesible desde la vista de detalle.
 
 ---
 
-# MiembroProyecto
+# 12. Formularios y teclado
 
-La tabla actual utiliza un identificador propio:
+Los formularios móviles deben evitar quedar tapados por el teclado.
+
+Se utiliza el patrón:
+
+```text
+SafeAreaView
+└── KeyboardAvoidingView
+    └── ScrollView
+```
+
+Cuando corresponda, utilizar:
+
+```tsx
+keyboardShouldPersistTaps="handled"
+```
+
+y comportamiento específico de plataforma.
+
+No solucionar problemas de teclado simplemente moviendo permanentemente la interfaz hacia arriba.
+
+Mantener una experiencia razonable tanto en iOS como Android.
+
+---
+
+# 13. Selector de fecha
+
+Existe:
+
+```text
+features/proyectos/components/CampoFecha
+```
+
+Reutilizarlo en formularios que requieran selección de fechas antes de crear otra implementación.
+
+No introducir otro DatePicker para la misma función salvo una razón clara.
+
+Utilidades existentes aproximadamente:
+
+```ts
+fechaVisualAIso()
+fechaIsoAVisual()
+fechaVisualADate()
+fechaDateAVisual()
+formatearEntradaFecha()
+```
+
+Inspeccionar `utils/fecha.ts` antes de implementar nuevas conversiones.
+
+---
+
+# 14. Estado funcional actual
+
+## Implementado
+
+Actualmente se considera implementado:
+
+- registro;
+- login/logout;
+- persistencia de sesión;
+- rutas protegidas;
+- perfil de usuario;
+- fotografía de usuario;
+
+### Proyectos
+- crear proyectos;
+- listar proyectos;
+- visualizar detalle;
+- editar nombre;
+- editar descripción;
+- editar fecha de término;
+- editar estado;
+- eliminar proyectos;
+
+### Miembros e invitaciones
+- invitar miembros;
+- aceptar invitaciones;
+- rechazar invitaciones;
+- cambiar roles;
+- retirar integrantes;
+
+### Tableros y listas
+- crear tableros;
+- visualizar tableros;
+- crear listas;
+- eliminar listas;
+
+### Tareas
+- crear tareas;
+- editar tareas;
+- eliminar tareas;
+- asignar responsables;
+
+### Fechas
+- selector de fecha mediante calendario;
+
+### Seguridad
+- RLS y RPC para varias operaciones ya implementadas;
+
+### Gantt
+- existe implementación de Carta Gantt en una rama/desarrollo reciente;
+
+### Chat
+- chat grupal por proyecto;
+- adjuntar archivos a mensajes;
+- realtime para mensajes;
+
+**IMPORTANTE:** Chat y Gantt pueden encontrarse en ramas que todavía no estén sincronizadas con el `dev` más reciente. No asumir que están integrados hasta inspeccionar Git.
+
+---
+
+# 15. Parcialmente implementado
+
+Actualmente quedan incompletas o pendientes de revisión:
+
+### Administrar tableros
+Falta:
+
+- editar tablero;
+- eliminar tablero.
+
+### Administrar listas
+Falta:
+
+- editar nombre;
+- reordenar listas mediante interacción drag-and-drop.
+
+El Product Owner solicitó que las listas puedan moverse como tarjetas agarrándolas y cambiándolas de posición.
+
+### Invitaciones
+Actualmente funciona mediante correo exacto.
+
+El diseño también contempla:
+
+- búsqueda de usuario;
+- previsualización del perfil antes de invitar.
+
+### Notificaciones
+Las invitaciones tienen interfaz propia.
+
+Sin embargo, la tabla general:
+
+```text
+notificacion
+```
+
+todavía no cuenta con un flujo completo de UI y lógica.
+
+---
+
+# 16. Funcionalidades pendientes
+
+Todavía quedan pendientes, entre otras:
+
+- reportar avances;
+- adjuntar archivos a tareas;
+- historial de actividades;
+- análisis de avances con IA;
+- realtime para asignaciones;
+- realtime para otros cambios colaborativos;
+- panel/inicio con tareas pendientes.
+
+No implementar IA antes de estabilizar correctamente las entidades y flujos que producirán los datos que analizará.
+
+---
+
+# 17. Comentarios actuales del Product Owner
+
+Estas observaciones tienen prioridad funcional.
+
+## Tareas y permisos
+
+Un miembro:
+
+- no debe poder editar tareas asignadas a otros;
+- no debe poder eliminar tareas asignadas a otros.
+
+Antes de resolverlo únicamente en UI, revisar:
+
+- RPC;
+- RLS;
+- policies;
+- asignaciones;
+- roles.
+
+La seguridad real debe estar en Supabase, no solo ocultando botones.
+
+---
+
+## Orden de tareas
+
+Las tareas deben mostrarse ordenadas por:
+
+```text
+fecha de entrega ascendente
+```
+
+Las más próximas a la fecha actual deben aparecer primero.
+
+Definir claramente el tratamiento de:
+
+- tareas vencidas;
+- tareas finalizadas;
+- tareas sin fecha, si llegaran a existir.
+
+---
+
+## Nuevo rol CO_LIDER
+
+Debe existir un rol equivalente a:
+
+```text
+CO_LIDER
+```
+
+El co-líder debe poder realizar acciones administrativas similares al líder.
+
+Restricción importante:
+
+```text
+CO_LIDER no puede eliminar al LIDER original
+```
+
+Antes de implementar este cambio:
+
+1. revisar cómo se almacenan actualmente roles y permisos;
+2. revisar todas las RPC que comprueban `LIDER`;
+3. evitar replicar condiciones distintas en múltiples funciones si puede centralizarse;
+4. revisar UI y RLS.
+
+No asumir que comparar:
+
+```sql
+rol = 'LIDER'
+```
+
+seguirá siendo suficiente después de introducir `CO_LIDER`.
+
+---
+
+## Reordenamiento de listas
+
+El PO quiere que las listas puedan:
+
+```text
+agarrarse
+→ arrastrarse
+→ cambiar de posición
+```
+
+Ya existe o se espera un campo equivalente a:
+
+```text
+lista_orden
+```
+
+La persistencia del nuevo orden debe reflejarse en PostgreSQL.
+
+No implementar solo el orden visual sin persistencia.
+
+---
+
+## Administración de tableros
+
+Agregar:
+
+- editar tablero;
+- eliminar tablero.
+
+Reutilizar el patrón ya utilizado en otras operaciones:
+
+```text
+Componente
+→ Hook
+→ Service
+→ RPC/RLS
+```
+
+---
+
+## Inicio
+
+La pestaña de inicio debe mostrar las tareas pendientes relevantes para el usuario autenticado.
+
+Antes de implementarlo, revisar:
+
+- `asignaciontarea`;
+- estado de tarea;
+- fecha de entrega;
+- RLS;
+- posibles consultas/RPC existentes.
+
+---
+
+# 18. MiembroProyecto
+
+La tabla utiliza:
 
 ```text
 miembro_proyecto_id UUID
 ```
 
-También debe existir una restricción de unicidad equivalente a:
+Debe mantenerse unicidad equivalente a:
 
 ```text
 UNIQUE (
@@ -368,39 +830,402 @@ UNIQUE (
 )
 ```
 
-Un usuario puede estar en muchos proyectos, pero no puede aparecer dos veces como miembro del mismo proyecto.
+Un usuario:
 
-`miembroproyecto` será una tabla central para la autorización del resto de la aplicación.
+- puede pertenecer a muchos proyectos;
+- no puede aparecer dos veces como miembro del mismo proyecto.
+
+`miembroproyecto` es central para autorización.
 
 Conceptualmente:
 
 ```text
 Usuario
    |
+   v
 MiembroProyecto
    |
+   v
 Proyecto
 ```
 
-y desde Proyecto se derivará el acceso a:
+Desde la membresía se deriva acceso a información asociada al proyecto.
+
+---
+
+# 19. AsignacionTarea
+
+Se conserva un identificador propio:
 
 ```text
-Tablero
-Lista
-Tarea
-Chat
-Gantt
-Análisis IA
-etc.
+asignacion_tarea_id
+```
+
+porque interesa mantener historial de asignaciones.
+
+Una misma persona puede recibir la misma tarea nuevamente en otro momento.
+
+No convertir esta tabla simplemente en una PK compuesta usuario/tarea.
+
+Antes de cambiar permisos de edición/eliminación de tareas, revisar esta entidad.
+
+---
+
+# 20. InvitacionProyecto
+
+Posee un identificador propio:
+
+```text
+invitacion_id
+```
+
+porque pueden existir invitaciones históricas.
+
+Estados conceptuales:
+
+```text
+PENDIENTE
+ACEPTADA
+RECHAZADA
+```
+
+Aceptar una invitación debe generar una membresía en:
+
+```text
+miembroproyecto
+```
+
+Verificar los valores reales almacenados antes de agregar validaciones nuevas.
+
+---
+
+# 21. Gantt
+
+La arquitectura de Gantt cambió respecto del diseño original.
+
+En una etapa anterior existían las entidades:
+
+```text
+CartaGantt
+ItemGantt
+```
+
+pero se determinó que podían ser redundantes si el Gantt solamente representa datos que ya pertenecen a las tareas.
+
+Existe una migration relacionada con eliminación de entidades Gantt:
+
+```text
+eliminar_entidades_gantt
+```
+
+y existe una función conocida aproximadamente como:
+
+```text
+obtener_datos_gantt
+```
+
+Por lo tanto:
+
+**NO recrear `cartagantt` ni `itemgantt` basándose únicamente en documentación antigua.**
+
+Antes de modificar Gantt:
+
+1. inspeccionar schema actual;
+2. inspeccionar migraciones;
+3. revisar implementación de la rama Gantt;
+4. comprobar de dónde obtiene fechas y responsables;
+5. confirmar que se derive de tareas si ese es el diseño actual.
+
+---
+
+# 22. Chat
+
+Existe una implementación reciente de chat por proyecto.
+
+Incluye al menos:
+
+- mensajes;
+- usuarios;
+- proyecto;
+- adjuntos;
+- realtime.
+
+Antes de integrarla con `dev`, comprobar:
+
+```text
+usuario miembro → puede acceder
+usuario externo → no puede acceder
+
+usuario A envía
+→ usuario B recibe mediante Realtime
+
+mensaje enviado
+→ persiste después de recargar
+
+archivo adjunto
+→ se almacena y mantiene su asociación
+```
+
+Revisar RLS y Storage policies correspondientes.
+
+No considerar una prueba de UI suficiente para validar seguridad.
+
+---
+
+# 23. Integración de ramas grandes
+
+Puede haber ramas como:
+
+```text
+feature/chat
+feature/gantt
+```
+
+o nombres equivalentes que todavía no estén alineadas con `dev`.
+
+No mezclarlas directamente sin inspección.
+
+Para probar una rama contra el estado actual se recomienda crear una rama temporal:
+
+```bash
+git switch dev
+git pull origin dev
+git switch -c test/integracion-chat
+git merge --no-ff <rama-chat>
+```
+
+Probar y luego eliminar la rama temporal si corresponde.
+
+Hacer lo mismo con Gantt.
+
+Para probar ambas juntas, utilizar otra rama temporal de integración.
+
+No usar estas ramas temporales como sustituto de `dev`.
+
+---
+
+# 24. RLS y seguridad
+
+La aplicación utiliza Supabase directamente desde el cliente.
+
+Por eso RLS es obligatorio para información privada.
+
+Nunca resolver permisos mediante:
+
+```text
+desactivar RLS
+```
+
+Nunca utilizar `service_role` desde React Native.
+
+La autorización debe seguir conceptualmente:
+
+```text
+auth.uid()
+    |
+    v
+MiembroProyecto
+    |
+    v
+Proyecto
+    |
+    v
+recursos del proyecto
+```
+
+El frontend puede ocultar acciones para mejorar UX, pero eso **no es una barrera de seguridad**.
+
+Las restricciones importantes también deben verificarse en PostgreSQL mediante:
+
+- RLS;
+- RPC;
+- policies;
+- constraints cuando corresponda.
+
+---
+
+# 25. Funciones PostgreSQL / RPC
+
+La base utiliza varias funciones RPC.
+
+Entre las conocidas actualmente pueden encontrarse:
+
+```text
+crear_proyecto
+editar_proyecto
+actualizar_miembro_proyecto
+asignar_miembro_tarea
+desasignar_miembro_tarea
+eliminar_miembro_proyecto
+es_lider_proyecto
+es_miembro_proyecto
+invitar_usuario_proyecto
+obtener_asignaciones_proyecto
+obtener_datos_gantt
+obtener_invitaciones_pendientes
+obtener_miembros_proyecto
+puede_eliminar_proyecto
+responder_invitacion
+```
+
+Esta lista puede quedar desactualizada.
+
+Siempre confirmar contra:
+
+```text
+mobile/lib/database.types.ts
+supabase/migrations/
+```
+
+antes de crear otra RPC que pueda duplicar comportamiento.
+
+---
+
+# 26. Migraciones Supabase
+
+Las migraciones se encuentran en:
+
+```text
+supabase/migrations/
+```
+
+El proyecto está enlazado a:
+
+```text
+plann-it-dev
+```
+
+Project ref:
+
+```text
+lmjcctnnnbjfsczasqci
+```
+
+Existe:
+
+```text
+supabase/config.toml
+```
+
+No ejecutar nuevamente `supabase init --force` sin una razón específica.
+
+---
+
+# 27. Flujo correcto para cambios de base de datos
+
+Cuando una funcionalidad requiere cambios en PostgreSQL:
+
+```text
+crear feature branch
+        |
+        v
+crear migration
+        |
+        v
+escribir SQL
+        |
+        v
+GUARDAR archivo
+        |
+        v
+revisar migration
+        |
+        v
+supabase db push
+        |
+        v
+regenerar database.types.ts
+        |
+        v
+implementar/ajustar frontend
+        |
+        v
+probar funcionalmente
+        |
+        v
+commit + Git push
+        |
+        v
+merge a dev
+```
+
+Crear una migration:
+
+```bash
+npx supabase migration new nombre_migration
+```
+
+Aplicar migrations pendientes al remoto:
+
+```bash
+npx supabase db push
+```
+
+`supabase db push` y `git push` son operaciones distintas:
+
+```text
+supabase db push
+→ ejecuta migrations en PostgreSQL remoto
+
+git push
+→ envía commits al repositorio Git remoto
 ```
 
 ---
 
-# Base de datos existente
+# 28. Migraciones ya aplicadas
 
-Un integrante del equipo ya creó gran parte del esquema en Supabase.
+Una migration que ya fue aplicada al remoto debe tratarse como historial.
 
-Existen o se proyectan tablas similares a:
+No editar una migration ya aplicada esperando que:
+
+```bash
+npx supabase db push
+```
+
+la vuelva a ejecutar.
+
+Supabase identifica migrations por su timestamp.
+
+Si una migration aplicada necesita corrección:
+
+```text
+NO modificar la aplicada
+        |
+        v
+crear nueva migration correctiva
+```
+
+Ejemplo reciente:
+
+```text
+20260816042743_editar_proyecto.sql
+20260816055225_crear_funcion_editar_proyecto.sql
+```
+
+La segunda se creó porque la primera había sido aplicada antes de guardar correctamente su contenido.
+
+Mantener ambas si ambas forman parte del historial remoto.
+
+---
+
+# 29. Verificar estado de migrations
+
+Usar:
+
+```bash
+npx supabase migration list
+```
+
+Una migration pendiente debería aparecer local pero no remotamente.
+
+Antes de hacer `db push`, revisar qué migrations se aplicarán.
+
+---
+
+# 30. Esquema actual
+
+Existen actualmente tablas similares a:
 
 ```text
 usuario
@@ -415,32 +1240,31 @@ etiqueta
 etiquetatarea
 archivo
 tareaarchivo
-chat
 mensaje
 mensajearchivo
-cartagantt
-itemgantt
 actividad
 notificacion
 analisis_ia
 ```
 
-No recrear estas tablas a ciegas.
+La lista exacta debe obtenerse del esquema actual.
 
-Antes de modificar base de datos:
+No recrear tablas basándose en modelos antiguos.
 
-- inspeccionar esquema actual;
-- revisar constraints;
-- revisar foreign keys;
-- revisar RLS;
-- revisar policies;
-- revisar funciones PostgreSQL existentes.
+En particular, comprobar el estado actual de entidades Gantt antes de asumir que:
+
+```text
+cartagantt
+itemgantt
+```
+
+siguen existiendo.
 
 ---
 
-# Modelo conceptual importante
+# 31. Modelo conceptual vigente aproximado
 
-Algunas relaciones relevantes:
+El núcleo actualmente puede entenderse como:
 
 ```text
 Usuario
@@ -459,23 +1283,26 @@ Proyecto
    |     v
    |    Tarea
    |
-   ├── Chat
-   |     |
-   |     v
-   |   Mensaje
+   ├── Mensajes / Chat
    |
-   ├── CartaGantt
-   |     |
-   |     v
-   |   ItemGantt
-   |
-   └── AnalisisIA
+   └── Análisis IA
 ```
 
-También existen:
+Además:
 
 ```text
-Tarea <-> AsignacionTarea <-> MiembroProyecto
+Tarea
+  |
+  v
+AsignacionTarea
+  |
+  v
+MiembroProyecto
+```
+
+y existen relaciones para:
+
+```text
 Tarea <-> Etiqueta
 Tarea <-> Archivo
 Mensaje <-> Archivo
@@ -484,130 +1311,11 @@ Usuario -> InvitacionProyecto -> Proyecto
 Usuario -> Actividad -> Tarea
 ```
 
----
-
-# AsignacionTarea
-
-Se decidió conservar un identificador propio:
-
-```text
-asignacion_tarea_id
-```
-
-porque interesa mantener historial de asignaciones.
-
-Una misma persona puede recibir la misma tarea nuevamente más adelante.
-
-Por lo tanto NO convertir esta tabla simplemente en una PK compuesta usuario/tarea.
+El Gantt debe comprobarse contra su implementación actual y no contra modelos antiguos.
 
 ---
 
-# InvitacionProyecto
-
-También posee identificador propio:
-
-```text
-invitacion_id
-```
-
-porque pueden existir varias invitaciones históricas entre un usuario y un proyecto.
-
-Estados esperados:
-
-```text
-PENDIENTE
-ACEPTADA
-RECHAZADA
-```
-
-Aceptar una invitación debe generar una membresía en `miembroproyecto`.
-
----
-
-# RLS y seguridad
-
-Supabase será utilizado directamente desde la aplicación móvil, por lo que RLS es obligatorio para datos privados.
-
-No asumir que todas las policies están completas.
-
-Actualmente se ha trabajado al menos en seguridad para:
-
-- usuario
-- proyecto
-- miembroproyecto
-
-Antes de agregar nuevas operaciones, revisar las policies existentes.
-
-Objetivo general:
-
-```text
-Usuario autenticado
-        |
-        v
-MiembroProyecto
-        |
-        v
-solo proyectos donde pertenece
-        |
-        v
-solo información asociada a esos proyectos
-```
-
-Nunca solucionar un problema de permisos desactivando RLS.
-
-Nunca usar una `service_role` key desde React Native.
-
----
-
-# Supabase CLI y migraciones
-
-El repositorio ya está vinculado al proyecto Supabase:
-
-```text
-plann-it-dev
-```
-
-Project ref actual:
-
-```text
-lmjcctnnnbjfsczasqci
-```
-
-Existe:
-
-```text
-supabase/config.toml
-```
-
-Se intentó ejecutar:
-
-```bash
-npx supabase db pull
-```
-
-pero quedó pendiente porque el computador necesitaba Docker Desktop para crear la shadow database.
-
-Por lo tanto, IMPORTANTE:
-
-El esquema remoto de Supabase puede contener cambios que todavía NO estén completamente versionados en:
-
-```text
-supabase/migrations/
-```
-
-Antes de hacer cambios importantes de base de datos, revisar este estado.
-
-Cuando Docker esté disponible:
-
-```bash
-npx supabase db pull
-```
-
-y revisar cuidadosamente la migración antes de subirla a Git.
-
----
-
-# Git workflow
+# 32. Git workflow
 
 Se utiliza:
 
@@ -620,26 +1328,23 @@ feature/*
 ```
 
 `main`:
-versión estable.
+
+```text
+versión estable
+```
 
 `dev`:
-integración del desarrollo.
 
-Para una nueva funcionalidad:
+```text
+integración del desarrollo
+```
+
+Nueva funcionalidad:
 
 ```bash
 git switch dev
 git pull origin dev
 git switch -c feature/nombre
-```
-
-Ejemplos:
-
-```text
-feature/proyectos
-feature/tareas
-feature/chat
-feature/invitaciones
 ```
 
 Después:
@@ -652,90 +1357,209 @@ dev
 main
 ```
 
-No trabajar directamente en `main`.
-
-Antes de modificar código, ejecuta:
-
-```bash
-git status
-git branch --show-current
-```
-
-No hagas commits ni pushes automáticamente salvo que se solicite explícitamente.
+No trabajar directamente sobre `main`.
 
 ---
 
-# Convenciones de commits
+# 33. Staging y commits
 
-Usar el formato de Conventional Commits:
+No utilizar automáticamente:
+
+```bash
+git add -A
+```
+
+si existen cambios no relacionados en el working tree.
+
+Preferir staging explícito cuando una feature modifica archivos concretos:
+
+```bash
+git add archivo1
+git add archivo2
+git add archivo3
+```
+
+Después revisar:
+
+```bash
+git status
+git diff --cached
+```
+
+Solo cuando el staged diff sea correcto, hacer commit.
+
+No incluir cambios accidentales en:
+
+```text
+package.json
+package-lock.json
+app.json
+```
+
+sin revisar primero su origen.
+
+---
+
+# 34. Conventional Commits
+
+Formato:
 
 ```text
 <tipo>: <descripción en español>
 ```
 
-Mantener el tipo convencional en inglés, por ejemplo `feat`, `fix`, `docs`,
-`refactor`, `test`, `chore` o `merge`, pero redactar siempre la descripción
-del cambio en español.
+Tipos habituales:
+
+```text
+feat
+fix
+refactor
+docs
+test
+chore
+merge
+```
 
 Ejemplos:
 
 ```text
-feat: implementar gestión de tareas
-feat: agregar creación de proyectos
-fix: corregir redirección de autenticación
-refactor: modularizar componentes de proyectos
-chore: versionar esquema de base de datos de Supabase
+feat: agregar edición de proyectos
+feat: implementar administración de tableros
+fix: restringir edición de tareas ajenas
+refactor: reutilizar selector de fechas
+chore: versionar cambios de Supabase
 ```
 
 ---
 
-# Forma de trabajo esperada
+# 35. Forma de trabajo esperada
 
-Cuando te pida implementar algo:
+Cuando se solicite implementar algo:
 
-1. Inspecciona primero el código relacionado.
-2. Explica brevemente qué arquitectura propones.
-3. Reutiliza los módulos existentes.
-4. No concentres la lógica en pantallas.
-5. Mantén TypeScript correctamente tipado.
-6. Evita `any` salvo que sea estrictamente necesario.
-7. Mantén consultas Supabase en services cuando corresponda.
-8. Usa hooks para estado/lógica de presentación cuando tenga sentido.
-9. Mantén componentes pequeños y reutilizables.
-10. Antes de cambiar tablas o policies, revisa el esquema actual.
-11. No desactives RLS para hacer funcionar una operación.
-12. No expongas secretos.
-13. Mantén compatibilidad con iOS y Android.
-14. Si una dependencia nueva no es necesaria, no la agregues.
-15. Prefiere implementaciones simples y comprensibles para un proyecto universitario.
+1. inspeccionar código actual;
+2. revisar rama;
+3. localizar feature existente;
+4. explicar brevemente qué se modificará;
+5. reutilizar componentes/hooks/services existentes;
+6. mantener consultas Supabase en services;
+7. mantener lógica de presentación en hooks cuando corresponda;
+8. mantener pantallas ligeras;
+9. mantener TypeScript tipado;
+10. evitar `any`;
+11. revisar RLS/RPC antes de operaciones sensibles;
+12. evitar duplicar utilidades;
+13. mantener compatibilidad iOS/Android;
+14. no agregar dependencias innecesarias;
+15. probar errores además del camino exitoso;
+16. si cambia Supabase, utilizar migrations;
+17. regenerar tipos después de cambios de esquema/RPC;
+18. revisar `git diff` antes de commit;
+19. no hacer commit/push sin autorización;
+20. preferir soluciones simples y defendibles para un proyecto universitario.
 
 ---
 
-# Estado funcional actual
+# 36. Prioridades actuales recomendadas
 
-Se ha probado correctamente:
+Salvo que el usuario indique otro orden, la prioridad funcional actual es aproximadamente:
 
 ```text
-Expo / React Native
-        ↓
-Supabase
+1. Terminar/integrar edición de proyectos
+2. Restricciones de permisos sobre tareas solicitadas por PO
+3. Introducir CO_LIDER correctamente
+4. Ordenar tareas por fecha de entrega
+5. Editar/eliminar tableros
+6. Editar/reordenar listas
+7. Integrar y probar Chat contra dev actual
+8. Integrar y probar Gantt contra dev actual
+9. Mostrar tareas pendientes en Inicio
+10. Adjuntar archivos a tareas
+11. Historial de actividades
+12. Notificaciones generales
+13. Realtime adicional
+14. Análisis de avances con IA
 ```
 
-y funcionan:
+Antes de ejecutar esta priorización, comprobar si alguna de estas funcionalidades ya fue implementada en otra rama.
 
-- conexión desde la app;
-- registro;
-- confirmación de correo;
-- login;
-- sesión persistente;
-- logout;
-- rutas protegidas;
-- creación de perfil público;
-- creación de proyectos;
-- creación automática del creador como líder;
-- listado de proyectos;
-- separación modular del módulo proyectos.
+---
 
-El próximo desarrollo debe construirse encima de esta base, sin romper estos flujos existentes.
+# 37. Criterio de finalización de una feature
 
-Antes de empezar cualquier nueva tarea, inspecciona el repositorio y dime brevemente qué archivos actuales intervienen y qué cambios propones.
+Una funcionalidad no se considera terminada únicamente porque la UI funciona.
+
+Revisar según corresponda:
+
+```text
+UI
+✓
+
+validaciones
+✓
+
+service
+✓
+
+RPC / query
+✓
+
+RLS / autorización
+✓
+
+migrations
+✓
+
+database.types.ts
+✓
+
+iOS
+✓
+
+Android cuando sea posible
+✓
+
+flujo exitoso
+✓
+
+errores
+✓
+
+usuario sin permisos
+✓
+
+persistencia después de recargar
+✓
+```
+
+Si utiliza Realtime:
+
+```text
+dos sesiones/usuarios
+✓
+```
+
+Si utiliza archivos:
+
+```text
+Storage + policies
+✓
+```
+
+---
+
+# 38. Regla final
+
+No optimices prematuramente ni introduzcas arquitectura innecesaria.
+
+Plann-It es un proyecto universitario que debe priorizar:
+
+```text
+corrección
+claridad
+modularidad
+seguridad
+trazabilidad
+facilidad de explicación
+```
+
+Cuando existan varias soluciones posibles, elegir la más sencilla que mantenga una arquitectura razonable y sea fácil de justificar técnicamente.

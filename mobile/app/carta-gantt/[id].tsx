@@ -1,75 +1,91 @@
-import { useFocusEffect, useLocalSearchParams } from 'expo-router';
-import React, { useCallback } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { View, Text, ActivityIndicator, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useState } from 'react';
 import { GanttChart } from '../../features/carta-gantt/components/GanttChart';
-import { useGantt } from '../../features/carta-gantt/hooks/useGantt';
+import { obtenerDetalleProyecto } from '../../features/proyectos/services/proyecto.service';
+import type { DetalleProyecto } from '../../features/proyectos/types';
+import type { TareaGantt } from '../../features/carta-gantt/types';
 
 export default function CartaGanttScreen() {
-  const { id, inicio, fin } = useLocalSearchParams();
-  const proyectoId = typeof id === 'string' ? id : '';
-  const fechaInicio = typeof inicio === 'string' ? inicio : '2026-08-01'; 
-  const fechaFin = typeof fin === 'string' ? fin : '2026-09-01';
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const [detalle, setDetalle] = useState<DetalleProyecto | null>(null);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const { tareas, loading, error, cargarDatos } = useGantt(proyectoId);
+  useEffect(() => {
+    if (!id) return;
+    cargarDatos();
+  }, [id]);
 
-  // Forza el reload de la Carta Gantt cada vez que la vista entra en foco
-  useFocusEffect(
-    useCallback(() => {
-      if (proyectoId) {
-        cargarDatos();
-      }
-    }, [proyectoId, cargarDatos])
+  async function cargarDatos() {
+    try {
+      setCargando(true);
+      setError(null);
+      const datos = await obtenerDetalleProyecto(id!);
+      setDetalle(datos);
+    } catch (err) {
+      console.error('Error al cargar proyecto:', err);
+      setError('No fue posible cargar el proyecto');
+    } finally {
+      setCargando(false);
+    }
+  }
+
+  if (!id) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F5FB' }}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <Text>Proyecto no encontrado</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (cargando) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F5FB' }}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <ActivityIndicator size="large" color="#6F45A5" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error || !detalle) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F5FB' }}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ color: '#D32F2F' }}>{error || 'Error al cargar'}</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Construir array de tareas desde tableros y listas
+  const tareas: TareaGantt[] = detalle.tableros.flatMap((tablero) =>
+    tablero.listas.flatMap((lista) =>
+      lista.tareas.map((tarea) => ({
+        id_tarea: tarea.tarea_id,
+        nombre_tarea: tarea.tarea_nombre,
+        fecha_inicio: tarea.tarea_fecha_entrega, // Campo de fecha
+        fecha_fin: tarea.tarea_fecha_entrega,    // Usar la misma fecha
+        asignado: tarea.asignaciones?.[0]?.usuario_nombre || null,
+        color: '#6F45A5',
+      }))
+    )
   );
-
-  if (loading && tareas.length === 0) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#6F45A5" />
-      </View>
-    );
-  }
-
-  if (error && tareas.length === 0) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>Error al cargar: {error}</Text>
-      </View>
-    );
-  }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Carta Gantt</Text>
-      <GanttChart 
-         proyectoId={proyectoId}
-         tareas={tareas} 
-         proyectoFechaInicio={fechaInicio} 
-         proyectoFechaFin={fechaFin} 
-       />
-    </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F5FB' }}>
+      <ScrollView style={{ flex: 1 }}>
+        <GanttChart
+          proyectoId={id}
+          tareas={tareas}
+          proyectoFechaInicio={detalle.proyecto.proyecto_fecha_inicio}
+          proyectoFechaFin={detalle.proyecto.proyecto_fecha_fin}
+        />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    padding: 16,
-    textAlign: 'center',
-    backgroundColor: '#fff',
-    marginTop: 50,
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 16,
-  },
-});

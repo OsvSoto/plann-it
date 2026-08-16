@@ -14,6 +14,9 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { useAppColors } from '../../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../../constants/theme'
+
 import { useInvitarMiembro } from '../hooks/useInvitarMiembro'
 
 type Props = {
@@ -29,6 +32,8 @@ export function InvitarMiembroModal({
   proyectoNombre,
   onClose,
 }: Props) {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const [correo, setCorreo] = useState('')
   const {
     enviando,
@@ -85,13 +90,13 @@ export function InvitarMiembroModal({
               onPress={cerrar}
               style={styles.iconButton}
             >
-              <Ionicons name="close" size={23} color="#4F2D7F" />
+              <Ionicons name="close" size={23} color={colors.brandDark} />
             </Pressable>
           </View>
 
           <View style={styles.content}>
             <View style={styles.info}>
-              <Ionicons name="information-circle-outline" size={21} color="#6F45A5" />
+              <Ionicons name="information-circle-outline" size={21} color={colors.brand} />
               <Text style={styles.infoText}>
                 Usa el correo exacto de una persona que ya tenga una cuenta en Plann-It.
               </Text>
@@ -119,7 +124,7 @@ export function InvitarMiembroModal({
 
             {error ? (
               <View style={styles.error} accessibilityRole="alert">
-                <Ionicons name="alert-circle-outline" size={19} color="#B42318" />
+                <Ionicons name="alert-circle-outline" size={19} color={colors.danger} />
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             ) : null}
@@ -158,8 +163,9 @@ export function InvitarMiembroModal({
   )
 }
 
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F8F5FB' },
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: colors.background },
   container: {
     flex: 1,
     width: '100%',
@@ -170,8 +176,8 @@ const styles = StyleSheet.create({
   },
   header: { flexDirection: 'row', alignItems: 'flex-start', gap: 16 },
   headerText: { flex: 1, gap: 4 },
-  title: { color: '#342247', fontSize: 23, fontWeight: '700' },
-  subtitle: { color: '#766682', fontSize: 14 },
+  title: { color: colors.text, fontSize: 23, fontWeight: '700' },
+  subtitle: { color: colors.textMuted, fontSize: 14 },
   iconButton: {
     width: 40,
     height: 40,
@@ -185,22 +191,22 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 9,
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 12,
     backgroundColor: '#F0EAF6',
   },
   infoText: { flex: 1, color: '#5D4D68', fontSize: 13, lineHeight: 19 },
   field: { gap: 8 },
-  label: { color: '#4F2D7F', fontSize: 15, fontWeight: '600' },
+  label: { color: colors.brandDark, fontSize: 15, fontWeight: '600' },
   input: {
     minHeight: 50,
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 14,
-    color: '#342247',
-    backgroundColor: '#FFFFFF',
+    color: colors.text,
+    backgroundColor: colors.surface,
     fontSize: 16,
   },
   error: {
@@ -211,7 +217,7 @@ const styles = StyleSheet.create({
     borderLeftColor: '#D92D20',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: '#FEF3F2',
+    backgroundColor: colors.dangerSoft,
   },
   errorText: { flex: 1, color: '#912018', fontSize: 14, lineHeight: 20 },
   actions: { flexDirection: 'row', gap: 10, paddingTop: 14 },
@@ -221,11 +227,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     borderRadius: 8,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
-  secondaryText: { color: '#4F2D7F', fontSize: 15, fontWeight: '600' },
+  secondaryText: { color: colors.brandDark, fontSize: 15, fontWeight: '600' },
   primaryButton: {
     minHeight: 48,
     flex: 1.4,
@@ -234,9 +240,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 7,
     borderRadius: 8,
-    backgroundColor: '#FF6B2C',
+    backgroundColor: colors.accent,
   },
-  primaryButtonPressed: { backgroundColor: '#E8521D' },
+  primaryButtonPressed: { backgroundColor: colors.accentPressed },
   primaryText: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' },
   disabled: { opacity: 0.65 },
 })
+}

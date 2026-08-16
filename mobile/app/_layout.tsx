@@ -9,11 +9,16 @@ import {
   StyleSheet,
   View,
 } from 'react-native'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { ChatGlobal } from '../features/chat/components/ChatGlobal'
 import { ChatProvider } from '../features/chat/context/ChatContext'
 import { supabase } from '../lib/supabase'
+import { useAppColors } from '../hooks/use-app-colors'
+import type { AppColorsShape } from '../constants/theme'
 
 export default function RootLayout() {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const [session, setSession] = useState<Session | null>(null)
   const [cargando, setCargando] = useState(true)
 
@@ -50,19 +55,21 @@ export default function RootLayout() {
 
   if (cargando) {
     return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" />
-      </View>
+      <GestureHandlerRootView style={styles.container}>
+        <View style={styles.loading}>
+          <ActivityIndicator size="large" />
+        </View>
+      </GestureHandlerRootView>
     )
   }
 
   return (
-    <View style={styles.container}>
+    <GestureHandlerRootView style={styles.container}>
       <Stack
         screenOptions={{
           headerShown: false,
-          headerStyle: { backgroundColor: '#FFFFFF' },
-          headerTintColor: '#342247',
+          headerStyle: { backgroundColor: colors.surface },
+          headerTintColor: colors.text,
           headerTitleStyle: { fontWeight: '700' },
         }}
       >
@@ -111,17 +118,19 @@ export default function RootLayout() {
           <ChatGlobal />
         </ChatProvider>
       )}
-    </View>
+    </GestureHandlerRootView>
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  loading: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-})
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    loading: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  })
+}

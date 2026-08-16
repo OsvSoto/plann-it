@@ -10,7 +10,8 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { AppColors } from '../../../constants/theme'
+import { useAppColors } from '../../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../../constants/theme'
 import { useAsignacionesTarea } from '../hooks/useAsignacionesTarea'
 
 import type { Tarea } from '../types'
@@ -32,6 +33,8 @@ export function AsignarMiembrosModal({
   onClose,
   onChanged,
 }: Props) {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const {
     miembros,
     asignaciones,
@@ -73,12 +76,12 @@ export function AsignarMiembrosModal({
               onPress={onClose}
               style={styles.iconButton}
             >
-              <Ionicons name="close" size={23} color={AppColors.brandDark} />
+              <Ionicons name="close" size={23} color={colors.brandDark} />
             </Pressable>
           </View>
 
           <View style={styles.info}>
-            <Ionicons name="information-circle-outline" size={20} color={AppColors.brand} />
+            <Ionicons name="information-circle-outline" size={20} color={colors.brand} />
             <Text style={styles.infoText}>
               Selecciona las personas responsables de completar esta tarea.
             </Text>
@@ -86,7 +89,7 @@ export function AsignarMiembrosModal({
 
           {cargando && miembros.length === 0 ? (
             <View style={styles.state}>
-              <ActivityIndicator size="small" color={AppColors.brand} />
+              <ActivityIndicator size="small" color={colors.brand} />
               <Text style={styles.stateText}>Cargando equipo...</Text>
             </View>
           ) : error && miembros.length === 0 ? (
@@ -136,12 +139,12 @@ export function AsignarMiembrosModal({
                       </Text>
                     </View>
                     {procesandoActual ? (
-                      <ActivityIndicator size="small" color={AppColors.brand} />
+                      <ActivityIndicator size="small" color={colors.brand} />
                     ) : (
                       <Ionicons
                         name={asignado ? 'checkbox' : 'square-outline'}
                         size={23}
-                        color={asignado ? AppColors.brand : AppColors.textMuted}
+                        color={asignado ? colors.brand : colors.textMuted}
                       />
                     )}
                   </Pressable>
@@ -150,7 +153,7 @@ export function AsignarMiembrosModal({
 
               {error ? (
                 <View style={styles.error} accessibilityRole="alert">
-                  <Ionicons name="alert-circle-outline" size={19} color={AppColors.danger} />
+                  <Ionicons name="alert-circle-outline" size={19} color={colors.danger} />
                   <Text style={styles.errorText}>{error}</Text>
                 </View>
               ) : null}
@@ -175,8 +178,9 @@ export function AsignarMiembrosModal({
   )
 }
 
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: AppColors.background },
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: colors.background },
   container: {
     flex: 1,
     width: '100%',
@@ -188,8 +192,8 @@ const styles = StyleSheet.create({
   },
   header: { flexDirection: 'row', alignItems: 'flex-start', gap: 16 },
   headerText: { flex: 1, gap: 4 },
-  title: { color: AppColors.text, fontSize: 23, fontWeight: '700' },
-  subtitle: { color: AppColors.textMuted, fontSize: 14, lineHeight: 19 },
+  title: { color: colors.text, fontSize: 23, fontWeight: '700' },
+  subtitle: { color: colors.textMuted, fontSize: 14, lineHeight: 19 },
   iconButton: {
     width: 40,
     height: 40,
@@ -202,15 +206,15 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 9,
     borderWidth: 1,
-    borderColor: AppColors.border,
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 12,
-    backgroundColor: AppColors.brandSoft,
+    backgroundColor: colors.brandSoft,
   },
-  infoText: { flex: 1, color: AppColors.text, fontSize: 13, lineHeight: 19 },
+  infoText: { flex: 1, color: colors.text, fontSize: 13, lineHeight: 19 },
   state: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 9 },
-  stateText: { color: AppColors.textMuted, fontSize: 13 },
-  retryText: { color: AppColors.brand, fontSize: 13, fontWeight: '700' },
+  stateText: { color: colors.textMuted, fontSize: 13 },
+  retryText: { color: colors.brand, fontSize: 13, fontWeight: '700' },
   members: { gap: 10, paddingBottom: 12 },
   member: {
     minHeight: 68,
@@ -218,12 +222,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 11,
     borderWidth: 1,
-    borderColor: AppColors.border,
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 11,
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
   },
-  memberSelected: { borderColor: AppColors.brand, backgroundColor: AppColors.brandSoft },
+  memberSelected: { borderColor: colors.brand, backgroundColor: colors.brandSoft },
   memberPressed: { opacity: 0.8 },
   avatar: {
     width: 40,
@@ -231,31 +235,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 20,
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
   },
-  avatarText: { color: AppColors.brandDark, fontSize: 16, fontWeight: '800' },
+  avatarText: { color: colors.brandDark, fontSize: 16, fontWeight: '800' },
   memberText: { minWidth: 0, flex: 1, gap: 2 },
-  memberName: { color: AppColors.text, fontSize: 14, fontWeight: '700' },
-  memberEmail: { color: AppColors.textMuted, fontSize: 12 },
+  memberName: { color: colors.text, fontSize: 14, fontWeight: '700' },
+  memberEmail: { color: colors.textMuted, fontSize: 12 },
   error: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 8,
     borderLeftWidth: 3,
-    borderLeftColor: AppColors.danger,
+    borderLeftColor: colors.danger,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: AppColors.dangerSoft,
+    backgroundColor: colors.dangerSoft,
   },
-  errorText: { flex: 1, color: AppColors.danger, fontSize: 13, lineHeight: 19 },
+  errorText: { flex: 1, color: colors.danger, fontSize: 13, lineHeight: 19 },
   doneButton: {
     minHeight: 48,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
-    backgroundColor: AppColors.accent,
+    backgroundColor: colors.accent,
   },
-  doneButtonPressed: { backgroundColor: AppColors.accentPressed },
-  doneText: { color: AppColors.surface, fontSize: 15, fontWeight: '700' },
+  doneButtonPressed: { backgroundColor: colors.accentPressed },
+  doneText: { color: colors.surface, fontSize: 15, fontWeight: '700' },
   disabled: { opacity: 0.6 },
 })
+}

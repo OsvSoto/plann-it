@@ -28,6 +28,7 @@ export type DetalleProyecto = {
   tableros: TableroDetalle[]
   esLider: boolean
   puedeEliminarProyecto: boolean
+  miUsuarioId: string | null
 }
 
 export type CrearProyectoInput = {
@@ -36,14 +37,37 @@ export type CrearProyectoInput = {
   fechaFin: string
 }
 
+export type EditarProyectoInput = {
+  proyectoId: string
+  nombre: string
+  descripcion: string
+  fechaFin: string
+  estado: EstadoProyecto
+}
+
 export type CrearTableroInput = {
   proyectoId: string
+  nombre: string
+}
+
+export type EditarTableroInput = {
+  tableroId: string
   nombre: string
 }
 
 export type CrearListaInput = {
   tableroId: string
   nombre: string
+  orden: number
+}
+
+export type OrdenLista = {
+  listaId: string
+  orden: number
+}
+
+export type OrdenTarea = {
+  tareaId: string
   orden: number
 }
 
@@ -55,14 +79,36 @@ export const ESTADOS_TAREA = [
 
 export type EstadoTarea = (typeof ESTADOS_TAREA)[number]
 
+export const ESTADOS_PROYECTO = [
+  'ACTIVO',
+  'PAUSADO',
+  'COMPLETADO',
+  'ARCHIVADO',
+] as const
+
+export type EstadoProyecto = (typeof ESTADOS_PROYECTO)[number]
+
+export const ESTADO_PROYECTO_COLORS: Record<
+  EstadoProyecto,
+  { color: string; background: string }
+> = {
+  ACTIVO: { color: '#2E9B5F', background: '#E3F3E9' },
+  PAUSADO: { color: '#B8860B', background: '#FBF0DA' },
+  COMPLETADO: { color: '#3B6FC4', background: '#E4EBFA' },
+  ARCHIVADO: { color: '#6B6470', background: '#ECE8EF' },
+}
+
 export type CrearTareaInput = {
   listaId: string
   nombre: string
   descripcion: string | null
   estado: EstadoTarea
   fechaEntrega: string
+  orden: number
 }
 
-export type EditarTareaInput = Omit<CrearTareaInput, 'listaId'> & {
+export type EditarTareaInput = Omit<CrearTareaInput, 'listaId' | 'orden'> & {
   tareaId: string
 }
+
+

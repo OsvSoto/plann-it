@@ -3,6 +3,8 @@ import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { TareaGantt } from '../types';
+import { useAppColors } from '../../../hooks/use-app-colors';
+import type { AppColorsShape } from '../../../constants/theme';
 
 interface GanttChartProps {
   proyectoId: string;
@@ -14,6 +16,8 @@ interface GanttChartProps {
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export const GanttChart: React.FC<GanttChartProps> = ({ proyectoId, tareas, proyectoFechaInicio, proyectoFechaFin }) => {
+  const colors = useAppColors();
+  const styles = createStyles(colors);
   const router = useRouter();
   const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
   const [expandedTask, setExpandedTask] = useState<string | null>(null);
@@ -98,7 +102,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({ proyectoId, tareas, proy
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={16} color="#4F2D7F" />
+          <Ionicons name="arrow-back" size={16} color={colors.brandDark} />
           <Text style={styles.backButtonText}>Volver al proyecto</Text>
         </TouchableOpacity>
 
@@ -180,7 +184,8 @@ export const GanttChart: React.FC<GanttChartProps> = ({ proyectoId, tareas, proy
   );
 };
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
   wrapper: {
     flex: 1,
     backgroundColor: '#fff',
@@ -201,10 +206,10 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
-    backgroundColor: '#E9E1F3',
+    backgroundColor: colors.brandSoft,
   },
   backButtonText: {
-    color: '#4F2D7F',
+    color: colors.brandDark,
     fontWeight: 'bold',
     fontSize: 14,
   },
@@ -323,4 +328,5 @@ const styles = StyleSheet.create({
     fontSize: 10,
     marginBottom: 2,
   },
-});
+  });
+}

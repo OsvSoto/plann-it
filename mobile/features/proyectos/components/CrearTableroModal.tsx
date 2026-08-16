@@ -12,11 +12,16 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { useCrearTablero } from '../hooks/useCrearTablero'
+import { useAppColors } from '../../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../../constants/theme'
+import { useFormularioTablero } from '../hooks/useCrearTablero'
+
+import type { TableroDetalle } from '../types'
 
 type Props = {
   visible: boolean
   proyectoId: string
+  tablero?: TableroDetalle | null
   onClose: () => void
   onCreated: () => Promise<void>
 }
@@ -24,9 +29,13 @@ type Props = {
 export function CrearTableroModal({
   visible,
   proyectoId,
+  tablero,
   onClose,
   onCreated,
 }: Props) {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
+  const editando = Boolean(tablero)
   const {
     nombre,
     guardando,
@@ -34,7 +43,7 @@ export function CrearTableroModal({
     actualizarNombre,
     reiniciar,
     guardar,
-  } = useCrearTablero()
+  } = useFormularioTablero(tablero)
 
   function cerrar() {
     if (guardando) {
@@ -46,9 +55,9 @@ export function CrearTableroModal({
   }
 
   async function crear() {
-    const creado = await guardar(proyectoId)
+    const guardado = await guardar(proyectoId)
 
-    if (creado) {
+    if (guardado) {
       onClose()
       await onCreated()
     }
@@ -68,8 +77,10 @@ export function CrearTableroModal({
         >
           <View style={styles.header}>
             <View>
-              <Text style={styles.title}>Nuevo tablero</Text>
-              <Text style={styles.subtitle}>Organiza las listas del proyecto</Text>
+              <Text style={styles.title}>{editando ? 'Editar tablero' : 'Nuevo tablero'}</Text>
+              <Text style={styles.subtitle}>
+                {editando ? 'Cambia el nombre del tablero' : 'Organiza las listas del proyecto'}
+              </Text>
             </View>
             <Pressable
               accessibilityLabel="Cerrar"
@@ -82,7 +93,7 @@ export function CrearTableroModal({
                 pressed && styles.closeButtonPressed,
               ]}
             >
-              <Ionicons name="close" size={23} color="#4F2D7F" />
+              <Ionicons name="close" size={23} color={colors.brandDark} />
             </Pressable>
           </View>
 
@@ -108,7 +119,7 @@ export function CrearTableroModal({
 
             {error ? (
               <View style={styles.error} accessibilityRole="alert">
-                <Ionicons name="alert-circle-outline" size={19} color="#B42318" />
+                <Ionicons name="alert-circle-outline" size={19} color={colors.danger} />
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             ) : null}
@@ -140,8 +151,10 @@ export function CrearTableroModal({
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
                 <>
-                  <Ionicons name="add" size={20} color="#FFFFFF" />
-                  <Text style={styles.primaryButtonText}>Crear tablero</Text>
+                  <Ionicons name={editando ? 'save-outline' : 'add'} size={20} color="#FFFFFF" />
+                  <Text style={styles.primaryButtonText}>
+                    {editando ? 'Guardar cambios' : 'Crear tablero'}
+                  </Text>
                 </>
               )}
             </Pressable>
@@ -152,10 +165,11 @@ export function CrearTableroModal({
   )
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8F5FB',
+    backgroundColor: colors.background,
   },
   container: {
     flex: 1,
@@ -172,12 +186,12 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   title: {
-    color: '#342247',
+    color: colors.text,
     fontSize: 23,
     fontWeight: '700',
   },
   subtitle: {
-    color: '#766682',
+    color: colors.textMuted,
     fontSize: 14,
     marginTop: 4,
   },
@@ -200,19 +214,19 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   label: {
-    color: '#4F2D7F',
+    color: colors.brandDark,
     fontSize: 15,
     fontWeight: '600',
   },
   input: {
     minHeight: 50,
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: '#342247',
-    backgroundColor: '#FFFFFF',
+    color: colors.text,
+    backgroundColor: colors.surface,
     fontSize: 16,
   },
   error: {
@@ -223,7 +237,7 @@ const styles = StyleSheet.create({
     borderLeftColor: '#D92D20',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: '#FEF3F2',
+    backgroundColor: colors.dangerSoft,
   },
   errorText: {
     flex: 1,
@@ -242,15 +256,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     borderRadius: 8,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   secondaryButtonPressed: {
     backgroundColor: '#F0EAF6',
   },
   secondaryButtonText: {
-    color: '#4F2D7F',
+    color: colors.brandDark,
     fontSize: 15,
     fontWeight: '600',
   },
@@ -262,10 +276,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 7,
     borderRadius: 8,
-    backgroundColor: '#FF6B2C',
+    backgroundColor: colors.accent,
   },
   primaryButtonPressed: {
-    backgroundColor: '#E8521D',
+    backgroundColor: colors.accentPressed,
   },
   buttonDisabled: {
     opacity: 0.65,
@@ -276,3 +290,4 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 })
+}
