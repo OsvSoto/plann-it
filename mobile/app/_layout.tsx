@@ -9,6 +9,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { ChatGlobal } from '../features/chat/components/ChatGlobal'
 import { ChatProvider } from '../features/chat/context/ChatContext'
 import { supabase } from '../lib/supabase'
@@ -54,14 +55,16 @@ export default function RootLayout() {
 
   if (cargando) {
     return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" />
-      </View>
+      <GestureHandlerRootView style={styles.container}>
+        <View style={styles.loading}>
+          <ActivityIndicator size="large" />
+        </View>
+      </GestureHandlerRootView>
     )
   }
 
   return (
-    <View style={styles.container}>
+    <GestureHandlerRootView style={styles.container}>
       <Stack
         screenOptions={{
           headerShown: false,
@@ -109,7 +112,7 @@ export default function RootLayout() {
           <ChatGlobal />
         </ChatProvider>
       )}
-    </View>
+    </GestureHandlerRootView>
   )
 }
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import {
   ActivityIndicator,
@@ -8,12 +8,16 @@ import {
   Text,
   View,
 } from 'react-native'
+import DraggableFlatList, {
+  type RenderItemParams,
+} from 'react-native-draggable-flatlist'
 
 import { useAppColors } from '../../../hooks/use-app-colors'
 import type { AppColorsShape } from '../../../constants/theme'
 import { TareaModal } from './CrearTareaModal'
 import { AsignarMiembrosModal } from './AsignarMiembrosModal'
 import { useEliminarRecursosProyecto } from '../hooks/useEliminarRecursosProyecto'
+import { reordenarTareas } from '../services/proyecto.service'
 
 import type { ListaDetalle, Tarea } from '../types'
 
@@ -22,6 +26,8 @@ type Props = {
   lista: ListaDetalle
   esLider: boolean
   miUsuarioId: string | null
+  isActive?: boolean
+  onDragHandle?: () => void
   onChanged: () => Promise<void>
 }
 
@@ -40,9 +46,11 @@ type TareaItemProps = {
   eliminando: boolean
   esLider: boolean
   puedeEliminar: boolean
+  isActive: boolean
   onOpen: () => void
   onAssign: () => void
   onDelete: () => void
+  onDrag: () => void
 }
 
 function TareaItem({
@@ -51,9 +59,11 @@ function TareaItem({
   eliminando,
   esLider,
   puedeEliminar,
+  isActive,
   onOpen,
   onAssign,
   onDelete,
+  onDrag,
 }: TareaItemProps) {
   const colors = useAppColors()
   const styles = createStyles(colors)
@@ -69,12 +79,15 @@ function TareaItem({
       accessibilityRole="button"
       disabled={eliminando}
       onPress={onOpen}
+      onLongPress={onDrag}
+      delayLongPress={200}
       style={({ pressed }) => [
         styles.tarea,
         colorNota,
         indice % 3 === 0 && styles.notaInclinadaIzquierda,
         indice % 3 === 2 && styles.notaInclinadaDerecha,
         pressed && styles.tareaPressed,
+        isActive && styles.tareaActiva,
       ]}
     >
       <View style={styles.pin} />
@@ -168,17 +181,49 @@ function TareaItem({
   )
 }
 
-export function ListaProyecto({ proyectoId, lista, esLider, miUsuarioId, onChanged }: Props) {
+export function ListaProyecto({
+  proyectoId,
+  lista,
+  esLider,
+  miUsuarioId,
+  isActive,
+  onDragHandle,
+  onChanged,
+}: Props) {
   const colors = useAppColors()
   const styles = createStyles(colors)
   const [creandoTarea, setCreandoTarea] = useState(false)
   const [tareaEditando, setTareaEditando] = useState<Tarea | null>(null)
   const [tareaAsignando, setTareaAsignando] = useState<Tarea | null>(null)
+  const [tareas, setTareas] = useState(lista.tareas)
   const {
     eliminando,
     eliminarLista,
     eliminarTarea,
   } = useEliminarRecursosProyecto()
+  const siguienteOrdenTarea = tareas.length === 0
+    ? 0
+    : Math.max(...tareas.map((tarea) => tarea.tarea_orden)) + 1
+
+  useEffect(() => {
+    setTareas(lista.tareas)
+  }, [lista.tareas])
+
+  async function manejarReordenTareas(data: Tarea[]) {
+    setTareas(data)
+
+    try {
+      await reordenarTareas(
+        lista.lista_id,
+        data.map((tarea, indice) => ({ tareaId: tarea.tarea_id, orden: indice }))
+      )
+      await onChanged()
+    } catch (error) {
+      console.error('Error al reordenar tareas:', error)
+      Alert.alert('No fue posible reordenar las tareas', 'Intenta nuevamente.')
+      await onChanged()
+    }
+  }
 
   async function ejecutarEliminacionTarea(tareaId: string) {
     const eliminada = await eliminarTarea(tareaId)
@@ -240,11 +285,18 @@ export function ListaProyecto({ proyectoId, lista, esLider, miUsuarioId, onChang
   }
 
   return (
-    <View style={styles.lista}>
+    <View style={[styles.lista, isActive && styles.listaActiva]}>
       <View style={styles.header}>
-        <Text style={styles.nombre} numberOfLines={2}>
-          {lista.lista_nombre}
-        </Text>
+        <Pressable
+          style={styles.nombreContenedor}
+          disabled={!esLider || !onDragHandle}
+          onLongPress={onDragHandle}
+          delayLongPress={200}
+        >
+          <Text style={styles.nombre} numberOfLines={2}>
+            {lista.lista_nombre}
+          </Text>
+        </Pressable>
         <View style={styles.contador}>
           <Text style={styles.contadorText}>{lista.tareas.length}</Text>
         </View>
@@ -281,33 +333,41 @@ export function ListaProyecto({ proyectoId, lista, esLider, miUsuarioId, onChang
         ) : null}
       </View>
 
-      {lista.tareas.length === 0 ? (
+      {tareas.length === 0 ? (
         <View style={styles.vacio}>
           <Ionicons name="checkbox-outline" size={20} color="#8A918B" />
           <Text style={styles.vacioText}>Sin tareas</Text>
         </View>
       ) : (
-        <View style={styles.tareas}>
-          {lista.tareas.map((tarea, indice) => (
+        <DraggableFlatList
+          data={tareas}
+          keyExtractor={(tarea) => tarea.tarea_id}
+          scrollEnabled={false}
+          activationDistance={10}
+          contentContainerStyle={styles.tareas}
+          onDragEnd={({ data }) => void manejarReordenTareas(data)}
+          renderItem={({ item: tarea, getIndex, drag, isActive }: RenderItemParams<Tarea>) => (
             <TareaItem
-              key={tarea.tarea_id}
               tarea={tarea}
-              indice={indice}
+              indice={getIndex() ?? 0}
               eliminando={eliminando === tarea.tarea_id}
               esLider={esLider}
               puedeEliminar={esLider || tarea.tarea_creado_por === miUsuarioId}
+              isActive={isActive}
               onOpen={() => setTareaEditando(tarea)}
               onAssign={() => setTareaAsignando(tarea)}
               onDelete={() => confirmarEliminacionTarea(tarea)}
+              onDrag={drag}
             />
-          ))}
-        </View>
+          )}
+        />
       )}
 
       <TareaModal
         visible={creandoTarea || tareaEditando !== null}
         listaId={lista.lista_id}
         listaNombre={lista.lista_nombre}
+        siguienteOrden={siguienteOrdenTarea}
         tarea={tareaEditando}
         onClose={() => {
           setCreandoTarea(false)
@@ -341,14 +401,22 @@ function createStyles(colors: AppColorsShape) {
     shadowRadius: 6,
     elevation: 5,
   },
+  listaActiva: {
+    opacity: 0.92,
+    transform: [{ scale: 1.02 }],
+    shadowOpacity: 0.4,
+    elevation: 10,
+  },
   header: {
     minHeight: 30,
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 10,
   },
-  nombre: {
+  nombreContenedor: {
     flex: 1,
+  },
+  nombre: {
     color: colors.text,
     fontSize: 16,
     fontWeight: '700',
@@ -413,6 +481,12 @@ function createStyles(colors: AppColorsShape) {
   },
   tareaPressed: {
     opacity: 0.82,
+  },
+  tareaActiva: {
+    opacity: 0.9,
+    transform: [{ scale: 1.03 }],
+    shadowOpacity: 0.35,
+    elevation: 8,
   },
   notaPendiente: {
     backgroundColor: colors.notePending,
