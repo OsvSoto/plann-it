@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons'
+import { LinearGradient } from 'expo-linear-gradient'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useState } from 'react'
 import {
@@ -12,7 +13,6 @@ import {
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-
 import { EquipoProyecto } from '../../features/invitaciones/components/EquipoProyecto'
 import { CrearTableroModal } from '../../features/proyectos/components/CrearTableroModal'
 import { TableroCard } from '../../features/proyectos/components/TableroCard'
@@ -202,6 +202,22 @@ export default function DetalleProyectoScreen() {
             <Ionicons name="list" size={20} color="#FFFFFF" />
             <Text style={styles.ganttButtonText}>Ir a la Carta Gantt</Text>
           </Pressable>
+
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push(`/proyectos/${proyecto.proyecto_id}/analisis`)}
+            style={{ width: '100%' }}
+          >
+            <LinearGradient
+              colors={['#FF6B2C', '#6F45A5', '#342247']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.aiButton}
+            >
+              <Ionicons name="sparkles" size={20} color="#FFFFFF" />
+              <Text style={styles.aiButtonText}>Analizar proyecto usando IA</Text>
+            </LinearGradient>
+          </Pressable>
         </View>
 
         <EquipoProyecto
@@ -371,6 +387,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#4F2D7F',
   },
   ganttButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  aiButton: {
+    minHeight: 46,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderRadius: 8,
+    paddingHorizontal: 20,
+  },
+  aiButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',

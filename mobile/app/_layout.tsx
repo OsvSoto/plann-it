@@ -90,6 +90,12 @@ export default function RootLayout() {
             }}
           />
           <Stack.Screen
+            name="proyectos/[proyectoId]/analisis"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
             name="proyectos/[proyectoId]/tableros/[tableroId]"
             options={{
               headerShown: true,
