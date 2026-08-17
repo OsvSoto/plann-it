@@ -107,7 +107,7 @@ export default function AnalisisIAScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['right', 'bottom', 'left']}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'right', 'bottom', 'left']}>
       <Stack.Screen options={{ title: 'Análisis de IA' }} />
       
       <View style={styles.header}>
