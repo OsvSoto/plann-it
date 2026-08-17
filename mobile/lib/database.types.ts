@@ -621,6 +621,24 @@ export type Database = {
         Args: { p_miembro_id: string; p_tarea_id: string }
         Returns: string
       }
+      buscar_usuarios: {
+        Args: { p_busqueda: string }
+        Returns: {
+          usuario_correo: string
+          usuario_foto: string
+          usuario_id: string
+          usuario_nombre: string
+        }[]
+      }
+      buscar_usuarios_para_invitacion: {
+        Args: { p_busqueda: string; p_proyecto_id: string }
+        Returns: {
+          usuario_correo: string
+          usuario_foto: string
+          usuario_id: string
+          usuario_nombre: string
+        }[]
+      }
       crear_proyecto: {
         Args: { p_descripcion: string; p_fecha_fin: string; p_nombre: string }
         Returns: string
@@ -641,6 +659,10 @@ export type Database = {
       }
       eliminar_miembro_proyecto: {
         Args: { p_miembro_id: string }
+        Returns: string
+      }
+      enviar_invitacion_usuario: {
+        Args: { p_proyecto_id: string; p_usuario_id: string }
         Returns: string
       }
       es_lider_proyecto: { Args: { p_proyecto_id: string }; Returns: boolean }
