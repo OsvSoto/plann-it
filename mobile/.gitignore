@@ -36,6 +36,9 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# contexto local para agentes de IA (no se versiona, solo uso individual)
+AGENTS.md
+
 app-example
 
 # generated native folders
