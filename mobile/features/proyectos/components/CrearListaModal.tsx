@@ -14,12 +14,15 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useAppColors } from '../../../hooks/use-app-colors'
 import type { AppColorsShape } from '../../../constants/theme'
-import { useCrearLista } from '../hooks/useCrearLista'
+import { useFormularioLista } from '../hooks/useCrearLista'
+
+import type { ListaDetalle } from '../types'
 
 type Props = {
   visible: boolean
   tableroId: string
   siguienteOrden: number
+  lista?: ListaDetalle | null
   onClose: () => void
   onCreated: () => Promise<void>
 }
@@ -28,11 +31,13 @@ export function CrearListaModal({
   visible,
   tableroId,
   siguienteOrden,
+  lista,
   onClose,
   onCreated,
 }: Props) {
   const colors = useAppColors()
   const styles = createStyles(colors)
+  const editando = Boolean(lista)
   const {
     nombre,
     guardando,
@@ -40,7 +45,7 @@ export function CrearListaModal({
     actualizarNombre,
     reiniciar,
     guardar,
-  } = useCrearLista()
+  } = useFormularioLista(lista)
 
   function cerrar() {
     if (!guardando) {
@@ -50,9 +55,9 @@ export function CrearListaModal({
   }
 
   async function crear() {
-    const creada = await guardar(tableroId, siguienteOrden)
+    const guardada = await guardar(tableroId, siguienteOrden)
 
-    if (creada) {
+    if (guardada) {
       onClose()
       await onCreated()
     }
@@ -72,8 +77,10 @@ export function CrearListaModal({
         >
           <View style={styles.header}>
             <View style={styles.headerText}>
-              <Text style={styles.title}>Nueva lista</Text>
-              <Text style={styles.subtitle}>Agrega una etapa al tablero</Text>
+              <Text style={styles.title}>{editando ? 'Editar lista' : 'Nueva lista'}</Text>
+              <Text style={styles.subtitle}>
+                {editando ? 'Cambia el nombre de la lista' : 'Agrega una etapa al tablero'}
+              </Text>
             </View>
             <Pressable
               accessibilityLabel="Cerrar"
@@ -133,8 +140,8 @@ export function CrearListaModal({
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
                 <>
-                  <Ionicons name="add" size={20} color="#FFFFFF" />
-                  <Text style={styles.primaryText}>Crear lista</Text>
+                  <Ionicons name={editando ? 'save-outline' : 'add'} size={20} color="#FFFFFF" />
+                  <Text style={styles.primaryText}>{editando ? 'Guardar cambios' : 'Crear lista'}</Text>
                 </>
               )}
             </Pressable>

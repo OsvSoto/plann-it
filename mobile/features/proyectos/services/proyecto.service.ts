@@ -8,6 +8,7 @@ import type {
   CrearTableroInput,
   CrearTareaInput,
   DetalleProyecto,
+  EditarListaInput,
   EditarTableroInput,
   EditarTareaInput,
   OrdenLista,
@@ -260,6 +261,23 @@ export async function crearTarea(
       tarea_fecha_entrega: tarea.fechaEntrega,
       tarea_orden: tarea.orden,
     })
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function editarLista(
+  lista: EditarListaInput
+): Promise<void> {
+  const { error } = await supabase
+    .from('lista')
+    .update({
+      lista_nombre: lista.nombre.trim(),
+    })
+    .eq('lista_id', lista.listaId)
+    .select('lista_id')
+    .single()
 
   if (error) {
     throw error
