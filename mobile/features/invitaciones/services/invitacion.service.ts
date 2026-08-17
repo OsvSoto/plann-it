@@ -33,8 +33,7 @@ export async function eliminarMiembroProyecto(
 
 export async function obtenerInvitacionesPendientes(): Promise<InvitacionPendiente[]> {
   const { data, error } = await supabase.rpc(
-    'obtener_invitaciones_pendientes',
-    {}
+    'obtener_invitaciones_pendientes'
   )
   if (error) {
     throw error

@@ -61,6 +61,11 @@ export type CrearListaInput = {
   orden: number
 }
 
+export type EditarListaInput = {
+  listaId: string
+  nombre: string
+}
+
 export type OrdenLista = {
   listaId: string
   orden: number

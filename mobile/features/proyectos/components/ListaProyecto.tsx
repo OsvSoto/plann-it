@@ -16,6 +16,7 @@ import { useAppColors } from '../../../hooks/use-app-colors'
 import type { AppColorsShape } from '../../../constants/theme'
 import { TareaModal } from './CrearTareaModal'
 import { AsignarMiembrosModal } from './AsignarMiembrosModal'
+import { CrearListaModal } from './CrearListaModal'
 import { useEliminarRecursosProyecto } from '../hooks/useEliminarRecursosProyecto'
 import { reordenarTareas } from '../services/proyecto.service'
 
@@ -195,6 +196,7 @@ export function ListaProyecto({
   const [creandoTarea, setCreandoTarea] = useState(false)
   const [tareaEditando, setTareaEditando] = useState<Tarea | null>(null)
   const [tareaAsignando, setTareaAsignando] = useState<Tarea | null>(null)
+  const [editandoLista, setEditandoLista] = useState(false)
   const [tareas, setTareas] = useState(lista.tareas)
   const {
     eliminando,
@@ -220,7 +222,13 @@ export function ListaProyecto({
       await onChanged()
     } catch (error) {
       console.error('Error al reordenar tareas:', error)
-      Alert.alert('No fue posible reordenar las tareas', 'Intenta nuevamente.')
+      const sinPermiso = (error as { code?: string })?.code === '42501'
+      Alert.alert(
+        'No fue posible reordenar las tareas',
+        sinPermiso
+          ? 'No tienes permiso para mover alguna de estas tareas (está asignada a otra persona).'
+          : 'Intenta nuevamente.'
+      )
       await onChanged()
     }
   }
@@ -313,23 +321,37 @@ export function ListaProyecto({
           <Ionicons name="add" size={19} color={colors.brand} />
         </Pressable>
         {esLider ? (
-          <Pressable
-            accessibilityLabel={`Eliminar lista ${lista.lista_nombre}`}
-            accessibilityRole="button"
-            disabled={eliminando === lista.lista_id}
-            hitSlop={6}
-            onPress={solicitarEliminacionLista}
-            style={({ pressed }) => [
-              styles.deleteListButton,
-              pressed && styles.deleteButtonPressed,
-            ]}
-          >
-            {eliminando === lista.lista_id ? (
-              <ActivityIndicator size="small" color={colors.accentStrong} />
-            ) : (
-              <Ionicons name="trash-outline" size={18} color={colors.accentStrong} />
-            )}
-          </Pressable>
+          <>
+            <Pressable
+              accessibilityLabel={`Editar lista ${lista.lista_nombre}`}
+              accessibilityRole="button"
+              hitSlop={6}
+              onPress={() => setEditandoLista(true)}
+              style={({ pressed }) => [
+                styles.editListButton,
+                pressed && styles.editButtonPressed,
+              ]}
+            >
+              <Ionicons name="create-outline" size={18} color={colors.brand} />
+            </Pressable>
+            <Pressable
+              accessibilityLabel={`Eliminar lista ${lista.lista_nombre}`}
+              accessibilityRole="button"
+              disabled={eliminando === lista.lista_id}
+              hitSlop={6}
+              onPress={solicitarEliminacionLista}
+              style={({ pressed }) => [
+                styles.deleteListButton,
+                pressed && styles.deleteButtonPressed,
+              ]}
+            >
+              {eliminando === lista.lista_id ? (
+                <ActivityIndicator size="small" color={colors.accentStrong} />
+              ) : (
+                <Ionicons name="trash-outline" size={18} color={colors.accentStrong} />
+              )}
+            </Pressable>
+          </>
         ) : null}
       </View>
 
@@ -380,6 +402,14 @@ export function ListaProyecto({
         tarea={tareaAsignando}
         onClose={() => setTareaAsignando(null)}
         onChanged={onChanged}
+      />
+      <CrearListaModal
+        visible={editandoLista}
+        tableroId={lista.lista_tablero_id}
+        siguienteOrden={0}
+        lista={lista}
+        onClose={() => setEditandoLista(false)}
+        onCreated={onChanged}
       />
     </View>
   )
@@ -452,6 +482,16 @@ function createStyles(colors: AppColorsShape) {
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
+  },
+  editListButton: {
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+  },
+  editButtonPressed: {
+    backgroundColor: colors.border,
   },
   deleteTaskButton: {
     width: 28,

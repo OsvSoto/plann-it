@@ -1,11 +1,21 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import { crearLista as crearListaService } from '../services/proyecto.service'
+import {
+  crearLista as crearListaService,
+  editarLista as editarListaService,
+} from '../services/proyecto.service'
 
-export function useCrearLista() {
-  const [nombre, setNombre] = useState('')
+import type { ListaDetalle } from '../types'
+
+export function useFormularioLista(lista?: ListaDetalle | null) {
+  const [nombre, setNombre] = useState(lista?.lista_nombre ?? '')
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setNombre(lista?.lista_nombre ?? '')
+    setError(null)
+  }, [lista])
 
   function actualizarNombre(valor: string) {
     setNombre(valor)
@@ -13,7 +23,7 @@ export function useCrearLista() {
   }
 
   function reiniciar() {
-    setNombre('')
+    setNombre(lista?.lista_nombre ?? '')
     setError(null)
   }
 
@@ -32,16 +42,25 @@ export function useCrearLista() {
     try {
       setGuardando(true)
       setError(null)
-      await crearListaService({
-        tableroId,
-        nombre: nombreLimpio,
-        orden,
-      })
+
+      if (lista) {
+        await editarListaService({
+          listaId: lista.lista_id,
+          nombre: nombreLimpio,
+        })
+      } else {
+        await crearListaService({
+          tableroId,
+          nombre: nombreLimpio,
+          orden,
+        })
+      }
+
       reiniciar()
       return true
     } catch (error) {
-      console.error('Error al crear lista:', error)
-      setError('No fue posible crear la lista. Intenta nuevamente.')
+      console.error('Error al guardar lista:', error)
+      setError('No fue posible guardar la lista. Intenta nuevamente.')
       return false
     } finally {
       setGuardando(false)

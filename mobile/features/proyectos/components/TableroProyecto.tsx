@@ -56,7 +56,11 @@ export function TableroProyecto({ tablero, esLider, miUsuarioId, onChanged }: Pr
       await onChanged()
     } catch (error) {
       console.error('Error al reordenar listas:', error)
-      Alert.alert('No fue posible reordenar las listas', 'Intenta nuevamente.')
+      const sinPermiso = (error as { code?: string })?.code === '42501'
+      Alert.alert(
+        'No fue posible reordenar las listas',
+        sinPermiso ? 'No tienes permiso para reordenar las listas de este tablero.' : 'Intenta nuevamente.'
+      )
       await onChanged()
     }
   }
