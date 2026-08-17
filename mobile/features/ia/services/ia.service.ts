@@ -38,7 +38,7 @@ ${JSON.stringify(resumen, null, 2)}`
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'llama-3.1-8b-instant',
+      model: 'openai/gpt-oss-20b',
       messages: [
         { role: 'system', content: 'You are a helpful project manager assistant.' },
         { role: 'user', content: prompt }
