@@ -12,6 +12,7 @@ import {
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { ChatGlobal } from '../features/chat/components/ChatGlobal'
 import { ChatProvider } from '../features/chat/context/ChatContext'
+import { usePushNotifications } from '../features/notificaciones/hooks/usePushNotifications'
 import { supabase } from '../lib/supabase'
 import { useAppColors } from '../hooks/use-app-colors'
 import type { AppColorsShape } from '../constants/theme'
@@ -116,10 +117,16 @@ export default function RootLayout() {
       {!!session && (
         <ChatProvider>
           <ChatGlobal />
+          <PushNotificationsBridge />
         </ChatProvider>
       )}
     </GestureHandlerRootView>
   )
+}
+
+function PushNotificationsBridge() {
+  usePushNotifications(true)
+  return null
 }
 
 function createStyles(colors: AppColorsShape) {

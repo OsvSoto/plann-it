@@ -59,7 +59,7 @@ function esMismoDia(iso1: string, iso2: string) {
 export function ChatGlobal() {
   const colors = useAppColors()
   const styles = createStyles(colors)
-  const { chatAbierto, setChatAbierto } = useChatGlobal()
+  const { chatAbierto, setChatAbierto, setProyectoActivoId } = useChatGlobal()
   const [proyectos, setProyectos] = useState<any[]>([])
   const [proyectoActivo, setProyectoActivo] = useState<any>(null)
   const [mensajes, setMensajes] = useState<any[]>([])
@@ -83,9 +83,14 @@ export function ChatGlobal() {
   }, [chatAbierto])
 
   useEffect(() => {
+    setProyectoActivoId(chatAbierto ? proyectoActivo?.proyectoId ?? null : null)
+    return () => setProyectoActivoId(null)
+  }, [chatAbierto, proyectoActivo, setProyectoActivoId])
+
+  useEffect(() => {
     if (proyectoActivo) {
       cargarMensajes(proyectoActivo.proyectoId)
-      
+
       const channel = supabase
         .channel(`chat_proyecto_${proyectoActivo.proyectoId}`)
         .on('postgres_changes', { 
