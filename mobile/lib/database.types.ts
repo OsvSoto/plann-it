@@ -509,6 +509,7 @@ export type Database = {
           tarea_id: string
           tarea_lista_id: string
           tarea_nombre: string
+          tarea_orden: number
         }
         Insert: {
           tarea_creado_por?: string | null
@@ -518,6 +519,7 @@ export type Database = {
           tarea_id?: string
           tarea_lista_id: string
           tarea_nombre: string
+          tarea_orden?: number
         }
         Update: {
           tarea_creado_por?: string | null
@@ -527,6 +529,7 @@ export type Database = {
           tarea_id?: string
           tarea_lista_id?: string
           tarea_nombre?: string
+          tarea_orden?: number
         }
         Relationships: [
           {
@@ -618,6 +621,24 @@ export type Database = {
         Args: { p_miembro_id: string; p_tarea_id: string }
         Returns: string
       }
+      buscar_usuarios: {
+        Args: { p_busqueda: string }
+        Returns: {
+          usuario_correo: string
+          usuario_foto: string
+          usuario_id: string
+          usuario_nombre: string
+        }[]
+      }
+      buscar_usuarios_para_invitacion: {
+        Args: { p_busqueda: string; p_proyecto_id: string }
+        Returns: {
+          usuario_correo: string
+          usuario_foto: string
+          usuario_id: string
+          usuario_nombre: string
+        }[]
+      }
       crear_proyecto: {
         Args: { p_descripcion: string; p_fecha_fin: string; p_nombre: string }
         Returns: string
@@ -638,6 +659,10 @@ export type Database = {
       }
       eliminar_miembro_proyecto: {
         Args: { p_miembro_id: string }
+        Returns: string
+      }
+      enviar_invitacion_usuario: {
+        Args: { p_proyecto_id: string; p_usuario_id: string }
         Returns: string
       }
       es_lider_proyecto: { Args: { p_proyecto_id: string }; Returns: boolean }
@@ -689,9 +714,21 @@ export type Database = {
           usuario_nombre: string
         }[]
       }
+      obtener_resumen_proyecto_ia: {
+        Args: { p_proyecto_id: string }
+        Returns: Json
+      }
       puede_eliminar_proyecto: {
         Args: { p_proyecto_id: string }
         Returns: boolean
+      }
+      reordenar_listas: {
+        Args: { p_orden: Json; p_tablero_id: string }
+        Returns: undefined
+      }
+      reordenar_tareas: {
+        Args: { p_lista_id: string; p_orden: Json }
+        Returns: undefined
       }
       responder_invitacion: {
         Args: { p_invitacion_id: string; p_respuesta: string }

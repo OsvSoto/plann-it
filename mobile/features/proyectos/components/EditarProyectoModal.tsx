@@ -13,11 +13,14 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { useAppColors } from '../../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../../constants/theme'
+
 import { CampoFecha } from './CampoFecha'
 import { useEditarProyecto } from '../hooks/useEditarProyecto'
 
 import type { Proyecto } from '../types'
-import { ESTADOS_PROYECTO } from '../types'
+import { ESTADO_PROYECTO_COLORS, ESTADOS_PROYECTO } from '../types'
 
 type Props = {
   visible: boolean
@@ -32,6 +35,8 @@ export function EditarProyectoModal({
   onCerrar,
   onGuardado,
 }: Props) {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const {
     formulario,
     guardando,
@@ -108,7 +113,7 @@ export function EditarProyectoModal({
               <Ionicons
                 name="close"
                 size={23}
-                color="#4F2D7F"
+                color={colors.brandDark}
               />
             </Pressable>
           </View>
@@ -221,6 +226,7 @@ export function EditarProyectoModal({
                       const seleccionado =
                         formulario.estado ===
                         estado
+                      const colorEstado = ESTADO_PROYECTO_COLORS[estado]
 
                       return (
                         <Pressable
@@ -235,8 +241,10 @@ export function EditarProyectoModal({
                           style={({ pressed }) => [
                             styles.estadoButton,
 
-                            seleccionado &&
-                              styles.estadoButtonActivo,
+                            seleccionado && {
+                              borderColor: colorEstado.color,
+                              backgroundColor: colorEstado.color,
+                            },
 
                             pressed &&
                               !guardando &&
@@ -268,7 +276,7 @@ export function EditarProyectoModal({
                   <Ionicons
                     name="alert-circle-outline"
                     size={20}
-                    color="#B42318"
+                    color={colors.danger}
                   />
 
                   <Text style={styles.errorText}>
@@ -344,10 +352,11 @@ export function EditarProyectoModal({
   )
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8F5FB',
+    backgroundColor: colors.background,
   },
 
   container: {
@@ -371,13 +380,13 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    color: '#342247',
+    color: colors.text,
     fontSize: 23,
     fontWeight: '700',
   },
 
   subtitle: {
-    color: '#766682',
+    color: colors.textMuted,
     fontSize: 14,
     marginTop: 4,
   },
@@ -419,7 +428,7 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    color: '#4F2D7F',
+    color: colors.brandDark,
     fontSize: 15,
     fontWeight: '600',
   },
@@ -432,12 +441,12 @@ const styles = StyleSheet.create({
   input: {
     minHeight: 50,
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: '#342247',
-    backgroundColor: '#FFFFFF',
+    color: colors.text,
+    backgroundColor: colors.surface,
     fontSize: 16,
   },
 
@@ -464,16 +473,11 @@ const styles = StyleSheet.create({
 
   estadoButton: {
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 9,
-    backgroundColor: '#FFFFFF',
-  },
-
-  estadoButtonActivo: {
-    borderColor: '#6F45A5',
-    backgroundColor: '#6F45A5',
+    backgroundColor: colors.surface,
   },
 
   estadoButtonPressed: {
@@ -481,7 +485,7 @@ const styles = StyleSheet.create({
   },
 
   estadoText: {
-    color: '#62566E',
+    color: colors.textMuted,
     fontSize: 13,
     fontWeight: '600',
   },
@@ -498,7 +502,7 @@ const styles = StyleSheet.create({
     borderLeftColor: '#D92D20',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: '#FEF3F2',
+    backgroundColor: colors.dangerSoft,
   },
 
   errorText: {
@@ -513,7 +517,7 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingTop: 12,
     paddingBottom: 8,
-    backgroundColor: '#F8F5FB',
+    backgroundColor: colors.background,
   },
 
   secondaryButton: {
@@ -522,9 +526,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     borderRadius: 8,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
 
   secondaryButtonPressed: {
@@ -532,7 +536,7 @@ const styles = StyleSheet.create({
   },
 
   secondaryButtonText: {
-    color: '#4F2D7F',
+    color: colors.brandDark,
     fontSize: 15,
     fontWeight: '600',
   },
@@ -545,11 +549,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 7,
     borderRadius: 8,
-    backgroundColor: '#FF6B2C',
+    backgroundColor: colors.accent,
   },
 
   primaryButtonPressed: {
-    backgroundColor: '#E8521D',
+    backgroundColor: colors.accentPressed,
   },
 
   buttonDisabled: {
@@ -561,4 +565,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
   },
-})
+  })
+}

@@ -8,7 +8,8 @@ import {
   View,
 } from 'react-native'
 
-import { AppColors } from '../../../constants/theme'
+import { useAppColors } from '../../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../../constants/theme'
 import {
   fechaDateAVisual,
   fechaVisualADate,
@@ -56,6 +57,8 @@ export function CalendarioModal({
   onClose,
   onSelect,
 }: Props) {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const [mesVisible, setMesVisible] = useState(() => inicioMes(hoyComoFechaUtc()))
 
   useEffect(() => {
@@ -113,7 +116,7 @@ export function CalendarioModal({
               onPress={() => cambiarMes(-1)}
               style={styles.iconButton}
             >
-              <Ionicons name="chevron-back" size={22} color={AppColors.brandDark} />
+              <Ionicons name="chevron-back" size={22} color={colors.brandDark} />
             </Pressable>
             <Text style={styles.monthTitle}>{MESES[mes]} {anio}</Text>
             <Pressable
@@ -122,7 +125,7 @@ export function CalendarioModal({
               onPress={() => cambiarMes(1)}
               style={styles.iconButton}
             >
-              <Ionicons name="chevron-forward" size={22} color={AppColors.brandDark} />
+              <Ionicons name="chevron-forward" size={22} color={colors.brandDark} />
             </Pressable>
           </View>
 
@@ -191,7 +194,8 @@ export function CalendarioModal({
   )
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
   overlay: {
     flex: 1,
     alignItems: 'center',
@@ -204,8 +208,8 @@ const styles = StyleSheet.create({
     maxWidth: 390,
     borderRadius: 12,
     padding: 18,
-    backgroundColor: AppColors.surface,
-    shadowColor: AppColors.brandDark,
+    backgroundColor: colors.surface,
+    shadowColor: colors.brandDark,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.25,
     shadowRadius: 16,
@@ -223,9 +227,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
-    backgroundColor: AppColors.brandSoft,
+    backgroundColor: colors.brandSoft,
   },
-  monthTitle: { color: AppColors.text, fontSize: 17, fontWeight: '700' },
+  monthTitle: { color: colors.text, fontSize: 17, fontWeight: '700' },
   weekRow: { flexDirection: 'row', marginBottom: 4 },
   daysGrid: { flexDirection: 'row', flexWrap: 'wrap' },
   dayCell: {
@@ -234,7 +238,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  weekDay: { color: AppColors.textMuted, fontSize: 12, fontWeight: '700' },
+  weekDay: { color: colors.textMuted, fontSize: 12, fontWeight: '700' },
   dayButton: {
     width: 36,
     height: 36,
@@ -242,21 +246,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 18,
   },
-  todayButton: { borderWidth: 1, borderColor: AppColors.accent },
-  selectedDay: { borderColor: AppColors.brand, backgroundColor: AppColors.brand },
+  todayButton: { borderWidth: 1, borderColor: colors.accent },
+  selectedDay: { borderColor: colors.brand, backgroundColor: colors.brand },
   dayPressed: { opacity: 0.65 },
-  dayText: { color: AppColors.text, fontSize: 14, fontWeight: '600' },
-  selectedDayText: { color: AppColors.surface, fontWeight: '800' },
+  dayText: { color: colors.text, fontSize: 14, fontWeight: '600' },
+  selectedDayText: { color: colors.surface, fontWeight: '800' },
   actions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderTopWidth: 1,
-    borderTopColor: AppColors.border,
+    borderTopColor: colors.border,
     marginTop: 14,
     paddingTop: 14,
   },
   todayAction: { minHeight: 40, justifyContent: 'center', paddingHorizontal: 10 },
-  todayActionText: { color: AppColors.brand, fontSize: 14, fontWeight: '700' },
+  todayActionText: { color: colors.brand, fontSize: 14, fontWeight: '700' },
   closeButton: { minHeight: 40, justifyContent: 'center', paddingHorizontal: 10 },
-  closeText: { color: AppColors.textMuted, fontSize: 14, fontWeight: '600' },
+  closeText: { color: colors.textMuted, fontSize: 14, fontWeight: '600' },
 })
+}

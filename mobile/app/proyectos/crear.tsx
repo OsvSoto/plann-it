@@ -13,10 +13,15 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { useAppColors } from '../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../constants/theme'
+
 import { useCrearProyecto } from '../../features/proyectos/hooks/useCrearProyecto'
 import { CampoFecha } from '../../features/proyectos/components/CampoFecha'
 
 export default function CrearProyectoScreen() {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const {
     formulario,
     guardando,
@@ -46,7 +51,7 @@ export default function CrearProyectoScreen() {
           <View style={styles.content}>
             <View style={styles.intro}>
               <View style={styles.iconContainer}>
-                <Ionicons name="folder-open-outline" size={24} color="#6F45A5" />
+                <Ionicons name="folder-open-outline" size={24} color={colors.brand} />
               </View>
               <View style={styles.introText}>
                 <Text style={styles.title}>Información general</Text>
@@ -104,7 +109,7 @@ export default function CrearProyectoScreen() {
 
               {error ? (
                 <View style={styles.errorContainer} accessibilityRole="alert">
-                  <Ionicons name="alert-circle-outline" size={20} color="#B42318" />
+                  <Ionicons name="alert-circle-outline" size={20} color={colors.danger} />
                   <Text style={styles.errorText}>{error}</Text>
                 </View>
               ) : null}
@@ -135,130 +140,132 @@ export default function CrearProyectoScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F8F5FB',
-  },
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 24,
-  },
-  content: {
-    width: '100%',
-    maxWidth: 640,
-    alignSelf: 'center',
-    gap: 28,
-  },
-  intro: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 14,
-  },
-  iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#E9E1F3',
-  },
-  introText: {
-    flex: 1,
-    gap: 6,
-  },
-  title: {
-    color: '#342247',
-    fontSize: 22,
-    fontWeight: '700',
-  },
-  subtitle: {
-    color: '#766682',
-    fontSize: 15,
-    lineHeight: 21,
-  },
-  form: {
-    gap: 22,
-  },
-  field: {
-    gap: 8,
-  },
-  labelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  label: {
-    color: '#4F2D7F',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  optional: {
-    color: '#747C76',
-    fontSize: 13,
-  },
-  input: {
-    minHeight: 50,
-    borderWidth: 1,
-    borderColor: '#D9CEE8',
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: '#342247',
-    backgroundColor: '#FFFFFF',
-    fontSize: 16,
-  },
-  textArea: {
-    minHeight: 112,
-  },
-  counter: {
-    color: '#747C76',
-    fontSize: 12,
-    textAlign: 'right',
-  },
-  helper: {
-    color: '#747C76',
-    fontSize: 12,
-  },
-  errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: '#D92D20',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    backgroundColor: '#FEF3F2',
-  },
-  errorText: {
-    flex: 1,
-    color: '#912018',
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  button: {
-    minHeight: 52,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    borderRadius: 8,
-    paddingHorizontal: 20,
-    backgroundColor: '#FF6B2C',
-  },
-  buttonPressed: {
-    backgroundColor: '#E8521D',
-  },
-  buttonDisabled: {
-    opacity: 0.65,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-})
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    container: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingHorizontal: 20,
+      paddingVertical: 24,
+    },
+    content: {
+      width: '100%',
+      maxWidth: 640,
+      alignSelf: 'center',
+      gap: 28,
+    },
+    intro: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 14,
+    },
+    iconContainer: {
+      width: 44,
+      height: 44,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.brandSoft,
+    },
+    introText: {
+      flex: 1,
+      gap: 6,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 22,
+      fontWeight: '700',
+    },
+    subtitle: {
+      color: colors.textMuted,
+      fontSize: 15,
+      lineHeight: 21,
+    },
+    form: {
+      gap: 22,
+    },
+    field: {
+      gap: 8,
+    },
+    labelRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    label: {
+      color: colors.brandDark,
+      fontSize: 15,
+      fontWeight: '600',
+    },
+    optional: {
+      color: '#747C76',
+      fontSize: 13,
+    },
+    input: {
+      minHeight: 50,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      color: colors.text,
+      backgroundColor: colors.surface,
+      fontSize: 16,
+    },
+    textArea: {
+      minHeight: 112,
+    },
+    counter: {
+      color: '#747C76',
+      fontSize: 12,
+      textAlign: 'right',
+    },
+    helper: {
+      color: '#747C76',
+      fontSize: 12,
+    },
+    errorContainer: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 8,
+      borderLeftWidth: 3,
+      borderLeftColor: '#D92D20',
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      backgroundColor: colors.dangerSoft,
+    },
+    errorText: {
+      flex: 1,
+      color: '#912018',
+      fontSize: 14,
+      lineHeight: 20,
+    },
+    button: {
+      minHeight: 52,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      borderRadius: 8,
+      paddingHorizontal: 20,
+      backgroundColor: colors.accent,
+    },
+    buttonPressed: {
+      backgroundColor: colors.accentPressed,
+    },
+    buttonDisabled: {
+      opacity: 0.65,
+    },
+    buttonText: {
+      color: '#FFFFFF',
+      fontSize: 16,
+      fontWeight: '700',
+    },
+  })
+}

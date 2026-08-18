@@ -11,10 +11,13 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { AppColors } from '../../constants/theme'
+import { useAppColors } from '../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../constants/theme'
 import { usePerfil } from '../../features/perfil/hooks/usePerfil'
 
 export default function PerfilScreen() {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const {
     perfil,
     cargando,
@@ -44,7 +47,7 @@ export default function PerfilScreen() {
             pressed && styles.buttonPressed,
           ]}
         >
-          <Ionicons name="arrow-back" size={24} color={AppColors.text} />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
         <Text style={styles.headerTitle}>Mi perfil</Text>
         <View style={styles.headerSpacer} />
@@ -52,11 +55,11 @@ export default function PerfilScreen() {
 
       {cargando ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={AppColors.brand} />
+          <ActivityIndicator size="large" color={colors.brand} />
         </View>
       ) : error || !perfil ? (
         <View style={styles.centered}>
-          <Ionicons name="alert-circle-outline" size={42} color={AppColors.danger} />
+          <Ionicons name="alert-circle-outline" size={42} color={colors.danger} />
           <Text style={styles.errorText}>{error ?? 'Perfil no disponible.'}</Text>
           <Pressable
             accessibilityRole="button"
@@ -79,7 +82,7 @@ export default function PerfilScreen() {
               {perfil.fotoUrl ? (
                 <Image source={{ uri: perfil.fotoUrl }} style={styles.avatar} />
               ) : (
-                <Ionicons name="person" size={64} color={AppColors.brand} />
+                <Ionicons name="person" size={64} color={colors.brand} />
               )}
             </View>
 
@@ -101,7 +104,7 @@ export default function PerfilScreen() {
                 pressed && styles.primaryButtonPressed,
               ]}
             >
-              <Ionicons name="create-outline" size={19} color={AppColors.surface} />
+              <Ionicons name="create-outline" size={19} color={colors.surface} />
               <Text style={styles.editButtonText}>Editar perfil</Text>
             </Pressable>
           </View>
@@ -111,10 +114,11 @@ export default function PerfilScreen() {
   )
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: AppColors.background,
+    backgroundColor: colors.background,
   },
   header: {
     height: 56,
@@ -123,8 +127,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: AppColors.border,
-    backgroundColor: AppColors.surface,
+    borderBottomColor: colors.border,
+    backgroundColor: colors.surface,
   },
   headerButton: {
     width: 40,
@@ -134,10 +138,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   buttonPressed: {
-    backgroundColor: AppColors.brandSoft,
+    backgroundColor: colors.brandSoft,
   },
   headerTitle: {
-    color: AppColors.text,
+    color: colors.text,
     fontSize: 18,
     fontWeight: '700',
   },
@@ -152,17 +156,17 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   errorText: {
-    color: AppColors.textMuted,
+    color: colors.textMuted,
     textAlign: 'center',
   },
   retryButton: {
     paddingHorizontal: 20,
     paddingVertical: 11,
     borderRadius: 8,
-    backgroundColor: AppColors.brand,
+    backgroundColor: colors.brand,
   },
   retryButtonText: {
-    color: AppColors.surface,
+    color: colors.surface,
     fontWeight: '700',
   },
   content: {
@@ -177,9 +181,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 24,
     borderWidth: 1,
-    borderColor: AppColors.border,
+    borderColor: colors.border,
     borderRadius: 12,
-    backgroundColor: AppColors.surface,
+    backgroundColor: colors.surface,
   },
   avatarFrame: {
     width: 112,
@@ -188,9 +192,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
     borderWidth: 3,
-    borderColor: AppColors.brand,
+    borderColor: colors.brand,
     borderRadius: 56,
-    backgroundColor: AppColors.brandSoft,
+    backgroundColor: colors.brandSoft,
   },
   avatar: {
     width: '100%',
@@ -198,14 +202,14 @@ const styles = StyleSheet.create({
   },
   name: {
     marginTop: 16,
-    color: AppColors.text,
+    color: colors.text,
     fontSize: 24,
     fontWeight: '700',
     textAlign: 'center',
   },
   email: {
     marginTop: 4,
-    color: AppColors.textMuted,
+    color: colors.textMuted,
     fontSize: 14,
     textAlign: 'center',
   },
@@ -214,17 +218,17 @@ const styles = StyleSheet.create({
     marginTop: 24,
     padding: 16,
     borderRadius: 8,
-    backgroundColor: AppColors.brandSoft,
+    backgroundColor: colors.brandSoft,
   },
   bioTitle: {
     marginBottom: 8,
-    color: AppColors.brandDark,
+    color: colors.brandDark,
     fontSize: 13,
     fontWeight: '700',
     textTransform: 'uppercase',
   },
   bioText: {
-    color: AppColors.text,
+    color: colors.text,
     fontSize: 15,
     lineHeight: 21,
   },
@@ -237,14 +241,15 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 14,
     borderRadius: 8,
-    backgroundColor: AppColors.accent,
+    backgroundColor: colors.accent,
   },
   primaryButtonPressed: {
     opacity: 0.82,
   },
   editButtonText: {
-    color: AppColors.surface,
+    color: colors.surface,
     fontSize: 16,
     fontWeight: '700',
   },
 })
+}

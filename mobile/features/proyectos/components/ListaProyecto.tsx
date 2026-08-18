@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import {
   ActivityIndicator,
@@ -8,10 +8,17 @@ import {
   Text,
   View,
 } from 'react-native'
+import DraggableFlatList, {
+  type RenderItemParams,
+} from 'react-native-draggable-flatlist'
 
+import { useAppColors } from '../../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../../constants/theme'
 import { TareaModal } from './CrearTareaModal'
 import { AsignarMiembrosModal } from './AsignarMiembrosModal'
+import { CrearListaModal } from './CrearListaModal'
 import { useEliminarRecursosProyecto } from '../hooks/useEliminarRecursosProyecto'
+import { reordenarTareas } from '../services/proyecto.service'
 
 import type { ListaDetalle, Tarea } from '../types'
 
@@ -20,6 +27,8 @@ type Props = {
   lista: ListaDetalle
   esLider: boolean
   miUsuarioId: string | null
+  isActive?: boolean
+  onDragHandle?: () => void
   onChanged: () => Promise<void>
 }
 
@@ -38,9 +47,11 @@ type TareaItemProps = {
   eliminando: boolean
   esLider: boolean
   puedeEliminar: boolean
+  isActive: boolean
   onOpen: () => void
   onAssign: () => void
   onDelete: () => void
+  onDrag: () => void
 }
 
 function TareaItem({
@@ -49,10 +60,14 @@ function TareaItem({
   eliminando,
   esLider,
   puedeEliminar,
+  isActive,
   onOpen,
   onAssign,
   onDelete,
+  onDrag,
 }: TareaItemProps) {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const colorNota = tarea.tarea_estado === 'COMPLETADA'
     ? styles.notaCompletada
     : tarea.tarea_estado === 'EN_PROGRESO'
@@ -65,12 +80,15 @@ function TareaItem({
       accessibilityRole="button"
       disabled={eliminando}
       onPress={onOpen}
+      onLongPress={onDrag}
+      delayLongPress={200}
       style={({ pressed }) => [
         styles.tarea,
         colorNota,
         indice % 3 === 0 && styles.notaInclinadaIzquierda,
         indice % 3 === 2 && styles.notaInclinadaDerecha,
         pressed && styles.tareaPressed,
+        isActive && styles.tareaActiva,
       ]}
     >
       <View style={styles.pin} />
@@ -96,9 +114,9 @@ function TareaItem({
             ]}
           >
             {eliminando ? (
-              <ActivityIndicator size="small" color="#7A271A" />
+              <ActivityIndicator size="small" color={colors.accentStrong} />
             ) : (
-              <Ionicons name="trash-outline" size={17} color="#7A271A" />
+              <Ionicons name="trash-outline" size={17} color={colors.accentStrong} />
             )}
           </Pressable>
         ) : null}
@@ -115,7 +133,7 @@ function TareaItem({
       ) : null}
 
       <View style={styles.tareaMeta}>
-        <Ionicons name="calendar-outline" size={14} color="#5D4D68" />
+        <Ionicons name="calendar-outline" size={14} color={colors.textMuted} />
         <Text style={styles.tareaFecha}>
           {formatearFecha(tarea.tarea_fecha_entrega)}
         </Text>
@@ -156,7 +174,7 @@ function TareaItem({
               pressed && styles.assignButtonPressed,
             ]}
           >
-            <Ionicons name="people-outline" size={17} color="#4F2D7F" />
+            <Ionicons name="people-outline" size={17} color={colors.brandDark} />
           </Pressable>
         ) : null}
       </View>
@@ -164,15 +182,56 @@ function TareaItem({
   )
 }
 
-export function ListaProyecto({ proyectoId, lista, esLider, miUsuarioId, onChanged }: Props) {
+export function ListaProyecto({
+  proyectoId,
+  lista,
+  esLider,
+  miUsuarioId,
+  isActive,
+  onDragHandle,
+  onChanged,
+}: Props) {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const [creandoTarea, setCreandoTarea] = useState(false)
   const [tareaEditando, setTareaEditando] = useState<Tarea | null>(null)
   const [tareaAsignando, setTareaAsignando] = useState<Tarea | null>(null)
+  const [editandoLista, setEditandoLista] = useState(false)
+  const [tareas, setTareas] = useState(lista.tareas)
   const {
     eliminando,
     eliminarLista,
     eliminarTarea,
   } = useEliminarRecursosProyecto()
+  const siguienteOrdenTarea = tareas.length === 0
+    ? 0
+    : Math.max(...tareas.map((tarea) => tarea.tarea_orden)) + 1
+
+  useEffect(() => {
+    setTareas(lista.tareas)
+  }, [lista.tareas])
+
+  async function manejarReordenTareas(data: Tarea[]) {
+    setTareas(data)
+
+    try {
+      await reordenarTareas(
+        lista.lista_id,
+        data.map((tarea, indice) => ({ tareaId: tarea.tarea_id, orden: indice }))
+      )
+      await onChanged()
+    } catch (error) {
+      console.error('Error al reordenar tareas:', error)
+      const sinPermiso = (error as { code?: string })?.code === '42501'
+      Alert.alert(
+        'No fue posible reordenar las tareas',
+        sinPermiso
+          ? 'No tienes permiso para mover alguna de estas tareas (está asignada a otra persona).'
+          : 'Intenta nuevamente.'
+      )
+      await onChanged()
+    }
+  }
 
   async function ejecutarEliminacionTarea(tareaId: string) {
     const eliminada = await eliminarTarea(tareaId)
@@ -234,11 +293,18 @@ export function ListaProyecto({ proyectoId, lista, esLider, miUsuarioId, onChang
   }
 
   return (
-    <View style={styles.lista}>
+    <View style={[styles.lista, isActive && styles.listaActiva]}>
       <View style={styles.header}>
-        <Text style={styles.nombre} numberOfLines={2}>
-          {lista.lista_nombre}
-        </Text>
+        <Pressable
+          style={styles.nombreContenedor}
+          disabled={!esLider || !onDragHandle}
+          onLongPress={onDragHandle}
+          delayLongPress={200}
+        >
+          <Text style={styles.nombre} numberOfLines={2}>
+            {lista.lista_nombre}
+          </Text>
+        </Pressable>
         <View style={styles.contador}>
           <Text style={styles.contadorText}>{lista.tareas.length}</Text>
         </View>
@@ -252,56 +318,78 @@ export function ListaProyecto({ proyectoId, lista, esLider, miUsuarioId, onChang
             pressed && styles.addTaskButtonPressed,
           ]}
         >
-          <Ionicons name="add" size={19} color="#6F45A5" />
+          <Ionicons name="add" size={19} color={colors.brand} />
         </Pressable>
         {esLider ? (
-          <Pressable
-            accessibilityLabel={`Eliminar lista ${lista.lista_nombre}`}
-            accessibilityRole="button"
-            disabled={eliminando === lista.lista_id}
-            hitSlop={6}
-            onPress={solicitarEliminacionLista}
-            style={({ pressed }) => [
-              styles.deleteListButton,
-              pressed && styles.deleteButtonPressed,
-            ]}
-          >
-            {eliminando === lista.lista_id ? (
-              <ActivityIndicator size="small" color="#B42318" />
-            ) : (
-              <Ionicons name="trash-outline" size={18} color="#B42318" />
-            )}
-          </Pressable>
+          <>
+            <Pressable
+              accessibilityLabel={`Editar lista ${lista.lista_nombre}`}
+              accessibilityRole="button"
+              hitSlop={6}
+              onPress={() => setEditandoLista(true)}
+              style={({ pressed }) => [
+                styles.editListButton,
+                pressed && styles.editButtonPressed,
+              ]}
+            >
+              <Ionicons name="create-outline" size={18} color={colors.brand} />
+            </Pressable>
+            <Pressable
+              accessibilityLabel={`Eliminar lista ${lista.lista_nombre}`}
+              accessibilityRole="button"
+              disabled={eliminando === lista.lista_id}
+              hitSlop={6}
+              onPress={solicitarEliminacionLista}
+              style={({ pressed }) => [
+                styles.deleteListButton,
+                pressed && styles.deleteButtonPressed,
+              ]}
+            >
+              {eliminando === lista.lista_id ? (
+                <ActivityIndicator size="small" color={colors.accentStrong} />
+              ) : (
+                <Ionicons name="trash-outline" size={18} color={colors.accentStrong} />
+              )}
+            </Pressable>
+          </>
         ) : null}
       </View>
 
-      {lista.tareas.length === 0 ? (
+      {tareas.length === 0 ? (
         <View style={styles.vacio}>
           <Ionicons name="checkbox-outline" size={20} color="#8A918B" />
           <Text style={styles.vacioText}>Sin tareas</Text>
         </View>
       ) : (
-        <View style={styles.tareas}>
-          {lista.tareas.map((tarea, indice) => (
+        <DraggableFlatList
+          data={tareas}
+          keyExtractor={(tarea) => tarea.tarea_id}
+          scrollEnabled={false}
+          activationDistance={10}
+          contentContainerStyle={styles.tareas}
+          onDragEnd={({ data }) => void manejarReordenTareas(data)}
+          renderItem={({ item: tarea, getIndex, drag, isActive }: RenderItemParams<Tarea>) => (
             <TareaItem
-              key={tarea.tarea_id}
               tarea={tarea}
-              indice={indice}
+              indice={getIndex() ?? 0}
               eliminando={eliminando === tarea.tarea_id}
               esLider={esLider}
               puedeEliminar={esLider || tarea.tarea_creado_por === miUsuarioId}
+              isActive={isActive}
               onOpen={() => setTareaEditando(tarea)}
               onAssign={() => setTareaAsignando(tarea)}
               onDelete={() => confirmarEliminacionTarea(tarea)}
+              onDrag={drag}
             />
-          ))}
-        </View>
+          )}
+        />
       )}
 
       <TareaModal
         visible={creandoTarea || tareaEditando !== null}
         listaId={lista.lista_id}
         listaNombre={lista.lista_nombre}
+        siguienteOrden={siguienteOrdenTarea}
         tarea={tareaEditando}
         onClose={() => {
           setCreandoTarea(false)
@@ -315,24 +403,39 @@ export function ListaProyecto({ proyectoId, lista, esLider, miUsuarioId, onChang
         onClose={() => setTareaAsignando(null)}
         onChanged={onChanged}
       />
+      <CrearListaModal
+        visible={editandoLista}
+        tableroId={lista.lista_tablero_id}
+        siguienteOrden={0}
+        lista={lista}
+        onClose={() => setEditandoLista(false)}
+        onCreated={onChanged}
+      />
     </View>
   )
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
   lista: {
     width: 292,
     alignSelf: 'flex-start',
     borderTopWidth: 6,
-    borderTopColor: '#6F45A5',
+    borderTopColor: colors.brand,
     padding: 14,
-    backgroundColor: '#FCFAFE',
+    backgroundColor: colors.surface,
     gap: 14,
-    shadowColor: '#4F2D7F',
+    shadowColor: colors.brandDark,
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.25,
     shadowRadius: 6,
     elevation: 5,
+  },
+  listaActiva: {
+    opacity: 0.92,
+    transform: [{ scale: 1.02 }],
+    shadowOpacity: 0.4,
+    elevation: 10,
   },
   header: {
     minHeight: 30,
@@ -340,9 +443,11 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 10,
   },
-  nombre: {
+  nombreContenedor: {
     flex: 1,
-    color: '#342247',
+  },
+  nombre: {
+    color: colors.text,
     fontSize: 16,
     fontWeight: '700',
     lineHeight: 21,
@@ -354,10 +459,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 8,
     paddingHorizontal: 7,
-    backgroundColor: '#E9E1F3',
+    backgroundColor: colors.brandSoft,
   },
   contadorText: {
-    color: '#6F45A5',
+    color: colors.brand,
     fontSize: 12,
     fontWeight: '700',
   },
@@ -369,7 +474,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   addTaskButtonPressed: {
-    backgroundColor: '#EEE7F6',
+    backgroundColor: colors.brandSoft,
   },
   deleteListButton: {
     width: 28,
@@ -377,6 +482,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
+  },
+  editListButton: {
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+  },
+  editButtonPressed: {
+    backgroundColor: colors.border,
   },
   deleteTaskButton: {
     width: 28,
@@ -386,7 +501,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   deleteButtonPressed: {
-    backgroundColor: '#FEF3F2',
+    backgroundColor: colors.accentStrongSoft,
   },
   tareas: {
     gap: 14,
@@ -398,7 +513,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingTop: 18,
     paddingBottom: 13,
-    shadowColor: '#4F2D7F',
+    shadowColor: colors.brandDark,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -407,14 +522,20 @@ const styles = StyleSheet.create({
   tareaPressed: {
     opacity: 0.82,
   },
+  tareaActiva: {
+    opacity: 0.9,
+    transform: [{ scale: 1.03 }],
+    shadowOpacity: 0.35,
+    elevation: 8,
+  },
   notaPendiente: {
-    backgroundColor: '#FFE0B8',
+    backgroundColor: colors.notePending,
   },
   notaEnProgreso: {
-    backgroundColor: '#DCCEF0',
+    backgroundColor: colors.noteInProgress,
   },
   notaCompletada: {
-    backgroundColor: '#FFD0C4',
+    backgroundColor: colors.noteCompleted,
   },
   notaInclinadaIzquierda: {
     transform: [{ rotate: '-0.7deg' }],
@@ -429,8 +550,8 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#FF6B2C',
-    shadowColor: '#A73812',
+    backgroundColor: colors.accent,
+    shadowColor: '#8C3D64',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.35,
     shadowRadius: 1,
@@ -444,13 +565,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   tareaNombre: {
-    color: '#342247',
+    color: colors.text,
     fontSize: 16,
     fontWeight: '700',
     lineHeight: 21,
   },
   tareaDescripcion: {
-    color: '#55475F',
+    color: colors.textMuted,
     fontSize: 13,
     lineHeight: 18,
   },
@@ -472,31 +593,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  noAssignees: { color: '#766682', fontSize: 11, fontWeight: '600' },
+  noAssignees: { color: colors.textMuted, fontSize: 11, fontWeight: '600' },
   assigneeAvatar: {
     width: 26,
     height: 26,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: colors.surface,
     borderRadius: 13,
     marginRight: -5,
-    backgroundColor: '#6F45A5',
+    backgroundColor: colors.brand,
   },
   assigneeAvatarText: { color: '#FFFFFF', fontSize: 10, fontWeight: '800' },
-  moreAssignees: { marginLeft: 9, color: '#4F2D7F', fontSize: 11, fontWeight: '700' },
+  moreAssignees: { marginLeft: 9, color: colors.brandDark, fontSize: 11, fontWeight: '700' },
   assignButton: {
     width: 30,
     height: 30,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
-    backgroundColor: '#FFFFFF80',
+    backgroundColor: colors.overlaySoft,
   },
-  assignButtonPressed: { backgroundColor: '#FFFFFF' },
+  assignButtonPressed: { backgroundColor: colors.surface },
   tareaFecha: {
-    color: '#5D4D68',
+    color: colors.textMuted,
     fontSize: 12,
     fontWeight: '600',
   },
@@ -504,7 +625,7 @@ const styles = StyleSheet.create({
     maxWidth: 125,
   },
   estadoText: {
-    color: '#503A63',
+    color: colors.text,
     fontSize: 10,
     fontWeight: '800',
     textTransform: 'uppercase',
@@ -516,11 +637,12 @@ const styles = StyleSheet.create({
     gap: 6,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: '#CDBDDF',
-    backgroundColor: '#F0EAF6',
+    borderColor: colors.border,
+    backgroundColor: colors.brandSoft,
   },
   vacioText: {
-    color: '#766682',
+    color: colors.textMuted,
     fontSize: 13,
   },
 })
+}

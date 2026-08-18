@@ -51,7 +51,7 @@ export function useFormularioTarea(tarea?: Tarea | null) {
     setError(null)
   }
 
-  async function guardar(listaId: string) {
+  async function guardar(listaId: string, orden: number) {
     if (guardando) {
       return false
     }
@@ -90,6 +90,7 @@ export function useFormularioTarea(tarea?: Tarea | null) {
       } else {
         await crearTareaService({
           listaId,
+          orden,
           ...datos,
         })
       }

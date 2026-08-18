@@ -55,6 +55,8 @@ Antes de modificar cualquier archivo:
 
 10. No hagas commits, merges, pushes de Git ni `supabase db push` salvo que el usuario lo solicite explícitamente.
 
+11. Si necesitas ejecutar un comando de terminal (npm, git, expo, supabase CLI, etc.), no lo ejecutes directamente: explica qué comando es, qué hace y por qué es necesario, y pídele al usuario que lo ejecute él mismo en su Git Bash. El usuario prefiere mantener el control de su propia terminal mientras trabaja.
+
 ---
 
 # 2. Arquitectura actual
@@ -603,14 +605,19 @@ Actualmente se considera implementado:
 ### Tableros y listas
 - crear tableros;
 - visualizar tableros;
+- editar nombre de tablero;
+- eliminar tablero (`TableroProyecto.tsx`, dentro de la pantalla de detalle de tablero);
 - crear listas;
+- editar nombre de lista;
 - eliminar listas;
+- reordenar listas y tareas mediante drag-and-drop (`react-native-draggable-flatlist`, orden persistido en `lista_orden`/`tarea_orden`);
 
 ### Tareas
 - crear tareas;
 - editar tareas;
 - eliminar tareas;
 - asignar responsables;
+- restricción real (RLS, no solo UI): un miembro no puede editar/eliminar tareas ajenas salvo que sea líder, esté asignado, o (para editar) la tarea no tenga responsable asignado — ver `supabase/migrations/20260816103000_restricciones_tareas.sql`;
 
 ### Fechas
 - selector de fecha mediante calendario;
@@ -619,14 +626,19 @@ Actualmente se considera implementado:
 - RLS y RPC para varias operaciones ya implementadas;
 
 ### Gantt
-- existe implementación de Carta Gantt en una rama/desarrollo reciente;
+- integrado en `dev` en `features/carta-gantt/` y `app/carta-gantt/[id].tsx`;
 
 ### Chat
-- chat grupal por proyecto;
+- chat grupal por proyecto, integrado en `dev` y montado globalmente en `app/_layout.tsx` (`<ChatGlobal />`);
 - adjuntar archivos a mensajes;
 - realtime para mensajes;
 
-**IMPORTANTE:** Chat y Gantt pueden encontrarse en ramas que todavía no estén sincronizadas con el `dev` más reciente. No asumir que están integrados hasta inspeccionar Git.
+### Análisis con IA
+- generación y visualización de análisis de proyecto vía Groq (`features/ia/`, pantalla `app/proyectos/[proyectoId]/analisis.tsx`);
+- requiere `EXPO_PUBLIC_GROQ_API_KEY` en `.env` (ver sección 38 para setup local) y modelo válido en Groq — los modelos se deprecan con el tiempo (ej. `llama-3.1-8b-instant` fue reemplazado por `openai/gpt-oss-20b` el 16-08-2026), si el análisis empieza a fallar con `model_not_found` revisar `https://console.groq.com/docs/deprecations`;
+- **riesgo de seguridad conocido, no resuelto:** la key de Groq viaja en el bundle del cliente (prefijo `EXPO_PUBLIC_`) y es extraíble. Migrar esta llamada a una Supabase Edge Function con la key como secreto de servidor sigue pendiente.
+
+**Nota:** este documento se desactualiza rápido. Antes de asumir que algo falta, verifica el código (regla #1) — varias veces este archivo listó como "pendiente" o "en otra rama" cosas que ya estaban en `dev`.
 
 ---
 
@@ -634,27 +646,10 @@ Actualmente se considera implementado:
 
 Actualmente quedan incompletas o pendientes de revisión:
 
-### Administrar tableros
-Falta:
-
-- editar tablero;
-- eliminar tablero.
-
-### Administrar listas
-Falta:
-
-- editar nombre;
-- reordenar listas mediante interacción drag-and-drop.
-
-El Product Owner solicitó que las listas puedan moverse como tarjetas agarrándolas y cambiándolas de posición.
-
 ### Invitaciones
-Actualmente funciona mediante correo exacto.
+Ya funciona con búsqueda de usuario por nombre o correo (`buscar_usuarios_para_invitacion` RPC) y una vista previa básica (avatar, nombre, correo) al seleccionar el resultado antes de confirmar el envío — ver `InvitarMiembroModal.tsx`.
 
-El diseño también contempla:
-
-- búsqueda de usuario;
-- previsualización del perfil antes de invitar.
+Lo que sigue sin existir es un perfil expandido (más allá de avatar/nombre/correo) antes de invitar, si se considera necesario.
 
 ### Notificaciones
 Las invitaciones tienen interfaz propia.
@@ -674,14 +669,15 @@ todavía no cuenta con un flujo completo de UI y lógica.
 Todavía quedan pendientes, entre otras:
 
 - reportar avances;
-- adjuntar archivos a tareas;
-- historial de actividades;
-- análisis de avances con IA;
+- adjuntar archivos a tareas (solo existen adjuntos en mensajes de chat, no en tareas);
+- historial de actividades (tabla `actividad` sin UI);
+- rol `CO_LIDER` (ver comentarios del PO más abajo);
+- orden automático de tareas por fecha de entrega ascendente — hoy el orden es manual vía drag-and-drop (`tarea_orden`), no por `tarea_fecha_entrega`;
 - realtime para asignaciones;
-- realtime para otros cambios colaborativos;
-- panel/inicio con tareas pendientes.
+- realtime para otros cambios colaborativos (fuera del chat, que ya tiene realtime);
+- panel/inicio con tareas pendientes (`app/(tabs)/index.tsx` es hoy una pantalla de bienvenida estática, sin lógica).
 
-No implementar IA antes de estabilizar correctamente las entidades y flujos que producirán los datos que analizará.
+El análisis de avances con IA **ya no está pendiente** — ver sección 14.
 
 ---
 
@@ -940,7 +936,7 @@ Antes de modificar Gantt:
 
 # 22. Chat
 
-Existe una implementación reciente de chat por proyecto.
+Ya está integrado en `dev` (`features/chat/`, montado globalmente vía `<ChatGlobal />` en `app/_layout.tsx`).
 
 Incluye al menos:
 
@@ -950,7 +946,7 @@ Incluye al menos:
 - adjuntos;
 - realtime.
 
-Antes de integrarla con `dev`, comprobar:
+Antes de confiar en que está sólido, comprobar (esta lista sigue siendo una buena checklist de regresión, aunque ya no sea "antes de integrar" sino "antes de tocarlo"):
 
 ```text
 usuario miembro → puede acceder
@@ -974,16 +970,11 @@ No considerar una prueba de UI suficiente para validar seguridad.
 
 # 23. Integración de ramas grandes
 
-Puede haber ramas como:
+Chat y Gantt ya fueron integrados a `dev` (ver secciones 14, 21 y 22) — las menciones de `feature/chat` y `feature/gantt` como ramas pendientes de alinear quedaron obsoletas.
 
-```text
-feature/chat
-feature/gantt
-```
+El flujo descrito abajo sigue siendo la forma correcta de probar cualquier rama grande futura antes de mezclarla con `dev`.
 
-o nombres equivalentes que todavía no estén alineadas con `dev`.
-
-No mezclarlas directamente sin inspección.
+No mezclar ramas grandes directamente sin inspección.
 
 Para probar una rama contra el estado actual se recomienda crear una rama temporal:
 
@@ -1461,26 +1452,22 @@ Cuando se solicite implementar algo:
 
 # 36. Prioridades actuales recomendadas
 
-Salvo que el usuario indique otro orden, la prioridad funcional actual es aproximadamente:
+Ya completado (ver sección 14 para detalle): edición de proyectos, restricciones de permisos sobre tareas, editar/eliminar tableros, editar/reordenar listas, Chat integrado, Gantt integrado, Análisis de avances con IA.
+
+Salvo que el usuario indique otro orden, la prioridad funcional actual sobre lo que queda pendiente (sección 16) es aproximadamente:
 
 ```text
-1. Terminar/integrar edición de proyectos
-2. Restricciones de permisos sobre tareas solicitadas por PO
-3. Introducir CO_LIDER correctamente
-4. Ordenar tareas por fecha de entrega
-5. Editar/eliminar tableros
-6. Editar/reordenar listas
-7. Integrar y probar Chat contra dev actual
-8. Integrar y probar Gantt contra dev actual
-9. Mostrar tareas pendientes en Inicio
-10. Adjuntar archivos a tareas
-11. Historial de actividades
-12. Notificaciones generales
-13. Realtime adicional
-14. Análisis de avances con IA
+1. Introducir CO_LIDER correctamente
+2. Ordenar tareas por fecha de entrega
+3. Mostrar tareas pendientes en Inicio
+4. Adjuntar archivos a tareas
+5. Historial de actividades
+6. Notificaciones generales
+7. Realtime adicional (asignaciones y otros cambios colaborativos)
+8. Reportar avances
 ```
 
-Antes de ejecutar esta priorización, comprobar si alguna de estas funcionalidades ya fue implementada en otra rama.
+Antes de ejecutar esta priorización, comprobar si alguna de estas funcionalidades ya fue implementada (regla #1) — este documento se ha quedado atrás de lo que hay en `dev` más de una vez.
 
 ---
 
@@ -1547,7 +1534,72 @@ Storage + policies
 
 ---
 
-# 38. Regla final
+# 38. Configuración en un dispositivo nuevo
+
+Este flujo ya fue probado exitosamente para levantar el proyecto en una máquina recién clonada.
+
+## Requisitos
+
+```text
+Node.js (probado con v26)
+npm
+Git
+App "Expo Go" instalada en el celular de prueba
+```
+
+## Pasos
+
+1. Clonar el repo y pararse en `dev` (ahí está el trabajo más reciente, no en `main`):
+
+   ```bash
+   git clone https://github.com/OsvSoto/plann-it.git
+   cd plann-it
+   git checkout -b dev origin/dev
+   ```
+
+2. Instalar dependencias del frontend:
+
+   ```bash
+   cd mobile
+   npm install
+   ```
+
+3. Crear `mobile/.env` (no está versionado, ni siquiera como plantilla `.env.example` en este punto del repo) con:
+
+   ```env
+   EXPO_PUBLIC_SUPABASE_URL=https://lmjcctnnnbjfsczasqci.supabase.co
+   EXPO_PUBLIC_SUPABASE_KEY=<publishable/anon key desde Project Settings → API del proyecto Supabase plann-it-dev>
+   EXPO_PUBLIC_GROQ_API_KEY=<API key desde console.groq.com/keys, tier gratuito alcanza>
+   ```
+
+   Nunca usar la `service_role key` de Supabase acá. La key de Groq es necesaria solo para probar "Análisis de IA" (sección 14); sin ella el resto de la app funciona igual.
+
+   Después de crear o modificar `.env` hay que **reiniciar** `npx expo start` (no basta con Fast Refresh, las env vars solo se leen al arrancar).
+
+4. Levantar el servidor de desarrollo:
+
+   ```bash
+   npx expo start
+   ```
+
+   Esto asume que el celular y la notebook están en la **misma red WiFi** (modo LAN). La primera vez puede aparecer un popup del Firewall de Windows pidiendo permitir acceso a redes privadas para Node/Metro — debe aceptarse o el celular no podrá conectar. Se escanea el QR con la app Expo Go.
+
+## Cuando no hay red compartida (ej. red universitaria con aislamiento de clientes)
+
+Alternativas, de más simple a más robusta:
+
+- **Hotspot del celular**: conectar la notebook al hotspot WiFi del propio celular y usar `npx expo start` normal (modo LAN dentro de esa red compartida). No requiere configuración adicional.
+- **`--tunnel`**: usa `@expo/ngrok` + `@expo/ngrok-bin` por debajo (se instalan como devDependency del proyecto: `npm install --save-dev @expo/ngrok`). El túnel legacy de ngrok requiere un authtoken propio (ngrok ya no permite túneles anónimos); si falta, falla con errores como `CommandError: failed to start tunnel` / `remote gone away`. Se soluciona creando una cuenta gratis en ngrok.com y guardando el token en `C:\Users\<usuario>\.ngrok2\ngrok.yml`:
+
+  ```yaml
+  authtoken: TU_TOKEN
+  ```
+
+  Luego `npx expo start --clear --tunnel`.
+
+---
+
+# 39. Regla final
 
 No optimices prematuramente ni introduzcas arquitectura innecesaria.
 

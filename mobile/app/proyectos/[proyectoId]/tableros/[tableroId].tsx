@@ -11,10 +11,14 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { useAppColors } from '../../../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../../../constants/theme'
 import { TableroProyecto } from '../../../../features/proyectos/components/TableroProyecto'
 import { useDetalleProyecto } from '../../../../features/proyectos/hooks/useDetalleProyecto'
 
 export default function DetalleTableroScreen() {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const { proyectoId, tableroId } = useLocalSearchParams<{
     proyectoId: string
     tableroId: string
@@ -34,7 +38,7 @@ export default function DetalleTableroScreen() {
     return (
       <SafeAreaView style={styles.safeArea} edges={['right', 'bottom', 'left']}>
         <View style={styles.centerState}>
-          <ActivityIndicator size="large" color="#6F45A5" />
+          <ActivityIndicator size="large" color={colors.brand} />
           <Text style={styles.stateText}>Preparando tablero...</Text>
         </View>
       </SafeAreaView>
@@ -46,7 +50,7 @@ export default function DetalleTableroScreen() {
       <SafeAreaView style={styles.safeArea} edges={['right', 'bottom', 'left']}>
         <View style={styles.centerState}>
           <View style={styles.errorIcon}>
-            <Ionicons name="alert-circle-outline" size={30} color="#B42318" />
+            <Ionicons name="alert-circle-outline" size={30} color={colors.danger} />
           </View>
           <Text style={styles.stateTitle}>No pudimos abrir el tablero</Text>
           <Text style={styles.stateText}>
@@ -81,14 +85,14 @@ export default function DetalleTableroScreen() {
           <RefreshControl
             refreshing={cargando}
             onRefresh={cargarDetalle}
-            tintColor="#6F45A5"
+            tintColor={colors.brand}
           />
         )}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
           <View style={styles.projectReference}>
-            <Ionicons name="folder-outline" size={15} color="#6F45A5" />
+            <Ionicons name="folder-outline" size={15} color={colors.brand} />
             <Text style={styles.projectName} numberOfLines={1}>
               {detalle.proyecto.proyecto_nombre}
             </Text>
@@ -96,13 +100,13 @@ export default function DetalleTableroScreen() {
           <Text style={styles.title}>{tablero.tablero_nombre}</Text>
           <View style={styles.summary}>
             <View style={styles.summaryItem}>
-              <Ionicons name="albums-outline" size={16} color="#6F45A5" />
+              <Ionicons name="albums-outline" size={16} color={colors.brand} />
               <Text style={styles.summaryText}>
                 {tablero.listas.length} {tablero.listas.length === 1 ? 'lista' : 'listas'}
               </Text>
             </View>
             <View style={styles.summaryItem}>
-              <Ionicons name="document-text-outline" size={16} color="#FF6B2C" />
+              <Ionicons name="document-text-outline" size={16} color={colors.accent} />
               <Text style={styles.summaryText}>
                 {cantidadTareas} {cantidadTareas === 1 ? 'tarea' : 'tareas'}
               </Text>
@@ -121,10 +125,11 @@ export default function DetalleTableroScreen() {
   )
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8F5FB',
+    backgroundColor: colors.background,
   },
   content: {
     paddingTop: 18,
@@ -142,12 +147,12 @@ const styles = StyleSheet.create({
   },
   projectName: {
     flexShrink: 1,
-    color: '#766682',
+    color: colors.textMuted,
     fontSize: 12,
     fontWeight: '600',
   },
   title: {
-    color: '#342247',
+    color: colors.text,
     fontSize: 26,
     fontWeight: '700',
     lineHeight: 32,
@@ -181,16 +186,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 8,
     marginBottom: 4,
-    backgroundColor: '#FEF3F2',
+    backgroundColor: colors.dangerSoft,
   },
   stateTitle: {
-    color: '#342247',
+    color: colors.text,
     fontSize: 18,
     fontWeight: '700',
     textAlign: 'center',
   },
   stateText: {
-    color: '#766682',
+    color: colors.textMuted,
     fontSize: 14,
     lineHeight: 20,
     textAlign: 'center',
@@ -200,16 +205,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 8,
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 18,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   retryButtonPressed: {
     backgroundColor: '#F0EAF6',
   },
   retryText: {
-    color: '#4F2D7F',
+    color: colors.brandDark,
     fontWeight: '600',
   },
 })
+}

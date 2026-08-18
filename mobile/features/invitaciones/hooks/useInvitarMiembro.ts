@@ -1,37 +1,43 @@
 import { useState } from 'react'
-
-import { invitarUsuarioProyecto } from '../services/invitacion.service'
+import { buscarUsuariosParaInvitacion, enviarInvitacionUsuario } from '../services/invitacion.service'
+import type { UsuarioBusqueda } from '../types'
 import { obtenerMensajeError } from './errorInvitacion'
 
-const PATRON_CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-export function useInvitarMiembro() {
+export function useInvitarMiembro(proyectoId: string) {
+  const [buscando, setBuscando] = useState(false)
   const [enviando, setEnviando] = useState(false)
+  const [resultados, setResultados] = useState<UsuarioBusqueda[]>([])
   const [error, setError] = useState<string | null>(null)
 
-  async function invitar(proyectoId: string, correo: string) {
-    if (enviando) {
-      return false
+  async function buscar(texto: string) {
+    const query = texto.trim()
+    if (query.length < 2) {
+      setResultados([])
+      return
     }
-
-    const correoLimpio = correo.trim().toLowerCase()
-
-    if (!PATRON_CORREO.test(correoLimpio)) {
-      setError('Ingresa un correo valido.')
-      return false
+    try {
+      setBuscando(true)
+      setError(null)
+      const data = await buscarUsuariosParaInvitacion(proyectoId, query)
+      setResultados(data)
+    } catch (err) {
+      console.error('Error al buscar usuarios:', err)
+      setError(obtenerMensajeError(err, 'No fue posible realizar la búsqueda.'))
+    } finally {
+      setBuscando(false)
     }
+  }
 
+  async function invitar(usuarioId: string) {
+    if (enviando) return false
     try {
       setEnviando(true)
       setError(null)
-      await invitarUsuarioProyecto(proyectoId, correoLimpio)
+      await enviarInvitacionUsuario(proyectoId, usuarioId)
       return true
-    } catch (error) {
-      console.error('Error al enviar invitacion:', error)
-      setError(obtenerMensajeError(
-        error,
-        'No fue posible enviar la invitacion.'
-      ))
+    } catch (err) {
+      console.error('Error al enviar invitación:', err)
+      setError(obtenerMensajeError(err, 'No fue posible enviar la invitación.'))
       return false
     } finally {
       setEnviando(false)
@@ -39,9 +45,13 @@ export function useInvitarMiembro() {
   }
 
   return {
+    buscando,
     enviando,
+    resultados,
     error,
+    setResultados,
     limpiarError: () => setError(null),
+    buscar,
     invitar,
   }
 }

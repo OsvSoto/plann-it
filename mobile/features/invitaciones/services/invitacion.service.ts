@@ -1,10 +1,10 @@
 import { supabase } from '../../../lib/supabase'
-
 import type {
   ActualizarMiembroInput,
   InvitacionPendiente,
   MiembroProyecto,
   RespuestaInvitacion,
+  UsuarioBusqueda,
 } from '../types'
 
 export async function actualizarMiembroProyecto(
@@ -15,7 +15,6 @@ export async function actualizarMiembroProyecto(
     p_rol: miembro.rol,
     p_permisos: miembro.permisos,
   })
-
   if (error) {
     throw error
   }
@@ -27,7 +26,6 @@ export async function eliminarMiembroProyecto(
   const { error } = await supabase.rpc('eliminar_miembro_proyecto', {
     p_miembro_id: miembroId,
   })
-
   if (error) {
     throw error
   }
@@ -35,14 +33,11 @@ export async function eliminarMiembroProyecto(
 
 export async function obtenerInvitacionesPendientes(): Promise<InvitacionPendiente[]> {
   const { data, error } = await supabase.rpc(
-    'obtener_invitaciones_pendientes',
-    {}
+    'obtener_invitaciones_pendientes'
   )
-
   if (error) {
     throw error
   }
-
   return data ?? []
 }
 
@@ -57,15 +52,36 @@ export async function invitarUsuarioProyecto(
       p_correo: correo.trim(),
     }
   )
-
   if (error) {
     throw error
   }
-
   if (typeof data !== 'string') {
     throw new Error('La invitacion no devolvio un identificador')
   }
+  return data
+}
 
+export async function buscarUsuariosParaInvitacion(
+  proyectoId: string,
+  busqueda: string
+): Promise<UsuarioBusqueda[]> {
+  const { data, error } = await supabase.rpc('buscar_usuarios_para_invitacion', {
+    p_busqueda: busqueda.trim(),
+    p_proyecto_id: proyectoId,
+  })
+  if (error) throw error
+  return data ?? []
+}
+
+export async function enviarInvitacionUsuario(
+  proyectoId: string,
+  usuarioId: string
+): Promise<string> {
+  const { data, error } = await supabase.rpc('enviar_invitacion_usuario', {
+    p_proyecto_id: proyectoId,
+    p_usuario_id: usuarioId,
+  })
+  if (error) throw error
   return data
 }
 
@@ -80,15 +96,12 @@ export async function responderInvitacion(
       p_respuesta: respuesta,
     }
   )
-
   if (error) {
     throw error
   }
-
   if (typeof data !== 'string') {
     throw new Error('La respuesta no devolvio el proyecto asociado')
   }
-
   return data
 }
 
@@ -99,29 +112,24 @@ export async function obtenerMiembrosProyecto(
     'obtener_miembros_proyecto',
     { p_proyecto_id: proyectoId }
   )
-
   if (error) {
     throw error
   }
-
   return (data ?? []).map((miembro) => {
     const rol = miembro.miembro_rol
     const permisos = miembro.miembro_permisos
-
     if (
       rol !== 'LIDER'
       && rol !== 'MIEMBRO'
     ) {
       throw new Error('El proyecto contiene un rol de miembro desconocido')
     }
-
     if (
       permisos !== 'TOTAL'
       && permisos !== 'COLABORAR'
     ) {
       throw new Error('El proyecto contiene permisos de miembro desconocidos')
     }
-
     return {
       ...miembro,
       miembro_rol: rol,
@@ -132,14 +140,11 @@ export async function obtenerMiembrosProyecto(
 
 export async function obtenerUsuarioActualId(): Promise<string> {
   const { data, error } = await supabase.auth.getUser()
-
   if (error) {
     throw error
   }
-
   if (!data.user) {
-    throw new Error('No hay una sesión activa')
+    throw new Error('No hay una sesi n activa')
   }
-
   return data.user.id
 }

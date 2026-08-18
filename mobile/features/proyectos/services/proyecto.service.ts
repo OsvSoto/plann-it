@@ -8,7 +8,11 @@ import type {
   CrearTableroInput,
   CrearTareaInput,
   DetalleProyecto,
+  EditarListaInput,
+  EditarTableroInput,
   EditarTareaInput,
+  OrdenLista,
+  OrdenTarea,
   Proyecto,
   TableroDetalle,
 
@@ -100,7 +104,8 @@ export async function obtenerDetalleProyecto(
             tarea_desc,
             tarea_estado,
             tarea_fecha_entrega,
-            tarea_creado_por
+            tarea_creado_por,
+            tarea_orden
           )
         )
       `)
@@ -152,10 +157,12 @@ export async function obtenerDetalleProyecto(
           lista_tablero_id: lista.lista_tablero_id,
           lista_nombre: lista.lista_nombre,
           lista_orden: lista.lista_orden,
-          tareas: lista.tarea.map((tarea) => ({
-            ...tarea,
-            asignaciones: asignacionesPorTarea.get(tarea.tarea_id) ?? [],
-          })),
+          tareas: [...lista.tarea]
+            .sort((a, b) => a.tarea_orden - b.tarea_orden)
+            .map((tarea) => ({
+              ...tarea,
+              asignaciones: asignacionesPorTarea.get(tarea.tarea_id) ?? [],
+            })),
         })),
     })
   )
@@ -195,6 +202,36 @@ export async function crearTablero(
   }
 }
 
+export async function editarTablero(
+  tablero: EditarTableroInput
+): Promise<void> {
+  const { error } = await supabase
+    .from('tablero')
+    .update({
+      tablero_nombre: tablero.nombre.trim(),
+    })
+    .eq('tablero_id', tablero.tableroId)
+    .select('tablero_id')
+    .single()
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function eliminarTablero(tableroId: string): Promise<void> {
+  const { error } = await supabase
+    .from('tablero')
+    .delete()
+    .eq('tablero_id', tableroId)
+    .select('tablero_id')
+    .single()
+
+  if (error) {
+    throw error
+  }
+}
+
 export async function crearLista(
   lista: CrearListaInput
 ): Promise<void> {
@@ -222,7 +259,59 @@ export async function crearTarea(
       tarea_desc: tarea.descripcion,
       tarea_estado: tarea.estado,
       tarea_fecha_entrega: tarea.fechaEntrega,
+      tarea_orden: tarea.orden,
     })
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function editarLista(
+  lista: EditarListaInput
+): Promise<void> {
+  const { error } = await supabase
+    .from('lista')
+    .update({
+      lista_nombre: lista.nombre.trim(),
+    })
+    .eq('lista_id', lista.listaId)
+    .select('lista_id')
+    .single()
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function reordenarListas(
+  tableroId: string,
+  orden: OrdenLista[]
+): Promise<void> {
+  const { error } = await supabase.rpc('reordenar_listas', {
+    p_tablero_id: tableroId,
+    p_orden: orden.map((item) => ({
+      lista_id: item.listaId,
+      orden: item.orden,
+    })),
+  })
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function reordenarTareas(
+  listaId: string,
+  orden: OrdenTarea[]
+): Promise<void> {
+  const { error } = await supabase.rpc('reordenar_tareas', {
+    p_lista_id: listaId,
+    p_orden: orden.map((item) => ({
+      tarea_id: item.tareaId,
+      orden: item.orden,
+    })),
+  })
 
   if (error) {
     throw error

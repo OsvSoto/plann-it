@@ -12,12 +12,17 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { useCrearLista } from '../hooks/useCrearLista'
+import { useAppColors } from '../../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../../constants/theme'
+import { useFormularioLista } from '../hooks/useCrearLista'
+
+import type { ListaDetalle } from '../types'
 
 type Props = {
   visible: boolean
   tableroId: string
   siguienteOrden: number
+  lista?: ListaDetalle | null
   onClose: () => void
   onCreated: () => Promise<void>
 }
@@ -26,9 +31,13 @@ export function CrearListaModal({
   visible,
   tableroId,
   siguienteOrden,
+  lista,
   onClose,
   onCreated,
 }: Props) {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
+  const editando = Boolean(lista)
   const {
     nombre,
     guardando,
@@ -36,7 +45,7 @@ export function CrearListaModal({
     actualizarNombre,
     reiniciar,
     guardar,
-  } = useCrearLista()
+  } = useFormularioLista(lista)
 
   function cerrar() {
     if (!guardando) {
@@ -46,9 +55,9 @@ export function CrearListaModal({
   }
 
   async function crear() {
-    const creada = await guardar(tableroId, siguienteOrden)
+    const guardada = await guardar(tableroId, siguienteOrden)
 
-    if (creada) {
+    if (guardada) {
       onClose()
       await onCreated()
     }
@@ -68,8 +77,10 @@ export function CrearListaModal({
         >
           <View style={styles.header}>
             <View style={styles.headerText}>
-              <Text style={styles.title}>Nueva lista</Text>
-              <Text style={styles.subtitle}>Agrega una etapa al tablero</Text>
+              <Text style={styles.title}>{editando ? 'Editar lista' : 'Nueva lista'}</Text>
+              <Text style={styles.subtitle}>
+                {editando ? 'Cambia el nombre de la lista' : 'Agrega una etapa al tablero'}
+              </Text>
             </View>
             <Pressable
               accessibilityLabel="Cerrar"
@@ -82,7 +93,7 @@ export function CrearListaModal({
                 pressed && styles.iconButtonPressed,
               ]}
             >
-              <Ionicons name="close" size={23} color="#4F2D7F" />
+              <Ionicons name="close" size={23} color={colors.brandDark} />
             </Pressable>
           </View>
 
@@ -106,7 +117,7 @@ export function CrearListaModal({
 
             {error ? (
               <View style={styles.error} accessibilityRole="alert">
-                <Ionicons name="alert-circle-outline" size={19} color="#B42318" />
+                <Ionicons name="alert-circle-outline" size={19} color={colors.danger} />
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             ) : null}
@@ -129,8 +140,8 @@ export function CrearListaModal({
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
                 <>
-                  <Ionicons name="add" size={20} color="#FFFFFF" />
-                  <Text style={styles.primaryText}>Crear lista</Text>
+                  <Ionicons name={editando ? 'save-outline' : 'add'} size={20} color="#FFFFFF" />
+                  <Text style={styles.primaryText}>{editando ? 'Guardar cambios' : 'Crear lista'}</Text>
                 </>
               )}
             </Pressable>
@@ -141,8 +152,9 @@ export function CrearListaModal({
   )
 }
 
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F8F5FB' },
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: colors.background },
   container: {
     flex: 1,
     width: '100%',
@@ -157,8 +169,8 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   headerText: { flex: 1, gap: 4 },
-  title: { color: '#342247', fontSize: 23, fontWeight: '700' },
-  subtitle: { color: '#766682', fontSize: 14 },
+  title: { color: colors.text, fontSize: 23, fontWeight: '700' },
+  subtitle: { color: colors.textMuted, fontSize: 14 },
   iconButton: {
     width: 40,
     height: 40,
@@ -169,16 +181,16 @@ const styles = StyleSheet.create({
   iconButtonPressed: { backgroundColor: '#E8ECE9' },
   form: { flex: 1, paddingTop: 34, gap: 18 },
   field: { gap: 8 },
-  label: { color: '#4F2D7F', fontSize: 15, fontWeight: '600' },
+  label: { color: colors.brandDark, fontSize: 15, fontWeight: '600' },
   input: {
     minHeight: 50,
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: '#342247',
-    backgroundColor: '#FFFFFF',
+    color: colors.text,
+    backgroundColor: colors.surface,
     fontSize: 16,
   },
   error: {
@@ -189,7 +201,7 @@ const styles = StyleSheet.create({
     borderLeftColor: '#D92D20',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: '#FEF3F2',
+    backgroundColor: colors.dangerSoft,
   },
   errorText: { flex: 1, color: '#912018', fontSize: 14, lineHeight: 20 },
   actions: { flexDirection: 'row', gap: 10, paddingTop: 16 },
@@ -199,11 +211,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#D9CEE8',
+    borderColor: colors.border,
     borderRadius: 8,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
-  secondaryText: { color: '#4F2D7F', fontSize: 15, fontWeight: '600' },
+  secondaryText: { color: colors.brandDark, fontSize: 15, fontWeight: '600' },
   primaryButton: {
     minHeight: 48,
     flex: 1.3,
@@ -212,9 +224,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 7,
     borderRadius: 8,
-    backgroundColor: '#FF6B2C',
+    backgroundColor: colors.accent,
   },
-  primaryButtonPressed: { backgroundColor: '#E8521D' },
+  primaryButtonPressed: { backgroundColor: colors.accentPressed },
   primaryText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
   disabled: { opacity: 0.65 },
 })
+}

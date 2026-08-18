@@ -13,9 +13,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Link, router } from 'expo-router'
 
+import { useAppColors } from '../../hooks/use-app-colors'
+import type { AppColorsShape } from '../../constants/theme'
+
 import { supabase } from '../../lib/supabase'
 
 export default function RegisterScreen() {
+  const colors = useAppColors()
+  const styles = createStyles(colors)
   const [nombre, setNombre] = useState('')
   const [correo, setCorreo] = useState('')
   const [password, setPassword] = useState('')
@@ -221,76 +226,78 @@ export default function RegisterScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F8F5FB',
-  },
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
 
-  keyboardView: {
-    flex: 1,
-  },
+    keyboardView: {
+      flex: 1,
+    },
 
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 24,
-  },
+    scrollContent: {
+      flexGrow: 1,
+      justifyContent: 'center',
+      padding: 24,
+    },
 
-  form: {
-    width: '100%',
-    maxWidth: 520,
-    alignSelf: 'center',
-    gap: 16,
-  },
+    form: {
+      width: '100%',
+      maxWidth: 520,
+      alignSelf: 'center',
+      gap: 16,
+    },
 
-  title: {
-    color: '#342247',
-    fontSize: 30,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
+    title: {
+      color: colors.text,
+      fontSize: 30,
+      fontWeight: 'bold',
+      marginBottom: 16,
+    },
 
-  field: {
-    gap: 7,
-  },
+    field: {
+      gap: 7,
+    },
 
-  label: {
-    color: '#4F2D7F',
-    fontSize: 14,
-    fontWeight: '600',
-  },
+    label: {
+      color: colors.brandDark,
+      fontSize: 14,
+      fontWeight: '600',
+    },
 
-  input: {
-    borderWidth: 1,
-    borderColor: '#D9CEE8',
-    borderRadius: 8,
-    padding: 14,
-    color: '#342247',
-    backgroundColor: '#FFFFFF',
-    fontSize: 16,
-  },
+    input: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      padding: 14,
+      color: colors.text,
+      backgroundColor: colors.surface,
+      fontSize: 16,
+    },
 
-  button: {
-    backgroundColor: '#FF6B2C',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
+    button: {
+      backgroundColor: colors.accent,
+      padding: 16,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
 
-  buttonDisabled: {
-    opacity: 0.5,
-  },
+    buttonDisabled: {
+      opacity: 0.5,
+    },
 
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
+    buttonText: {
+      color: '#fff',
+      fontWeight: 'bold',
+    },
 
-  link: {
-    color: '#6F45A5',
-    fontWeight: '700',
-    textAlign: 'center',
-    marginTop: 12,
-  },
-})
+    link: {
+      color: colors.brand,
+      fontWeight: '700',
+      textAlign: 'center',
+      marginTop: 12,
+    },
+  })
+}

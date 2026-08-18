@@ -2,6 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import type { AppColorsShape } from '../../../constants/theme';
+import { useAppColors } from '../../../hooks/use-app-colors';
 import { TareaGantt } from '../types';
 
 interface GanttChartProps {
@@ -14,6 +16,8 @@ interface GanttChartProps {
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export const GanttChart: React.FC<GanttChartProps> = ({ proyectoId, tareas, proyectoFechaInicio, proyectoFechaFin }) => {
+  const colors = useAppColors();
+  const styles = createStyles(colors);
   const router = useRouter();
   const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
   const [expandedTask, setExpandedTask] = useState<string | null>(null);
@@ -26,7 +30,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({ proyectoId, tareas, proy
 
   const startProjectDate = getSantiagoTime(proyectoFechaInicio);
   const endProjectDate = getSantiagoTime(proyectoFechaFin);
-  const todayTime = new Date().getTime(); 
+  const todayTime = new Date().getTime();
 
   const sortedTareas = useMemo(() => {
     return [...tareas].sort((a, b) => {
@@ -98,7 +102,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({ proyectoId, tareas, proy
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={16} color="#4F2D7F" />
+          <Ionicons name="arrow-back" size={16} color={colors.brandDark} />
           <Text style={styles.backButtonText}>Volver al proyecto</Text>
         </TouchableOpacity>
 
@@ -136,7 +140,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({ proyectoId, tareas, proy
                 const leftOffset = Math.max(0, Math.ceil((startTaskDate - startProjectDate) / (1000 * 60 * 60 * 24)) * DAY_WIDTH);
                 const taskDurationDays = Math.max(1, Math.ceil((endTaskDate - startTaskDate) / (1000 * 60 * 60 * 24)));
                 const taskWidth = taskDurationDays * DAY_WIDTH;
-                const cardColor = tarea.color && tarea.color.trim() !== '' ? tarea.color : '#808080';
+                const cardColor = tarea.color && tarea.color.trim() !== '' ? tarea.color : colors.brand;
                 const asignadoText = tarea.asignado && tarea.asignado.trim() !== '' ? tarea.asignado : 'No hay miembro asignado';
                 const isExpanded = expandedTask === tarea.id_tarea;
 
@@ -180,147 +184,153 @@ export const GanttChart: React.FC<GanttChartProps> = ({ proyectoId, tareas, proy
   );
 };
 
-const styles = StyleSheet.create({
-  wrapper: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  controls: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 10,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
-    backgroundColor: '#f9f9f9',
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: '#E9E1F3',
-  },
-  backButtonText: {
-    color: '#4F2D7F',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  viewModeControls: {
-    flexDirection: 'row',
-  },
-  button: {
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    marginHorizontal: 5,
-    borderRadius: 20,
-    backgroundColor: '#e0e0e0',
-  },
-  buttonActive: {
-    backgroundColor: '#007AFF',
-  },
-  buttonText: {
-    color: '#333',
-    fontWeight: 'bold',
-  },
-  buttonTextActive: {
-    color: '#fff',
-  },
-  container: {
-    flex: 1,
-  },
-  verticalScroll: {
-    flex: 1,
-  },
-  chartArea: {
-    position: 'relative',
-  },
-  gridBackground: {
-    ...StyleSheet.absoluteFillObject,
-    flexDirection: 'row',
-    zIndex: 0,
-  },
-  gridColumn: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    borderLeftWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  gridHeader: {
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderColor: '#ccc',
-    backgroundColor: '#fafafa',
-  },
-  gridHeaderText: {
-    fontSize: 10,
-    color: '#666',
-    fontWeight: 'bold',
-  },
-  gridLine: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
-  todayLine: {
-    position: 'absolute',
-    top: 40,
-    bottom: 0,
-    width: 2,
-    backgroundColor: 'rgba(255, 0, 0, 0.4)',
-    zIndex: 1,
-  },
-  timelineContainer: {
-    paddingTop: 50,
-    paddingBottom: 20,
-    minHeight: 200,
-    zIndex: 2,
-  },
-  taskRow: {
-    height: 60,
-    marginBottom: 10,
-    position: 'relative',
-    justifyContent: 'center',
-  },
-  taskRowExpanded: {
-    height: 120,
-  },
-  taskBar: {
-    position: 'absolute',
-    borderRadius: 8,
-    padding: 8,
-    justifyContent: 'flex-start',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
-    overflow: 'hidden',
-  },
-  taskName: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 12,
-    marginBottom: 2,
-  },
-  taskAssignee: {
-    color: '#fff',
-    fontSize: 10,
-    opacity: 0.9,
-  },
-  expandedContent: {
-    marginTop: 10,
-    borderTopWidth: 1,
-    borderColor: 'rgba(255,255,255,0.3)',
-    paddingTop: 8,
-  },
-  expandedText: {
-    color: '#fff',
-    fontSize: 10,
-    marginBottom: 2,
-  },
-});
+function createStyles(colors: AppColorsShape) {
+  return StyleSheet.create({
+    wrapper: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    controls: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 10,
+      borderBottomWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+    },
+    backButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 8,
+      backgroundColor: colors.brandSoft,
+    },
+    backButtonText: {
+      color: colors.brandDark,
+      fontWeight: 'bold',
+      fontSize: 14,
+    },
+    viewModeControls: {
+      flexDirection: 'row',
+    },
+    button: {
+      paddingVertical: 8,
+      paddingHorizontal: 20,
+      marginHorizontal: 5,
+      borderRadius: 20,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    buttonActive: {
+      backgroundColor: colors.brand,
+      borderColor: colors.brand,
+    },
+    buttonText: {
+      color: colors.text,
+      fontWeight: 'bold',
+    },
+    buttonTextActive: {
+      color: '#FFFFFF',
+    },
+    container: {
+      flex: 1,
+    },
+    verticalScroll: {
+      flex: 1,
+    },
+    chartArea: {
+      position: 'relative',
+    },
+    gridBackground: {
+      ...StyleSheet.absoluteFillObject,
+      flexDirection: 'row',
+      zIndex: 0,
+    },
+    gridColumn: {
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      borderLeftWidth: 1,
+      borderColor: colors.border,
+    },
+    gridHeader: {
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderBottomWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+    },
+    gridHeaderText: {
+      fontSize: 10,
+      color: colors.textMuted,
+      fontWeight: 'bold',
+    },
+    gridLine: {
+      flex: 1,
+      backgroundColor: 'transparent',
+    },
+    todayLine: {
+      position: 'absolute',
+      top: 40,
+      bottom: 0,
+      width: 2,
+      backgroundColor: colors.danger,
+      opacity: 0.6,
+      zIndex: 1,
+    },
+    timelineContainer: {
+      paddingTop: 50,
+      paddingBottom: 20,
+      minHeight: 200,
+      zIndex: 2,
+    },
+    taskRow: {
+      height: 60,
+      marginBottom: 10,
+      position: 'relative',
+      justifyContent: 'center',
+    },
+    taskRowExpanded: {
+      height: 120,
+    },
+    taskBar: {
+      position: 'absolute',
+      borderRadius: 8,
+      padding: 8,
+      justifyContent: 'flex-start',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.2,
+      shadowRadius: 1.41,
+      elevation: 2,
+      overflow: 'hidden',
+    },
+    taskName: {
+      color: '#FFFFFF',
+      fontWeight: 'bold',
+      fontSize: 12,
+      marginBottom: 2,
+    },
+    taskAssignee: {
+      color: '#FFFFFF',
+      fontSize: 10,
+      opacity: 0.9,
+    },
+    expandedContent: {
+      marginTop: 10,
+      borderTopWidth: 1,
+      borderColor: 'rgba(255,255,255,0.3)',
+      paddingTop: 8,
+    },
+    expandedText: {
+      color: '#FFFFFF',
+      fontSize: 10,
+      marginBottom: 2,
+    },
+  });
+}
