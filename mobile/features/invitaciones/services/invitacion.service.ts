@@ -120,6 +120,7 @@ export async function obtenerMiembrosProyecto(
     const permisos = miembro.miembro_permisos
     if (
       rol !== 'LIDER'
+      && rol !== 'CO_LIDER'
       && rol !== 'MIEMBRO'
     ) {
       throw new Error('El proyecto contiene un rol de miembro desconocido')

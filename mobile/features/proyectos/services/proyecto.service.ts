@@ -70,6 +70,7 @@ export async function obtenerDetalleProyecto(
     proyectoResultado,
     tablerosResultado,
     liderResultado,
+    liderPrincipalResultado,
     puedeEliminarResultado,
     asignacionesResultado,
     usuarioResultado,
@@ -114,6 +115,9 @@ export async function obtenerDetalleProyecto(
     supabase.rpc('es_lider_proyecto', {
       p_proyecto_id: proyectoId,
     }),
+    supabase.rpc('es_lider_principal_proyecto', {
+      p_proyecto_id: proyectoId,
+    }),
     supabase.rpc('puede_eliminar_proyecto', {
       p_proyecto_id: proyectoId,
     }),
@@ -131,6 +135,10 @@ export async function obtenerDetalleProyecto(
 
   if (liderResultado.error) {
     throw liderResultado.error
+  }
+
+  if (liderPrincipalResultado.error) {
+    throw liderPrincipalResultado.error
   }
 
   if (puedeEliminarResultado.error) {
@@ -171,6 +179,7 @@ export async function obtenerDetalleProyecto(
     proyecto: proyectoResultado.data,
     tableros,
     esLider: liderResultado.data,
+    esLiderPrincipal: liderPrincipalResultado.data,
     puedeEliminarProyecto: puedeEliminarResultado.data,
     miUsuarioId: usuarioResultado.data.user?.id ?? null,
   }

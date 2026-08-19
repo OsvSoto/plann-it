@@ -27,6 +27,7 @@ export type DetalleProyecto = {
   proyecto: Proyecto
   tableros: TableroDetalle[]
   esLider: boolean
+  esLiderPrincipal: boolean
   puedeEliminarProyecto: boolean
   miUsuarioId: string | null
 }

@@ -36,6 +36,12 @@ const OPCIONES: Array<{
     icono: 'person-outline',
   },
   {
+    rol: 'CO_LIDER',
+    titulo: 'Co-líder',
+    descripcion: 'Mismo acceso administrativo que el líder, salvo eliminar el proyecto o gestionar miembros.',
+    icono: 'shield-half-outline',
+  },
+  {
     rol: 'LIDER',
     titulo: 'Líder',
     descripcion: 'Acceso total, incluida la administración del equipo.',
@@ -80,7 +86,7 @@ export function AdministrarMiembroModal({
     const actualizado = await actualizar({
       miembroId: miembro.miembro_proyecto_id,
       rol,
-      permisos: rol === 'LIDER' ? 'TOTAL' : 'COLABORAR',
+      permisos: rol === 'MIEMBRO' ? 'COLABORAR' : 'TOTAL',
     })
 
     if (actualizado) {
