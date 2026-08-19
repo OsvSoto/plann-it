@@ -53,12 +53,14 @@ export function TareaModal({
     nombre,
     descripcion,
     estado,
+    fechaInicio,
     fechaEntrega,
     guardando,
     error,
     setNombre,
     setDescripcion,
     setEstado,
+    setFechaInicio,
     setFechaEntrega,
     limpiarError,
     reiniciar,
@@ -190,6 +192,19 @@ export function TareaModal({
                   )
                 })}
               </View>
+            </View>
+
+            <View style={styles.field}>
+              <Text style={styles.label}>Fecha de inicio</Text>
+              <CampoFecha
+                accessibilityLabel="Fecha de inicio"
+                editable={!guardando}
+                valor={fechaInicio}
+                onChange={(valor) => {
+                  setFechaInicio(valor)
+                  limpiarError()
+                }}
+              />
             </View>
 
             <View style={styles.field}>

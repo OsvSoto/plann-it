@@ -532,6 +532,7 @@ export type Database = {
           tarea_desc: string | null
           tarea_estado: string
           tarea_fecha_entrega: string
+          tarea_fecha_inicio: string
           tarea_id: string
           tarea_lista_id: string
           tarea_nombre: string
@@ -542,6 +543,7 @@ export type Database = {
           tarea_desc?: string | null
           tarea_estado: string
           tarea_fecha_entrega: string
+          tarea_fecha_inicio: string
           tarea_id?: string
           tarea_lista_id: string
           tarea_nombre: string
@@ -552,6 +554,7 @@ export type Database = {
           tarea_desc?: string | null
           tarea_estado?: string
           tarea_fecha_entrega?: string
+          tarea_fecha_inicio?: string
           tarea_id?: string
           tarea_lista_id?: string
           tarea_nombre?: string
@@ -711,17 +714,6 @@ export type Database = {
           usuario_correo: string
           usuario_id: string
           usuario_nombre: string
-        }[]
-      }
-      obtener_datos_gantt: {
-        Args: { p_id_proyecto: string }
-        Returns: {
-          asignado: string
-          color: string
-          fecha_fin: string
-          fecha_inicio: string
-          id_tarea: string
-          nombre_tarea: string
         }[]
       }
       obtener_invitaciones_pendientes: {

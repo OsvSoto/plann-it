@@ -109,6 +109,7 @@ export type CrearTareaInput = {
   nombre: string
   descripcion: string | null
   estado: EstadoTarea
+  fechaInicio: string
   fechaEntrega: string
   orden: number
 }
