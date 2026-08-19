@@ -337,6 +337,32 @@ export type Database = {
           },
         ]
       }
+      mensaje_lectura: {
+        Row: {
+          mensaje_lectura_proyecto_id: string
+          mensaje_lectura_ultima_fecha: string
+          mensaje_lectura_usuario_id: string
+        }
+        Insert: {
+          mensaje_lectura_proyecto_id: string
+          mensaje_lectura_ultima_fecha?: string
+          mensaje_lectura_usuario_id: string
+        }
+        Update: {
+          mensaje_lectura_proyecto_id?: string
+          mensaje_lectura_ultima_fecha?: string
+          mensaje_lectura_usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mensaje_lectura_proyecto_id_fkey"
+            columns: ["mensaje_lectura_proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "proyecto"
+            referencedColumns: ["proyecto_id"]
+          },
+        ]
+      }
       mensajearchivo: {
         Row: {
           id: string
@@ -671,6 +697,7 @@ export type Database = {
         Args: { p_correo: string; p_proyecto_id: string }
         Returns: string
       }
+      marcar_chat_leido: { Args: { p_proyecto_id: string }; Returns: undefined }
       obtener_asignaciones_proyecto: {
         Args: { p_proyecto_id: string }
         Returns: {
@@ -712,6 +739,13 @@ export type Database = {
           usuario_correo: string
           usuario_id: string
           usuario_nombre: string
+        }[]
+      }
+      obtener_no_leidos_chat: {
+        Args: never
+        Returns: {
+          no_leido: boolean
+          proyecto_id: string
         }[]
       }
       obtener_resumen_proyecto_ia: {
