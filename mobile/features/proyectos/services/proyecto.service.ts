@@ -104,6 +104,7 @@ export async function obtenerDetalleProyecto(
             tarea_nombre,
             tarea_desc,
             tarea_estado,
+            tarea_fecha_inicio,
             tarea_fecha_entrega,
             tarea_creado_por,
             tarea_orden
@@ -267,6 +268,7 @@ export async function crearTarea(
       tarea_nombre: tarea.nombre.trim(),
       tarea_desc: tarea.descripcion,
       tarea_estado: tarea.estado,
+      tarea_fecha_inicio: tarea.fechaInicio,
       tarea_fecha_entrega: tarea.fechaEntrega,
       tarea_orden: tarea.orden,
     })
@@ -336,6 +338,7 @@ export async function actualizarTarea(
       tarea_nombre: tarea.nombre.trim(),
       tarea_desc: tarea.descripcion,
       tarea_estado: tarea.estado,
+      tarea_fecha_inicio: tarea.fechaInicio,
       tarea_fecha_entrega: tarea.fechaEntrega,
     })
     .eq('tarea_id', tarea.tareaId)

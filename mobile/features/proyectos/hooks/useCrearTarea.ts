@@ -16,6 +16,7 @@ function valoresIniciales(tarea?: Tarea | null) {
     nombre: tarea?.tarea_nombre ?? '',
     descripcion: tarea?.tarea_desc ?? '',
     estado: (tarea?.tarea_estado as EstadoTarea | undefined) ?? 'PENDIENTE',
+    fechaInicio: tarea ? fechaIsoAVisual(tarea.tarea_fecha_inicio) : '',
     fechaEntrega: tarea ? fechaIsoAVisual(tarea.tarea_fecha_entrega) : '',
   }
 }
@@ -25,6 +26,7 @@ export function useFormularioTarea(tarea?: Tarea | null) {
   const [nombre, setNombre] = useState(iniciales.nombre)
   const [descripcion, setDescripcion] = useState(iniciales.descripcion)
   const [estado, setEstado] = useState<EstadoTarea>(iniciales.estado)
+  const [fechaInicio, setFechaInicio] = useState(iniciales.fechaInicio)
   const [fechaEntrega, setFechaEntrega] = useState(iniciales.fechaEntrega)
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -34,6 +36,7 @@ export function useFormularioTarea(tarea?: Tarea | null) {
     setNombre(valores.nombre)
     setDescripcion(valores.descripcion)
     setEstado(valores.estado)
+    setFechaInicio(valores.fechaInicio)
     setFechaEntrega(valores.fechaEntrega)
     setError(null)
   }, [tarea])
@@ -47,6 +50,7 @@ export function useFormularioTarea(tarea?: Tarea | null) {
     setNombre(valores.nombre)
     setDescripcion(valores.descripcion)
     setEstado(valores.estado)
+    setFechaInicio(valores.fechaInicio)
     setFechaEntrega(valores.fechaEntrega)
     setError(null)
   }
@@ -57,7 +61,8 @@ export function useFormularioTarea(tarea?: Tarea | null) {
     }
 
     const nombreLimpio = nombre.trim()
-    const fechaVisual = fechaEntrega.trim()
+    const fechaInicioVisual = fechaInicio.trim()
+    const fechaEntregaVisual = fechaEntrega.trim()
     const descripcionLimpia = descripcion.trim()
 
     if (!nombreLimpio) {
@@ -65,10 +70,22 @@ export function useFormularioTarea(tarea?: Tarea | null) {
       return false
     }
 
-    const fechaIso = fechaVisualAIso(fechaVisual)
+    const fechaInicioIso = fechaVisualAIso(fechaInicioVisual)
 
-    if (!fechaIso) {
-      setError('Ingresa una fecha válida con el formato DD-MM-AAAA.')
+    if (!fechaInicioIso) {
+      setError('Ingresa una fecha de inicio válida con el formato DD-MM-AAAA.')
+      return false
+    }
+
+    const fechaEntregaIso = fechaVisualAIso(fechaEntregaVisual)
+
+    if (!fechaEntregaIso) {
+      setError('Ingresa una fecha de entrega válida con el formato DD-MM-AAAA.')
+      return false
+    }
+
+    if (fechaInicioIso > fechaEntregaIso) {
+      setError('La fecha de inicio no puede ser posterior a la de entrega.')
       return false
     }
 
@@ -79,7 +96,8 @@ export function useFormularioTarea(tarea?: Tarea | null) {
         nombre: nombreLimpio,
         descripcion: descripcionLimpia || null,
         estado,
-        fechaEntrega: fechaIso,
+        fechaInicio: fechaInicioIso,
+        fechaEntrega: fechaEntregaIso,
       }
 
       if (tarea) {
@@ -109,12 +127,14 @@ export function useFormularioTarea(tarea?: Tarea | null) {
     nombre,
     descripcion,
     estado,
+    fechaInicio,
     fechaEntrega,
     guardando,
     error,
     setNombre,
     setDescripcion,
     setEstado,
+    setFechaInicio,
     setFechaEntrega,
     limpiarError,
     reiniciar,

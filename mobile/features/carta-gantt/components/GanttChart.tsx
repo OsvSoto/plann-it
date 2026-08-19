@@ -1,24 +1,37 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import type { AppColorsShape } from '../../../constants/theme';
 import { useAppColors } from '../../../hooks/use-app-colors';
+import type { EstadoTarea } from '../../proyectos/types';
 import { TareaGantt } from '../types';
 
 interface GanttChartProps {
-  proyectoId: string;
   tareas: TareaGantt[];
   proyectoFechaInicio: string;
   proyectoFechaFin: string;
 }
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const ROW_HEIGHT = 70;
+const HEADER_HEIGHT = 50;
+const CONTROLS_HEIGHT = 60;
 
-export const GanttChart: React.FC<GanttChartProps> = ({ proyectoId, tareas, proyectoFechaInicio, proyectoFechaFin }) => {
+const COLOR_POR_ESTADO: Record<EstadoTarea, string> = {
+  PENDIENTE: '#8A7CA8',
+  EN_PROGRESO: '#6F45A5',
+  COMPLETADA: '#2E9B5F',
+};
+
+export const GanttChart: React.FC<GanttChartProps> = ({
+  tareas,
+  proyectoFechaInicio,
+  proyectoFechaFin,
+}) => {
   const colors = useAppColors();
   const styles = createStyles(colors);
   const router = useRouter();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
   const [expandedTask, setExpandedTask] = useState<string | null>(null);
 
@@ -42,8 +55,38 @@ export const GanttChart: React.FC<GanttChartProps> = ({ proyectoId, tareas, proy
 
   const DAY_WIDTH = viewMode === 'day' ? 45 : 15;
   const totalDays = Math.max(1, Math.ceil((endProjectDate - startProjectDate) / (1000 * 60 * 60 * 24)));
-  const chartWidth = Math.max(SCREEN_WIDTH, totalDays * DAY_WIDTH);
-  const chartHeight = Math.max(200, sortedTareas.length * 80 + 100);
+
+  const posiciones = useMemo(() => {
+    const mapa = new Map<string, { index: number; left: number; width: number }>();
+
+    sortedTareas.forEach((tarea, index) => {
+      const startTaskDate = tarea.fecha_inicio ? getSantiagoTime(tarea.fecha_inicio) : startProjectDate;
+      const endTaskDate = tarea.fecha_fin ? getSantiagoTime(tarea.fecha_fin) : startTaskDate + 1000 * 60 * 60 * 24;
+      const left = Math.max(0, Math.ceil((startTaskDate - startProjectDate) / (1000 * 60 * 60 * 24)) * DAY_WIDTH);
+      const durationDays = Math.max(1, Math.ceil((endTaskDate - startTaskDate) / (1000 * 60 * 60 * 24)));
+      const width = Math.max(durationDays * DAY_WIDTH, 80);
+
+      mapa.set(tarea.id_tarea, { index, left, width });
+    });
+
+    return mapa;
+  }, [sortedTareas, DAY_WIDTH, startProjectDate]);
+
+  // El ancho del grafico debe cubrir tanto la duracion nominal del proyecto
+  // como la barra que mas se extienda a la derecha: una tarea que termina
+  // muy cerca del fin del proyecto (o con el ancho minimo de 80px) puede
+  // sobrepasar el rango de dias nominal y quedar cortada si no se contempla.
+  const anchoContenido = Math.max(
+    totalDays * DAY_WIDTH,
+    ...Array.from(posiciones.values()).map((p) => p.left + p.width)
+  );
+  const chartWidth = Math.max(screenWidth, anchoContenido);
+
+  const timelineHeight = Math.max(150, sortedTareas.length * ROW_HEIGHT + 20);
+  // Las lineas de dia deben llenar la pantalla aunque el proyecto tenga
+  // pocas tareas, para que no se vea vacio debajo del contenido.
+  const alturaDisponible = screenHeight - CONTROLS_HEIGHT;
+  const chartHeight = Math.max(HEADER_HEIGHT + timelineHeight, alturaDisponible);
   const todayLeftOffset = ((todayTime - startProjectDate) / (1000 * 60 * 60 * 24)) * DAY_WIDTH;
   const showTodayLine = todayLeftOffset >= 0 && todayLeftOffset <= chartWidth;
 
@@ -68,7 +111,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({ proyectoId, tareas, proy
       const dayOfWeek = currentDate.getDay();
       const diffToMonday = currentDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
       currentDate.setDate(diffToMonday);
-      
+
       let weekCount = 1;
       let offsetDays = Math.floor((currentDate.getTime() - startProjectDate) / (1000 * 60 * 60 * 24));
 
@@ -107,14 +150,14 @@ export const GanttChart: React.FC<GanttChartProps> = ({ proyectoId, tareas, proy
         </TouchableOpacity>
 
         <View style={styles.viewModeControls}>
-          <TouchableOpacity 
-            style={[styles.button, viewMode === 'day' && styles.buttonActive]} 
+          <TouchableOpacity
+            style={[styles.button, viewMode === 'day' && styles.buttonActive]}
             onPress={() => setViewMode('day')}
           >
             <Text style={[styles.buttonText, viewMode === 'day' && styles.buttonTextActive]}>Días</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.button, viewMode === 'week' && styles.buttonActive]} 
+          <TouchableOpacity
+            style={[styles.button, viewMode === 'week' && styles.buttonActive]}
             onPress={() => setViewMode('week')}
           >
             <Text style={[styles.buttonText, viewMode === 'week' && styles.buttonTextActive]}>Semanas</Text>
@@ -124,51 +167,54 @@ export const GanttChart: React.FC<GanttChartProps> = ({ proyectoId, tareas, proy
 
       <ScrollView horizontal style={styles.container}>
         <ScrollView style={styles.verticalScroll}>
-          <View style={[styles.chartArea, { width: chartWidth, minHeight: chartHeight }]}>
+          <View style={[styles.chartArea, { width: chartWidth, height: chartHeight }]}>
             <View style={styles.gridBackground}>
               {renderGrid()}
             </View>
 
             {showTodayLine && (
-              <View style={[styles.todayLine, { left: todayLeftOffset }]} />
+              <View style={[styles.todayLine, { left: todayLeftOffset, height: chartHeight }]} />
             )}
 
-            <View style={styles.timelineContainer}>
+            <View style={[styles.timelineContainer, { height: timelineHeight }]}>
               {sortedTareas.map((tarea) => {
-                const startTaskDate = tarea.fecha_inicio ? getSantiagoTime(tarea.fecha_inicio) : startProjectDate;
-                const endTaskDate = tarea.fecha_fin ? getSantiagoTime(tarea.fecha_fin) : startTaskDate + (1000 * 60 * 60 * 24);
-                const leftOffset = Math.max(0, Math.ceil((startTaskDate - startProjectDate) / (1000 * 60 * 60 * 24)) * DAY_WIDTH);
-                const taskDurationDays = Math.max(1, Math.ceil((endTaskDate - startTaskDate) / (1000 * 60 * 60 * 24)));
-                const taskWidth = taskDurationDays * DAY_WIDTH;
-                const cardColor = tarea.color && tarea.color.trim() !== '' ? tarea.color : colors.brand;
+                const posicion = posiciones.get(tarea.id_tarea);
+                if (!posicion) return null;
+
+                const cardColor = COLOR_POR_ESTADO[tarea.estado] ?? colors.brand;
                 const asignadoText = tarea.asignado && tarea.asignado.trim() !== '' ? tarea.asignado : 'No hay miembro asignado';
                 const isExpanded = expandedTask === tarea.id_tarea;
 
                 return (
-                  <View key={tarea.id_tarea} style={[styles.taskRow, isExpanded && styles.taskRowExpanded, { zIndex: isExpanded ? 100 : 1 }]}>
+                  <View
+                    key={tarea.id_tarea}
+                    style={[
+                      styles.taskRow,
+                      { top: posicion.index * ROW_HEIGHT, zIndex: isExpanded ? 100 : 2 },
+                    ]}
+                  >
                     <TouchableOpacity
                       activeOpacity={0.9}
                       onPress={() => setExpandedTask(isExpanded ? null : tarea.id_tarea)}
                       style={[
                         styles.taskBar,
                         {
-                          left: leftOffset,
-                          width: isExpanded ? Math.max(taskWidth, 220) : Math.max(taskWidth, 80),
+                          left: posicion.left,
+                          width: posicion.width,
                           backgroundColor: cardColor,
-                          height: isExpanded ? 110 : 50,
                         },
                       ]}
                     >
                       <Text style={styles.taskName} numberOfLines={isExpanded ? 0 : 1}>{tarea.nombre_tarea}</Text>
                       <Text style={styles.taskAssignee} numberOfLines={1}>{asignadoText}</Text>
-                      
+
                       {isExpanded && (
                         <View style={styles.expandedContent}>
                           <Text style={styles.expandedText}>
-                            Inicio: {tarea.fecha_inicio ? new Date(getSantiagoTime(tarea.fecha_inicio)).toLocaleDateString('es-CL') : 'Pendiente'}
+                            Inicio: {new Date(getSantiagoTime(tarea.fecha_inicio)).toLocaleDateString('es-CL')}
                           </Text>
                           <Text style={styles.expandedText}>
-                            Fin: {tarea.fecha_fin ? new Date(getSantiagoTime(tarea.fecha_fin)).toLocaleDateString('es-CL') : 'Pendiente'}
+                            Fin: {new Date(getSantiagoTime(tarea.fecha_fin)).toLocaleDateString('es-CL')}
                           </Text>
                         </View>
                       )}
@@ -276,30 +322,28 @@ function createStyles(colors: AppColorsShape) {
     },
     todayLine: {
       position: 'absolute',
-      top: 40,
-      bottom: 0,
+      top: 0,
       width: 2,
       backgroundColor: colors.danger,
       opacity: 0.6,
       zIndex: 1,
     },
     timelineContainer: {
-      paddingTop: 50,
-      paddingBottom: 20,
-      minHeight: 200,
-      zIndex: 2,
+      position: 'absolute',
+      top: HEADER_HEIGHT,
+      left: 0,
+      right: 0,
     },
     taskRow: {
-      height: 60,
-      marginBottom: 10,
-      position: 'relative',
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      height: ROW_HEIGHT,
       justifyContent: 'center',
-    },
-    taskRowExpanded: {
-      height: 120,
     },
     taskBar: {
       position: 'absolute',
+      minHeight: 50,
       borderRadius: 8,
       padding: 8,
       justifyContent: 'flex-start',
@@ -326,11 +370,11 @@ function createStyles(colors: AppColorsShape) {
       borderTopWidth: 1,
       borderColor: 'rgba(255,255,255,0.3)',
       paddingTop: 8,
+      gap: 4,
     },
     expandedText: {
       color: '#FFFFFF',
       fontSize: 10,
-      marginBottom: 2,
     },
   });
 }

@@ -1,12 +1,13 @@
-import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
+import * as ScreenOrientation from 'expo-screen-orientation';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { AppColorsShape } from '../../constants/theme';
 import { GanttChart } from '../../features/carta-gantt/components/GanttChart';
 import type { TareaGantt } from '../../features/carta-gantt/types';
 import { obtenerDetalleProyecto } from '../../features/proyectos/services/proyecto.service';
-import type { DetalleProyecto } from '../../features/proyectos/types';
+import type { DetalleProyecto, EstadoTarea } from '../../features/proyectos/types';
 import { useAppColors } from '../../hooks/use-app-colors';
 
 export default function CartaGanttScreen() {
@@ -17,24 +18,34 @@ export default function CartaGanttScreen() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const cargarDatos = useCallback(async () => {
     if (!id) return;
-    cargarDatos();
-  }, [id]);
-
-  async function cargarDatos() {
     try {
       setCargando(true);
       setError(null);
-      const datos = await obtenerDetalleProyecto(id!);
-      setDetalle(datos);
+      const datosProyecto = await obtenerDetalleProyecto(id);
+      setDetalle(datosProyecto);
     } catch (err) {
       console.error('Error al cargar proyecto:', err);
       setError('No fue posible cargar el proyecto');
     } finally {
       setCargando(false);
     }
-  }
+  }, [id]);
+
+  useEffect(() => {
+    void cargarDatos();
+  }, [cargarDatos]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void ScreenOrientation.unlockAsync();
+
+      return () => {
+        void ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+      };
+    }, [])
+  );
 
   if (!id) {
     return (
@@ -71,24 +82,21 @@ export default function CartaGanttScreen() {
       lista.tareas.map((tarea) => ({
         id_tarea: tarea.tarea_id,
         nombre_tarea: tarea.tarea_nombre,
-        fecha_inicio: tarea.tarea_fecha_entrega, 
-        fecha_fin: tarea.tarea_fecha_entrega,    
+        fecha_inicio: tarea.tarea_fecha_inicio,
+        fecha_fin: tarea.tarea_fecha_entrega,
+        estado: tarea.tarea_estado as EstadoTarea,
         asignado: tarea.asignaciones?.[0]?.usuario_nombre || null,
-        color: colors.brand,
       }))
     )
   );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.scroll}>
-        <GanttChart
-          proyectoId={id}
-          tareas={tareas}
-          proyectoFechaInicio={detalle.proyecto.proyecto_fecha_inicio}
-          proyectoFechaFin={detalle.proyecto.proyecto_fecha_fin}
-        />
-      </ScrollView>
+      <GanttChart
+        tareas={tareas}
+        proyectoFechaInicio={detalle.proyecto.proyecto_fecha_inicio}
+        proyectoFechaFin={detalle.proyecto.proyecto_fecha_fin}
+      />
     </SafeAreaView>
   );
 }
@@ -98,9 +106,6 @@ function createStyles(colors: AppColorsShape) {
     safeArea: {
       flex: 1,
       backgroundColor: colors.background,
-    },
-    scroll: {
-      flex: 1,
     },
     center: {
       flex: 1,
