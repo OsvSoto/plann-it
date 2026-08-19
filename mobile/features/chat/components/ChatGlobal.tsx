@@ -59,7 +59,7 @@ function esMismoDia(iso1: string, iso2: string) {
 export function ChatGlobal() {
   const colors = useAppColors()
   const styles = createStyles(colors)
-  const { chatAbierto, setChatAbierto } = useChatGlobal()
+  const { chatAbierto, setChatAbierto, proyectosNoLeidos, hayNoLeidos, marcarProyectoLeido } = useChatGlobal()
   const [proyectos, setProyectos] = useState<any[]>([])
   const [proyectoActivo, setProyectoActivo] = useState<any>(null)
   const [mensajes, setMensajes] = useState<any[]>([])
@@ -85,16 +85,18 @@ export function ChatGlobal() {
   useEffect(() => {
     if (proyectoActivo) {
       cargarMensajes(proyectoActivo.proyectoId)
-      
+      marcarProyectoLeido(proyectoActivo.proyectoId)
+
       const channel = supabase
         .channel(`chat_proyecto_${proyectoActivo.proyectoId}`)
-        .on('postgres_changes', { 
-          event: 'INSERT', 
-          schema: 'public', 
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
           table: 'mensaje'
         }, (payload) => {
           if (payload.new.mensaje_proyecto_id === proyectoActivo.proyectoId) {
             cargarMensajes(proyectoActivo.proyectoId, true)
+            marcarProyectoLeido(proyectoActivo.proyectoId)
           }
         })
         .on('postgres_changes', { 
@@ -251,11 +253,12 @@ export function ChatGlobal() {
 
   return (
     <>
-      <Pressable 
-        style={styles.fab} 
+      <Pressable
+        style={styles.fab}
         onPress={() => setChatAbierto(true)}
       >
         <Ionicons name="chatbubbles" size={28} color="#FFFFFF" />
+        {hayNoLeidos && <View style={styles.fabBadge} />}
       </Pressable>
 
       <Modal
@@ -279,18 +282,22 @@ export function ChatGlobal() {
               {proyectos.map((p) => (
                 <Pressable
                   key={p.proyectoId}
-                  onPress={() => setProyectoActivo(p)}
+                  onPress={() => {
+                    setProyectoActivo(p)
+                    marcarProyectoLeido(p.proyectoId)
+                  }}
                   style={[
-                    styles.projectPill, 
+                    styles.projectPill,
                     proyectoActivo?.proyectoId === p.proyectoId && styles.projectPillActive
                   ]}
                 >
                   <Text style={[
-                    styles.projectPillText, 
+                    styles.projectPillText,
                     proyectoActivo?.proyectoId === p.proyectoId && styles.projectPillTextActive
                   ]}>
                     {p.proyectoNombre}
                   </Text>
+                  {proyectosNoLeidos.has(p.proyectoId) && <View style={styles.pillBadge} />}
                 </Pressable>
               ))}
             </ScrollView>
@@ -390,6 +397,17 @@ function createStyles(colors: AppColorsShape) {
     elevation: 6,
     zIndex: 1000,
   },
+  fabBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: colors.danger,
+    borderWidth: 2,
+    borderColor: colors.brand,
+  },
   modalContainer: {
     flex: 1,
     backgroundColor: colors.background,
@@ -430,6 +448,15 @@ function createStyles(colors: AppColorsShape) {
     borderRadius: 20,
     backgroundColor: colors.brandSoft,
     marginHorizontal: 5,
+  },
+  pillBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.danger,
   },
   projectPillActive: {
     backgroundColor: colors.brand,

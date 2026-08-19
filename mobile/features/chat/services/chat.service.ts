@@ -50,6 +50,21 @@ export async function obtenerMensajes(proyectoId: string) {
   return data || []
 }
 
+export async function obtenerNoLeidosChat(): Promise<string[]> {
+  const { data, error } = await supabase.rpc('obtener_no_leidos_chat')
+  if (error) throw error
+  return (data || [])
+    .filter((fila: { proyecto_id: string; no_leido: boolean }) => fila.no_leido)
+    .map((fila: { proyecto_id: string; no_leido: boolean }) => fila.proyecto_id)
+}
+
+export async function marcarChatLeido(proyectoId: string) {
+  const { error } = await supabase.rpc('marcar_chat_leido', {
+    p_proyecto_id: proyectoId,
+  })
+  if (error) throw error
+}
+
 export type ArchivoAdjunto = {
   uri: string;
   nombreBase: string;
