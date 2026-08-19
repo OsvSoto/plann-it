@@ -1,5 +1,5 @@
 export type RespuestaInvitacion = 'ACEPTADA' | 'RECHAZADA'
-export type RolMiembro = 'LIDER' | 'MIEMBRO'
+export type RolMiembro = 'LIDER' | 'CO_LIDER' | 'MIEMBRO'
 export type PermisosMiembro = 'TOTAL' | 'COLABORAR'
 
 export type InvitacionPendiente = {

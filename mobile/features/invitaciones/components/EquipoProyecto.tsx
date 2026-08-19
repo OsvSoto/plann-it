@@ -19,7 +19,7 @@ import type { MiembroProyecto } from '../types'
 type Props = {
   proyectoId: string
   proyectoNombre: string
-  esLider: boolean
+  puedeGestionarMiembros: boolean
 }
 
 function inicial(nombre: string) {
@@ -29,7 +29,7 @@ function inicial(nombre: string) {
 export function EquipoProyecto({
   proyectoId,
   proyectoNombre,
-  esLider,
+  puedeGestionarMiembros,
 }: Props) {
   const colors = useAppColors()
   const styles = createStyles(colors)
@@ -50,7 +50,7 @@ export function EquipoProyecto({
           <Text style={styles.eyebrow}>COLABORACIÓN</Text>
           <Text style={styles.title}>Equipo</Text>
         </View>
-        {esLider ? (
+        {puedeGestionarMiembros ? (
           <Pressable
             accessibilityLabel="Invitar miembro"
             accessibilityRole="button"
@@ -105,18 +105,24 @@ export function EquipoProyecto({
                 style={[
                   styles.role,
                   miembro.miembro_rol === 'LIDER' && styles.leaderRole,
+                  miembro.miembro_rol === 'CO_LIDER' && styles.coLeaderRole,
                 ]}
               >
                 <Text
                   style={[
                     styles.roleText,
                     miembro.miembro_rol === 'LIDER' && styles.leaderRoleText,
+                    miembro.miembro_rol === 'CO_LIDER' && styles.coLeaderRoleText,
                   ]}
                 >
-                  {miembro.miembro_rol === 'LIDER' ? 'Líder' : 'Miembro'}
+                  {miembro.miembro_rol === 'LIDER'
+                    ? 'Líder'
+                    : miembro.miembro_rol === 'CO_LIDER'
+                      ? 'Co-líder'
+                      : 'Miembro'}
                 </Text>
               </View>
-              {esLider && miembro.usuario_id !== usuarioActualId ? (
+              {puedeGestionarMiembros && miembro.usuario_id !== usuarioActualId ? (
                 <Pressable
                   accessibilityLabel={`Administrar a ${miembro.usuario_nombre}`}
                   accessibilityRole="button"
@@ -221,6 +227,8 @@ function createStyles(colors: AppColorsShape) {
   roleText: { color: colors.brand, fontSize: 10, fontWeight: '700' },
   leaderRole: { backgroundColor: colors.accentSoft },
   leaderRoleText: { color: colors.accentPressed },
+  coLeaderRole: { backgroundColor: colors.brandSoft },
+  coLeaderRoleText: { color: colors.brandDark },
   manageButton: {
     width: 38,
     height: 38,

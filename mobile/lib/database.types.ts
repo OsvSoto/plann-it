@@ -691,6 +691,10 @@ export type Database = {
         Args: { p_proyecto_id: string; p_usuario_id: string }
         Returns: string
       }
+      es_lider_principal_proyecto: {
+        Args: { p_proyecto_id: string }
+        Returns: boolean
+      }
       es_lider_proyecto: { Args: { p_proyecto_id: string }; Returns: boolean }
       es_miembro_proyecto: { Args: { p_proyecto_id: string }; Returns: boolean }
       invitar_usuario_proyecto: {

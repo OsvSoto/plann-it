@@ -120,6 +120,7 @@ export default function DetalleProyectoScreen() {
     proyecto,
     tableros,
     esLider,
+    esLiderPrincipal,
     puedeEliminarProyecto,
   } = detalle
 
@@ -354,7 +355,7 @@ export default function DetalleProyectoScreen() {
           proyectoNombre={
             proyecto.proyecto_nombre
           }
-          esLider={esLider}
+          puedeGestionarMiembros={esLiderPrincipal}
         />
 
         <View style={styles.workspaceHeader}>
